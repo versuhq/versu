@@ -1,11 +1,11 @@
-import { AdapterIdentifier } from './identifier.js';
+import { AdapterIdentifier } from './adapter-identifier.js';
 
 /**
  * Composed adapter identifier that chains multiple adapter identifiers.
  * Iterates through a list of identifiers until one returns a non-null result.
  */
 export class AdapterIdentifierRegistry {
-  private readonly identifiers: Map<string, AdapterIdentifier>;
+  private readonly identifiers: ReadonlyMap<string, AdapterIdentifier>;
   private readonly supportedAdapters: string[];
 
   /**

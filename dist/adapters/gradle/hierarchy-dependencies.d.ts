@@ -2,13 +2,14 @@
  * Gradle-specific implementation for parsing project hierarchy dependencies
  * Uses the init-hierarchy-deps.gradle.kts script to extract dependency information
  */
-import { ProjectHierarchy, HierarchyParseResult } from '../hierarchy.js';
+import { RawProjectInformation } from '../hierarchy.js';
+import { ProjectInformation } from '../core.js';
 /**
  * Execute the gradle hierarchy command to get the JSON output
  */
-export declare function executeGradleHierarchyCommand(projectRoot: string): Promise<string>;
+export declare function getRawProjectInformation(projectRoot: string): Promise<RawProjectInformation>;
 /**
  * Parse the hierarchy structure and extract dependency relationships
  */
-export declare function parseHierarchyStructure(hierarchy: ProjectHierarchy): HierarchyParseResult;
+export declare function parseHierarchyStructure(projectInformation: RawProjectInformation): ProjectInformation;
 //# sourceMappingURL=hierarchy-dependencies.d.ts.map

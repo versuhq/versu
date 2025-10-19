@@ -1,13 +1,13 @@
 import * as core from '@actions/core';
 import { ProcessingModuleChange, ProcessedModuleChange, BumpType, ChangeReason, CommitInfo } from '../adapters/core.js';
 import { Config, getDependencyBumpType } from '../config/index.js';
-import { ModuleManager } from '../adapters/module-manager.js';
+import { ModuleRegistry } from '../adapters/module-registry.js';
 import { calculateCascadeEffects } from '../graph/index.js';
 import { calculateBumpFromCommits } from '../utils/commits.js';
 import { bumpSemVer, bumpToPrerelease, formatSemVer, addBuildMetadata, generateTimestampPrereleaseId } from '../semver/index.js';
 import { getCurrentCommitShortSha } from '../git/index.js';
 import { SemVer } from 'semver';
-import { AdapterMetadata } from '../adapters/identifier.js';
+import { AdapterMetadata } from '../adapters/adapter-identifier.js';
 import { applySnapshotSuffix } from '../utils/versioning.js';
 
 export type VersionBumperOptions = {
@@ -27,7 +27,7 @@ export class VersionBumper {
   }
 
   async calculateVersionBumps(
-    hierarchyManager: ModuleManager,
+    hierarchyManager: ModuleRegistry,
     moduleCommits: Map<string, CommitInfo[]>,
     config: Config
   ): Promise<ProcessedModuleChange[]> {
@@ -64,7 +64,7 @@ export class VersionBumper {
   }
 
   private calculateInitialBumps(
-    hierarchyManager: ModuleManager,
+    hierarchyManager: ModuleRegistry,
     moduleCommits: Map<string, CommitInfo[]>,
     config: Config
   ): ProcessingModuleChange[] {

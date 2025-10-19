@@ -1,5 +1,5 @@
 import { SemVer } from 'semver';
-import { ModuleManager } from './module-manager.js';
+import { ModuleRegistry } from './module-registry.js';
 import { VersionUpdateStrategy } from "./version-update-strategy.js";
 import { formatSemVer } from '../semver/index.js';
 
@@ -11,7 +11,7 @@ export class VersionManager {
   private readonly pendingUpdates = new Map<string, string>();
 
   constructor(
-    private readonly hierarchyManager: ModuleManager,
+    private readonly hierarchyManager: ModuleRegistry,
     private readonly strategy: VersionUpdateStrategy
   ) { }
 

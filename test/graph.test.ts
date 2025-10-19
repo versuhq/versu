@@ -1,30 +1,29 @@
 import { describe, it, expect } from 'vitest';
 import { calculateCascadeEffects } from '../src/graph/index.js';
-import { ProcessingModuleChange, BumpType } from '../src/adapters/core.js';
-import { HierarchyParseResult } from '../src/adapters/hierarchy.js';
+import { ProcessingModuleChange, BumpType, ProjectInformation } from '../src/adapters/core.js';
 import { parseSemVer } from '../src/semver/index.js';
-import { ModuleManager } from '../src/adapters/module-manager.js';
+import { ModuleRegistry } from '../src/adapters/module-registry.js';
 
 describe('Cascade Effects', () => {
-  const hierarchyResult: HierarchyParseResult = {
-    projectIds: ['root', 'core', 'utils', 'api'],
-    projectMap: new Map([
-      ['root', { id: 'root', name: 'root', path: '.', type: 'root', affectedProjects: new Set(['core', 'utils', 'api']), version: parseSemVer('1.0.0'), declaredVersion: true }],
-      ['core', { id: 'core', name: 'core', path: 'core', type: 'module', affectedProjects: new Set(['api']), version: parseSemVer('1.0.0'), declaredVersion: true }],
-      ['utils', { id: 'utils', name: 'utils', path: 'utils', type: 'module', affectedProjects: new Set(['core', 'api']), version: parseSemVer('1.0.0'), declaredVersion: true }],
-      ['api', { id: 'api', name: 'api', path: 'api', type: 'module', affectedProjects: new Set(), version: parseSemVer('1.0.0'), declaredVersion: true }],
+  const hierarchyResult: ProjectInformation = {
+    moduleIds: ['root', 'core', 'utils', 'api'],
+    modules: new Map([
+      ['root', { id: 'root', name: 'root', path: '.', type: 'root', affectedModules: new Set(['core', 'utils', 'api']), version: parseSemVer('1.0.0'), declaredVersion: true }],
+      ['core', { id: 'core', name: 'core', path: 'core', type: 'module', affectedModules: new Set(['api']), version: parseSemVer('1.0.0'), declaredVersion: true }],
+      ['utils', { id: 'utils', name: 'utils', path: 'utils', type: 'module', affectedModules: new Set(['core', 'api']), version: parseSemVer('1.0.0'), declaredVersion: true }],
+      ['api', { id: 'api', name: 'api', path: 'api', type: 'module', affectedModules: new Set(), version: parseSemVer('1.0.0'), declaredVersion: true }],
     ]),
-    rootProject: 'root',
+    rootModule: 'root',
   };
 
   describe('calculateCascadeEffects', () => {
     it('should calculate cascade effects correctly', () => {
-      const utilsProjectInfo = hierarchyResult.projectMap.get('utils')!;
+      const utilsModuleInfo = hierarchyResult.modules.get('utils')!;
 
       const allModuleChanges: ProcessingModuleChange[] = [
         // Utils module has changes and needs processing
         {
-          module: utilsProjectInfo,
+          module: utilsModuleInfo,
           fromVersion: parseSemVer('1.0.0'),
           toVersion: '1.1.0',
           bumpType: 'minor',
@@ -33,7 +32,7 @@ describe('Cascade Effects', () => {
         },
         // Core module - initially no changes
         {
-          module: hierarchyResult.projectMap.get('core')!,
+          module: hierarchyResult.modules.get('core')!,
           fromVersion: parseSemVer('1.0.0'),
           toVersion: '1.0.0',
           bumpType: 'none',
@@ -42,7 +41,7 @@ describe('Cascade Effects', () => {
         },
         // API module - initially no changes
         {
-          module: hierarchyResult.projectMap.get('api')!,
+          module: hierarchyResult.modules.get('api')!,
           fromVersion: parseSemVer('1.0.0'),
           toVersion: '1.0.0',
           bumpType: 'none',
@@ -51,7 +50,7 @@ describe('Cascade Effects', () => {
         },
         // Root module - initially no changes
         {
-          module: hierarchyResult.projectMap.get('root')!,
+          module: hierarchyResult.modules.get('root')!,
           fromVersion: parseSemVer('1.0.0'),
           toVersion: '1.0.0',
           bumpType: 'none',
@@ -62,14 +61,14 @@ describe('Cascade Effects', () => {
 
       // Mock module manager for the test
       const mockModuleManager = {
-        getModuleInfo: (moduleId: string) => {
-          const info = hierarchyResult.projectMap.get(moduleId);
+        getModule: (moduleId: string) => {
+          const info = hierarchyResult.modules.get(moduleId);
           if (!info) {
             throw new Error(`Module ${moduleId} not found`);
           }
           return info;
         }
-      } as ModuleManager;
+      } as ModuleRegistry;
 
       const getDependencyBumpType = (): BumpType => 'patch';
       

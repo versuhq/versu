@@ -59,12 +59,12 @@ gradle.rootProject {
             val hierarchyMap = hierarchyDepsProvider.get()
             val projectDataMap = projectDataProvider.get()
 
-            val result = hierarchyMap.toSortedMap().mapValues { (projectPath, affectedProjects) ->
+            val result = hierarchyMap.toSortedMap().mapValues { (projectPath, affectedModules) ->
                 val projectInfo = projectDataMap.getValue(projectPath)
 
                 mapOf(
                     "path" to projectInfo["path"],
-                    "affectedSubprojects" to affectedProjects.toSortedSet(),
+                    "affectedModules" to affectedModules.toSortedSet(),
                     "version" to projectInfo["version"],
                     "type" to projectInfo["type"],
                     "name" to projectInfo["name"],

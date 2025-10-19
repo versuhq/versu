@@ -1,11 +1,10 @@
-import { ModuleManager } from "./module-manager";
-
+import { ModuleRegistry } from "./module-registry";
 
 export interface ModuleDetector {
   readonly repoRoot: string;
 
   /**
-   * Detect all modules in the repository and return a hierarchy manager
+   * Detect all modules in the repository and return a module manager
    */
-  detect(): Promise<ModuleManager>;
+  detect(): Promise<ModuleRegistry>;
 }

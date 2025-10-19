@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { CommitInfo } from '../adapters/core.js';
-import { ModuleManager } from '../adapters/module-manager.js';
+import { ModuleRegistry } from '../adapters/module-registry.js';
 import { getCommitsSinceLastTag } from '../git/index.js';
 
 export class CommitAnalyzer {
@@ -8,7 +8,7 @@ export class CommitAnalyzer {
   constructor(private readonly repoRoot: string) {
   }
 
-  async analyzeCommitsSinceLastRelease(hierarchyManager: ModuleManager): Promise<Map<string, CommitInfo[]>> {
+  async analyzeCommitsSinceLastRelease(hierarchyManager: ModuleRegistry): Promise<Map<string, CommitInfo[]>> {
     core.info('📝 Analyzing commits since last release...');
     
     const moduleCommits = new Map<string, CommitInfo[]>();
@@ -49,7 +49,7 @@ export class CommitAnalyzer {
   private findChildModulePaths(
     modulePath: string,
     moduleId: string,
-    hierarchyManager: ModuleManager
+    hierarchyManager: ModuleRegistry
   ): string[] {
     const childPaths: string[] = [];
     

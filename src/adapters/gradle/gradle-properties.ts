@@ -1,6 +1,8 @@
 const ROOT_MODULE_ID = ':';
 const VERSION = 'version';
 const MODULE_SEPARATOR = ':';
+const DOT_SEPARATOR = '.';
+const VERSION_REGEX = /\.version$/;
 
 /**
  * Convert version property name to module path
@@ -15,10 +17,10 @@ function versionPropertyNameToModuleId(propertyName: string): string {
   }
   
   // Remove '.version' suffix
-  const nameWithoutSuffix = propertyName.replace(/\.version$/, '');
+  const nameWithoutSuffix = propertyName.replace(VERSION_REGEX, '');
   
   // Convert dot-separated to module path: "x.y" -> ":x:y"
-  return `${ROOT_MODULE_ID}${nameWithoutSuffix.replaceAll('.', MODULE_SEPARATOR)}`;
+  return `${ROOT_MODULE_ID}${nameWithoutSuffix.replaceAll(DOT_SEPARATOR, MODULE_SEPARATOR)}`;
 }
 
 /**

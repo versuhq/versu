@@ -1,5 +1,5 @@
 import { SemVer } from 'semver';
-import { ModuleManager } from './module-manager.js';
+import { ModuleRegistry } from './module-registry.js';
 import { VersionUpdateStrategy } from "./version-update-strategy.js";
 /**
  * Generic version management implementation that uses strategy pattern for build-system specific operations.
@@ -9,7 +9,7 @@ export declare class VersionManager {
     private readonly hierarchyManager;
     private readonly strategy;
     private readonly pendingUpdates;
-    constructor(hierarchyManager: ModuleManager, strategy: VersionUpdateStrategy);
+    constructor(hierarchyManager: ModuleRegistry, strategy: VersionUpdateStrategy);
     /**
      * Stage a version update for a module in memory.
      * The update will be persisted when commit() is called.

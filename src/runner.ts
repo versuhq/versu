@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { ModuleSystemFactory } from "./adapters/module-system-factory.js";
-import { ModuleManager } from './adapters/module-manager.js';
+import { ModuleRegistry } from './adapters/module-registry.js';
 import { VersionManager } from './adapters/version-manager.js';
 import { createModuleSystemFactory } from './factories/module-system-factory.js';
 import { Config } from './config/index.js';
@@ -15,9 +15,9 @@ import { VersionBumper, VersionBumperOptions } from './services/version-bumper.j
 import { VersionApplier, VersionApplierOptions, ModuleChangeResult } from './services/version-applier.js';
 import { ChangelogGenerator } from './services/changelog-generator.js';
 import { GitOperations, GitOperationsOptions } from './services/git-operations.js';
-import { ProjectInfo } from './adapters/hierarchy.js';
-import { AdapterMetadata } from './adapters/identifier.js';
+import { AdapterMetadata } from './adapters/adapter-identifier.js';
 import { getAdapterMetadata } from './adapters/adapter-identifier-factory.js';
+import { Module } from './adapters/core.js';
 
 export type RunnerOptions = {
   readonly repoRoot: string;
@@ -37,7 +37,7 @@ export type RunnerOptions = {
 
 export type RunnerResult = {
   readonly bumped: boolean;
-  readonly discoveredModules: Array<ProjectInfo>;
+  readonly discoveredModules: Array<Module>;
   readonly changedModules: Array<ModuleChangeResult>;
   readonly createdTags: string[];
   readonly changelogPaths: string[];
@@ -45,7 +45,7 @@ export type RunnerResult = {
 
 export class VerseRunner {
   private moduleSystemFactory!: ModuleSystemFactory; // Will be initialized in run()
-  private hierarchyManager!: ModuleManager; // Will be initialized in run()
+  private hierarchyManager!: ModuleRegistry; // Will be initialized in run()
   private versionManager!: VersionManager; // Will be initialized in run()
   private config!: Config; // Will be initialized in run()
   private adapter!: AdapterMetadata; // Will be initialized in run()

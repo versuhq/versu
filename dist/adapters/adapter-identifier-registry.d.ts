@@ -1,4 +1,4 @@
-import { AdapterIdentifier } from './identifier.js';
+import { AdapterIdentifier } from './adapter-identifier.js';
 /**
  * Composed adapter identifier that chains multiple adapter identifiers.
  * Iterates through a list of identifiers until one returns a non-null result.

@@ -1,4 +1,4 @@
-import { AdapterMetadata } from './identifier.js';
+import { AdapterMetadata } from './adapter-identifier.js';
 import { AdapterIdentifierRegistry } from './adapter-identifier-registry.js';
 import { RunnerOptions } from '../runner.js';
 /**

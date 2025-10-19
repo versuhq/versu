@@ -1,20 +1,16 @@
 import { ModuleDetector } from "../module-detector.js";
-import { ProjectHierarchy } from '../hierarchy.js';
-import { ModuleManager } from '../module-manager.js';
+import { ModuleRegistry } from '../module-registry.js';
 import { 
-  executeGradleHierarchyCommand,
+  getRawProjectInformation,
   parseHierarchyStructure 
 } from './hierarchy-dependencies.js';
 
 export class GradleModuleDetector implements ModuleDetector {
-  constructor(readonly repoRoot: string) {
-  }
+  constructor(readonly repoRoot: string) {}
 
-  async detect(): Promise<ModuleManager> {
-    const hierarchyJson = await executeGradleHierarchyCommand(this.repoRoot);
-    const hierarchy: ProjectHierarchy = JSON.parse(hierarchyJson);
-    
-    const hierarchyResult = parseHierarchyStructure(hierarchy);
-    return new ModuleManager(hierarchyResult);
+  async detect(): Promise<ModuleRegistry> {
+    const rawProjectInformation = await getRawProjectInformation(this.repoRoot);
+    const hierarchy = parseHierarchyStructure(rawProjectInformation);
+    return new ModuleRegistry(hierarchy);
   }
 }

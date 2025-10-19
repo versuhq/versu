@@ -1,5 +1,5 @@
 import { ProcessingModuleChange, BumpType } from '../adapters/core.js';
-import { ModuleManager } from '../adapters/module-manager.js';
+import { ModuleRegistry } from '../adapters/module-registry.js';
 import { maxBumpType } from '../semver/index.js';
 import * as core from '@actions/core';
 
@@ -8,7 +8,7 @@ import * as core from '@actions/core';
  * Modifies the input array in place and returns all modules with cascade effects applied.
  */
 export function calculateCascadeEffects(
-  moduleManager: ModuleManager,
+  moduleManager: ModuleRegistry,
   allModuleChanges: ProcessingModuleChange[],
   getDependencyBumpType: (dependencyBump: BumpType) => BumpType
 ): ProcessingModuleChange[] {
@@ -33,9 +33,9 @@ export function calculateCascadeEffects(
     }
     
     processed.add(currentChange.module.id);
-    const currentModuleInfo = moduleManager.getModuleInfo(currentChange.module.id);
+    const currentModuleInfo = moduleManager.getModule(currentChange.module.id);
 
-    for (const dependentName of currentModuleInfo.affectedProjects) {
+    for (const dependentName of currentModuleInfo.affectedModules) {
       core.debug(`➡️ Processing dependent module ${dependentName} affected by ${currentChange.module.id} with bump ${currentChange.bumpType}`);
       
       if (processed.has(dependentName)) {

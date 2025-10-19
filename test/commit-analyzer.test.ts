@@ -1,10 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { CommitAnalyzer } from '../src/services/commit-analyzer.js';
-import { ModuleManager } from '../src/adapters/module-manager.js';
-import { HierarchyParseResult, ProjectInfo } from '../src/adapters/hierarchy.js';
+import { ModuleRegistry } from '../src/adapters/module-registry.js';
 import * as gitIndex from '../src/git/index.js';
 import { parseSemVer } from '../src/semver/index.js';
-import { CommitInfo } from '../src/adapters/core.js';
+import { CommitInfo, Module, ProjectInformation } from '../src/adapters/core.js';
 
 // Mock the git module
 vi.mock('../src/git/index.js', () => ({
@@ -13,7 +12,7 @@ vi.mock('../src/git/index.js', () => ({
 
 describe('CommitAnalyzer - Child Module Exclusion', () => {
   let commitAnalyzer: CommitAnalyzer;
-  let hierarchyManager: ModuleManager;
+  let moduleRegistry: ModuleRegistry;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -23,13 +22,13 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
   describe('child module path exclusion', () => {
     it('should pass child module paths to git exclusion for parent modules', async () => {
       // Setup hierarchy with parent and child modules
-      const projectMap = new Map<string, ProjectInfo>([
+      const modules = new Map<string, Module>([
         [':core', {
           id: ':core',
           name: 'core',
           path: './core',
           type: 'module',
-          affectedProjects: new Set(),
+          affectedModules: new Set(),
           version: parseSemVer('1.0.0'),
           declaredVersion: true,
         }],
@@ -38,7 +37,7 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
           name: 'api',
           path: './core/api',
           type: 'module',
-          affectedProjects: new Set(),
+          affectedModules: new Set(),
           version: parseSemVer('1.0.0'),
           declaredVersion: true,
         }],
@@ -47,19 +46,19 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
           name: 'impl',
           path: './core/impl',
           type: 'module',
-          affectedProjects: new Set(),
+          affectedModules: new Set(),
           version: parseSemVer('1.0.0'),
           declaredVersion: true,
         }],
       ]);
 
-      const hierarchyResult: HierarchyParseResult = {
-        projectIds: [':core', ':core:api', ':core:impl'],
-        projectMap,
-        rootProject: ':',
+      const hierarchyResult: ProjectInformation = {
+        moduleIds: [':core', ':core:api', ':core:impl'],
+        modules,
+        rootModule: ':',
       };
 
-      hierarchyManager = new ModuleManager(hierarchyResult);
+      moduleRegistry = new ModuleRegistry(hierarchyResult);
 
       // Mock commits - git will handle exclusion natively
       const coreCommits: CommitInfo[] = [
@@ -94,7 +93,7 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
       );
 
       // Analyze commits
-      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease(hierarchyManager);
+      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease(moduleRegistry);
 
       // Verify each module got the correct commits
       expect(result.get(':core')).toEqual(coreCommits);
@@ -103,13 +102,13 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
     });
 
     it('should handle multi-level nested modules correctly', async () => {
-      const projectMap = new Map<string, ProjectInfo>([
+      const modules = new Map<string, Module>([
         [':services', {
           id: ':services',
           name: 'services',
           path: './services',
           type: 'module',
-          affectedProjects: new Set(),
+          affectedModules: new Set(),
           version: parseSemVer('1.0.0'),
           declaredVersion: true,
         }],
@@ -118,7 +117,7 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
           name: 'api',
           path: './services/api',
           type: 'module',
-          affectedProjects: new Set(),
+          affectedModules: new Set(),
           version: parseSemVer('1.0.0'),
           declaredVersion: true,
         }],
@@ -127,19 +126,19 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
           name: 'v1',
           path: './services/api/v1',
           type: 'module',
-          affectedProjects: new Set(),
+          affectedModules: new Set(),
           version: parseSemVer('1.0.0'),
           declaredVersion: true,
         }],
       ]);
 
-      const hierarchyResult: HierarchyParseResult = {
-        projectIds: [':services', ':services:api', ':services:api:v1'],
-        projectMap,
-        rootProject: ':',
+      const hierarchyResult: ProjectInformation = {
+        moduleIds: [':services', ':services:api', ':services:api:v1'],
+        modules,
+        rootModule: ':',
       };
 
-      hierarchyManager = new ModuleManager(hierarchyResult);
+      moduleRegistry = new ModuleRegistry(hierarchyResult);
 
       vi.mocked(gitIndex.getCommitsSinceLastTag).mockImplementation(
         async (modulePath, moduleName, moduleType, options, excludePaths = []) => {
@@ -162,20 +161,20 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
         }
       );
 
-      await commitAnalyzer.analyzeCommitsSinceLastRelease(hierarchyManager);
+      await commitAnalyzer.analyzeCommitsSinceLastRelease(moduleRegistry);
 
       // Verify the mock was called with correct exclusions (assertions are in mock implementation)
       expect(vi.mocked(gitIndex.getCommitsSinceLastTag)).toHaveBeenCalledTimes(3);
     });
 
     it('should handle root module correctly by excluding all submodules', async () => {
-      const projectMap = new Map<string, ProjectInfo>([
+      const modules = new Map<string, Module>([
         [':', {
           id: ':',
           name: 'root',
           path: '.',
           type: 'root',
-          affectedProjects: new Set(),
+          affectedModules: new Set(),
           version: parseSemVer('1.0.0'),
           declaredVersion: true,
         }],
@@ -184,7 +183,7 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
           name: 'core',
           path: './core',
           type: 'module',
-          affectedProjects: new Set(),
+          affectedModules: new Set(),
           version: parseSemVer('1.0.0'),
           declaredVersion: true,
         }],
@@ -193,19 +192,19 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
           name: 'utils',
           path: './utils',
           type: 'module',
-          affectedProjects: new Set(),
+          affectedModules: new Set(),
           version: parseSemVer('1.0.0'),
           declaredVersion: true,
         }],
       ]);
 
-      const hierarchyResult: HierarchyParseResult = {
-        projectIds: [':', ':core', ':utils'],
-        projectMap,
-        rootProject: ':',
+      const hierarchyResult: ProjectInformation = {
+        moduleIds: [':', ':core', ':utils'],
+        modules,
+        rootModule: ':',
       };
 
-      hierarchyManager = new ModuleManager(hierarchyResult);
+      moduleRegistry = new ModuleRegistry(hierarchyResult);
 
       const rootCommits: CommitInfo[] = [
         { hash: 'root123', type: 'feat', subject: 'update root build file', breaking: false },
@@ -224,20 +223,20 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
         }
       );
 
-      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease(hierarchyManager);
+      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease(moduleRegistry);
 
       // Root should have its commits with all submodules excluded
       expect(result.get(':')).toEqual(rootCommits);
     });
 
     it('should handle modules with no child modules (no exclusions)', async () => {
-      const projectMap = new Map<string, ProjectInfo>([
+      const modules = new Map<string, Module>([
         [':utils', {
           id: ':utils',
           name: 'utils',
           path: './utils',
           type: 'module',
-          affectedProjects: new Set(),
+          affectedModules: new Set(),
           version: parseSemVer('1.0.0'),
           declaredVersion: true,
         }],
@@ -246,19 +245,19 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
           name: 'services',
           path: './services',
           type: 'module',
-          affectedProjects: new Set(),
+          affectedModules: new Set(),
           version: parseSemVer('1.0.0'),
           declaredVersion: true,
         }],
       ]);
 
-      const hierarchyResult: HierarchyParseResult = {
-        projectIds: [':utils', ':services'],
-        projectMap,
-        rootProject: ':',
+      const hierarchyResult: ProjectInformation = {
+        moduleIds: [':utils', ':services'],
+        modules,
+        rootModule: ':',
       };
 
-      hierarchyManager = new ModuleManager(hierarchyResult);
+      moduleRegistry = new ModuleRegistry(hierarchyResult);
 
       const utilsCommits: CommitInfo[] = [
         { hash: 'utils123', type: 'feat', subject: 'add util', breaking: false },
@@ -281,7 +280,7 @@ describe('CommitAnalyzer - Child Module Exclusion', () => {
         }
       );
 
-      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease(hierarchyManager);
+      const result = await commitAnalyzer.analyzeCommitsSinceLastRelease(moduleRegistry);
 
       // Both modules should get their commits without any filtering
       expect(result.get(':utils')).toEqual(utilsCommits);

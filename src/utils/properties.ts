@@ -1,5 +1,5 @@
 import { promises as fs } from 'fs';
-import { fileExists } from './file.js';
+import { exists } from './file.js';
 
 /**
  * Update or insert a property in a properties file
@@ -28,11 +28,11 @@ export async function upsertProperties(
     return; // Nothing to update
   }
 
-  const exists = await fileExists(propertiesPath);
+  const propertiesExist = await exists(propertiesPath);
   
   let updatedContent: string;
-  
-  if (exists) {
+
+  if (propertiesExist) {
     // File exists, read and update it
     let content = await fs.readFile(propertiesPath, 'utf8');
     

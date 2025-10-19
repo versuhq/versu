@@ -4,13 +4,12 @@ import * as core from '@actions/core';
 import { cosmiconfig } from 'cosmiconfig';
 import deepmerge from 'deepmerge';
 import { BumpType } from '../adapters/core.js';
-import { fileExists } from '../utils/file.js';
+import { exists } from '../utils/file.js';
 
 export type Config = {
   readonly defaultBump: BumpType;
   readonly commitTypes: Record<string, BumpType | 'ignore'>;
   readonly dependencyRules: DependencyRules;
-  readonly gradle?: GradleConfig;
   readonly nodejs?: NodeJSConfig;
 };
 
@@ -18,10 +17,6 @@ export type DependencyRules = {
   readonly onMajorOfDependency: BumpType;
   readonly onMinorOfDependency: BumpType;
   readonly onPatchOfDependency: BumpType;
-};
-
-export type GradleConfig = {
-  readonly versionSource: ('gradle.properties')[];
 };
 
 export type NodeJSConfig = {
@@ -47,10 +42,7 @@ const DEFAULT_CONFIG: Config = {
     onMajorOfDependency: 'major',
     onMinorOfDependency: 'minor',
     onPatchOfDependency: 'patch',
-  },
-  gradle: {
-    versionSource: ['gradle.properties'],
-  },
+  }
 };
 
 /**
@@ -65,7 +57,7 @@ export async function loadConfig(configPath?: string, repoRoot?: string): Promis
     if (configPath && repoRoot) {
       // If specific config path provided, try to load it
       const fullPath = join(repoRoot, configPath);
-      if (await fileExists(fullPath)) {
+      if (await exists(fullPath)) {
         result = await explorer.load(fullPath);
       } else {
         core.info(`Specified config file not found at ${configPath}, searching for config files...`);

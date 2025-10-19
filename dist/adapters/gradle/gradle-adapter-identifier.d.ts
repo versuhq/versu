@@ -1,4 +1,4 @@
-import { AdapterIdentifier } from '../identifier.js';
+import { AdapterIdentifier } from '../adapter-identifier.js';
 /**
  * Adapter identifier for Gradle projects.
  * Identifies Gradle projects by looking for build.gradle(.kts) and settings.gradle(.kts) files.

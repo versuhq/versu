@@ -1,4 +1,4 @@
-import { AdapterIdentifier, AdapterMetadata } from './identifier.js';
+import { AdapterIdentifier, AdapterMetadata } from './adapter-identifier.js';
 import { AdapterIdentifierRegistry } from './adapter-identifier-registry.js';
 import { GradleAdapterIdentifier } from './gradle/gradle-adapter-identifier.js';
 import { RunnerOptions } from '../runner.js';

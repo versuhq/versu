@@ -1,6 +1,8 @@
-import { AdapterIdentifier } from '../identifier.js';
+import { AdapterIdentifier } from '../adapter-identifier.js';
 import * as fs from 'fs/promises';
 import { GRADLE_PROPERTIES_FILE, GRADLE_BUILD_FILE, GRADLE_BUILD_KTS_FILE, GRADLE_SETTINGS_FILE, GRADLE_SETTINGS_KTS_FILE, GRADLE_ID } from './constants.js';
+import { exists } from '../../utils/file.js';
+import * as core from '@actions/core';
 
 const GRADLE_FILES = [
   GRADLE_PROPERTIES_FILE,
@@ -23,19 +25,17 @@ export class GradleAdapterIdentifier implements AdapterIdentifier {
   };
 
   async accept(projectRoot: string): Promise<boolean> {
-    try {
-      const files = await fs.readdir(projectRoot);
-      
-      const hasGradleFile = GRADLE_FILES.some(file => files.includes(file));
-      
-      if (hasGradleFile) {
-        return true;
-      }
+    const projectRootExists = await exists(projectRoot);
 
-      return false;
-    } catch (error) {
-      // If we can't read the directory, this adapter doesn't apply
+    if (!projectRootExists) {
+      core.debug(`Project root does not exist: ${projectRoot}`);
       return false;
     }
+
+    const files = await fs.readdir(projectRoot);
+    
+    const hasGradleFile = GRADLE_FILES.some(file => files.includes(file));
+    
+    return hasGradleFile;
   }
 }

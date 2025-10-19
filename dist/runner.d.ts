@@ -1,5 +1,5 @@
 import { ModuleChangeResult } from './services/version-applier.js';
-import { ProjectInfo } from './adapters/hierarchy.js';
+import { Module } from './adapters/core.js';
 export type RunnerOptions = {
     readonly repoRoot: string;
     readonly adapter?: string;
@@ -17,7 +17,7 @@ export type RunnerOptions = {
 };
 export type RunnerResult = {
     readonly bumped: boolean;
-    readonly discoveredModules: Array<ProjectInfo>;
+    readonly discoveredModules: Array<Module>;
     readonly changedModules: Array<ModuleChangeResult>;
     readonly createdTags: string[];
     readonly changelogPaths: string[];
