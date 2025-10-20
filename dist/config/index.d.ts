@@ -14,10 +14,7 @@ export type NodeJSConfig = {
     readonly versionSource: ('package.json')[];
     readonly updatePackageLock: boolean;
 };
-/**
- * Load configuration from file or return default
- */
-export declare function loadConfig(configPath?: string, repoRoot?: string): Promise<Config>;
+export declare const DEFAULT_CONFIG: Config;
 /**
  * Get bump type for a commit based on configuration
  */
@@ -26,14 +23,6 @@ export declare function getBumpTypeForCommit(commitType: string, isBreaking: boo
  * Get bump type for a module when one of its dependencies changes
  */
 export declare function getDependencyBumpType(dependencyBumpType: BumpType, config: Config): BumpType;
-/**
- * Validate configuration object
- */
-export declare function validateConfig(config: Config): void;
-/**
- * Create a default config file
- */
-export declare function createDefaultConfig(configPath: string, repoRoot: string): Promise<void>;
 /**
  * Get adapter-specific configuration
  */

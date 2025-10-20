@@ -20,6 +20,7 @@ import { AdapterMetadataProvider } from './adapter-metadata-provider.js';
 import { AdapterIdentifierRegistry } from './adapter-identifier-registry.js';
 import { createAdapterIdentifierRegistry } from '../factories/adapter-identifier-registry.js';
 import { Module } from '../adapters/project-information.js';
+import { ConfigurationValidator } from './configuration-validator.js';
 
 export type RunnerOptions = {
   readonly repoRoot: string;
@@ -67,7 +68,7 @@ export class VerseRunner {
     this.options = options;
 
     // Initialize services
-    this.configurationLoader = new ConfigurationLoader();
+    this.configurationLoader = new ConfigurationLoader(new ConfigurationValidator());
     this.changelogGenerator = new ChangelogGenerator({
       generateChangelog: options.generateChangelog,
       repoRoot: options.repoRoot,
@@ -90,7 +91,7 @@ export class VerseRunner {
     this.moduleSystemFactory = createModuleSystemFactory(this.adapter.id, this.options.repoRoot);
 
     // Load configuration
-    this.config = await this.configurationLoader.loadConfiguration(
+    this.config = await this.configurationLoader.load(
       this.options.configPath,
       this.options.repoRoot
     );
