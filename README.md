@@ -355,9 +355,8 @@ If you specify a `config-path` in your GitHub Action, VERSE will try to load tha
 The Gradle adapter supports:
 
 - **Multi-module projects** via `settings.gradle(.kts)`
-- **Version sources**: Version catalogs (`libs.versions.toml`), `gradle.properties`, `build.gradle(.kts)`
-- **Version catalogs**: Full support for Gradle's centralized dependency management
-- **Dependency detection**: `implementation(project(":module"))`, `implementation(libs.mylib)`
+- **Version source**: Root `gradle.properties` file only
+- **Dependency detection**: Custom Gradle init script to analyze project dependencies
 - **Both DSLs**: Groovy and Kotlin DSL
 
 Example structure:
@@ -365,23 +364,31 @@ Example structure:
 myproject/
 ├── settings.gradle.kts
 ├── build.gradle.kts
-├── gradle.properties      # version=1.0.0
-├── gradle/
-│   └── libs.versions.toml # [versions] core = "2.1.0"
+├── gradle.properties      # All module versions defined here
 ├── core/
-│   └── build.gradle.kts   # version = libs.versions.core
+│   └── build.gradle.kts
 └── api/
-    ├── build.gradle.kts
-    └── gradle.properties   # version=2.1.0
+    └── build.gradle.kts
+```
+
+Example `gradle.properties`:
+```properties
+# Root module version
+version=1.0.0
+
+# Submodule versions
+core.version=2.1.0
+api.version=1.5.0
 ```
 
 ### Version Management
 
-VERSE manages module versions through **root** `gradle.properties` file:
+VERSE manages all module versions through the **root** `gradle.properties` file:
 
-- **Each module** must have its version declared on **root** `gradle.properties`
-- **Root module** version is read from the root `gradle.properties` file
-- **Version updates** are applied directly to **root** `gradle.properties` file
+- **All module versions** must be declared in the root `gradle.properties` file
+- **Root module** version uses the `version` property
+- **Submodule versions** use the pattern `{moduleName}.version` (e.g., `core.version`)
+- **Version updates** are applied directly to the root `gradle.properties` file
 - **Project dependencies** are detected using a Gradle custom init script
 
 ## Commit Message Format
