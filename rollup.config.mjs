@@ -1,76 +1,22 @@
-import typescript from '@rollup/plugin-typescript';
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import json from '@rollup/plugin-json';
+// See: https://rollupjs.org/introduction/
 
-export default {
+import commonjs from '@rollup/plugin-commonjs'
+import nodeResolve from '@rollup/plugin-node-resolve'
+import typescript from '@rollup/plugin-typescript'
+
+const config = {
   input: 'src/main.ts',
   output: {
+    esModule: true,
     file: 'dist/index.js',
-    format: 'cjs',
+    format: 'es',
     sourcemap: true,
-    banner: '#!/usr/bin/env node',
-    inlineDynamicImports: true,
   },
   plugins: [
-    json(),
-    resolve({
-      preferBuiltins: true,
-      exportConditions: ['node'],
-    }),
-    commonjs(),
-    typescript({
-      tsconfig: './tsconfig.build.json',
-      sourceMap: true,
-      inlineSources: true,
-    }),
-  ],
-  external: [
-    // Node.js built-in modules
-    'assert',
-    'async_hooks',
-    'buffer',
-    'child_process',
-    'cluster',
-    'console',
-    'constants',
-    'crypto',
-    'dgram',
-    'diagnostics_channel',
-    'dns',
-    'domain',
-    'events',
-    'fs',
-    'fs/promises',
-    'http',
-    'http2',
-    'https',
-    'inspector',
-    'module',
-    'net',
-    'os',
-    'path',
-    'perf_hooks',
-    'process',
-    'punycode',
-    'querystring',
-    'readline',
-    'repl',
-    'stream',
-    'stream/promises',
-    'string_decoder',
-    'sys',
-    'timers',
-    'timers/promises',
-    'tls',
-    'trace_events',
-    'tty',
-    'url',
-    'util',
-    'v8',
-    'vm',
-    'wasi',
-    'worker_threads',
-    'zlib',
-  ],
-};
+    typescript(),
+    nodeResolve({ preferBuiltins: true }),
+    commonjs()
+  ]
+}
+
+export default config

@@ -1,6 +1,3 @@
-#!/usr/bin/env node
-'use strict';
-
 Object.defineProperty(exports, "__esModule", { value: true });
 const action_js_1 = require("./action.js");
 // Main entry point for the GitHub Action

@@ -1,0 +1,1 @@
+{"version":3,"file":"gradle-adapter-identifier.d.ts","sourceRoot":"","sources":["../../../../src/adapters/gradle/services/gradle-adapter-identifier.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,iBAAiB,EAAE,MAAM,yCAAyC,CAAC;AAe5E;;;GAGG;AACH,qBAAa,uBAAwB,YAAW,iBAAiB;IAC/D,kFAAkF;IAClF,QAAQ,CAAC,QAAQ;;;;;MAKf;IAEF;;;;OAIG;IACG,MAAM,CAAC,WAAW,EAAE,MAAM,GAAG,OAAO,CAAC,OAAO,CAAC;CAkBpD"}
