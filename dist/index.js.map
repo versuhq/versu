@@ -1,1 +1,1 @@
-{"version":3,"file":"index.js","sources":["../src/main.ts"],"sourcesContent":[null],"names":[],"mappings":";AAAA,MAAA,WAAA,GAAA,OAAA,CAAA,aAAA,CAAA;AAEA;AACA,IAAA,WAAA,CAAA,GAAG,GAAE"}
+{"version":3,"file":"index.js","sources":["../src/index.ts"],"sourcesContent":["import { run } from './action.js';\n\n// Main entry point for the GitHub Action\nrun();\n"],"names":[],"mappings":";AAAA,MAAA,WAAA,GAAA,OAAA,CAAA,aAAA,CAAA;AAEA;AACA,IAAA,WAAA,CAAA,GAAG,GAAE"}

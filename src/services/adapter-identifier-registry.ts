@@ -30,7 +30,7 @@ export class AdapterIdentifierRegistry {
    * @returns A promise that resolves to the first matching adapter, or `null` if no adapter can handle the project
    */
   async identify(projectRoot: string): Promise<AdapterIdentifier | null> {
-    for (const [id, identifier] of this.identifiers) {
+    for (const [_, identifier] of this.identifiers) {
       try {
         const result = await identifier.accept(projectRoot);
         if (result) {
