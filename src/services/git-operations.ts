@@ -14,6 +14,7 @@ export type GitOperationsOptions = {
   pushTags: boolean;
   repoRoot: string;
   dryRun: boolean;
+  isTemporaryVersion: boolean;
 };
 
 export class GitOperations {
@@ -64,6 +65,11 @@ export class GitOperations {
 
   async createAndPushTags(moduleChangeResults: ModuleChangeResult[]): Promise<string[]> {
     const createdTags: string[] = [];
+
+    if (this.options.isTemporaryVersion) {
+      core.info('🏷️ Skipping tag creation and push (temporary version enabled)');
+      return createdTags;
+    }
 
     const disabledBy = [
       this.options.dryRun && 'dry-run',
