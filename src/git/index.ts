@@ -12,7 +12,9 @@ import * as core from '@actions/core';
  * Shared CommitParser instance for parsing conventional commits.
  * Reused across all commit parsing operations to avoid repeated instantiation.
  */
-const commitParser = new CommitParser();
+const commitParser = new CommitParser({ 
+  breakingHeaderPattern: /^(\w*)(?:\(([\w$@.\-*/ ]*)\))?!: (.*)$/ 
+});
 
 /**
  * Represents a parsed git tag with extracted module and version metadata.
