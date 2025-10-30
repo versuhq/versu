@@ -205,6 +205,8 @@ function parseGitLog(output: string): CommitInfo[] {
   if (!output.trim()) {
     return [];
   }
+
+  core.debug(`Raw git log output:\n${output}`);
   
   const commits: CommitInfo[] = [];
   
@@ -217,17 +219,25 @@ function parseGitLog(output: string): CommitInfo[] {
     const lines = block.trim().split('\n');
     
     // Skip malformed blocks (need at least hash and subject)
-    if (lines.length < 2) continue;
+    if (lines.length < 2) {
+      core.debug(`Skipping malformed commit block:\n${block}`);
+      continue;
+    }
     
     // Extract structured data from the block
     const hash = lines[0];           // Line 1: commit SHA
     const subject = lines[1];        // Line 2: commit message subject
     const body = lines.slice(2).join('\n').trim();  // Remaining: commit body
+
+    core.debug(`Processing commit ${hash} with subject: ${subject}`);
+    core.debug(`Commit body:\n${body}`);
     
     try {
       // Parse using Conventional Commits specification
       // Combines subject and body for full context (breaking changes may be in body)
       const parsed = commitParser.parse(subject + '\n\n' + body);
+
+      core.debug(`Parsed commit ${hash}: ${JSON.stringify(parsed)}`);
       
       // Build CommitInfo from parsed data
       commits.push({
