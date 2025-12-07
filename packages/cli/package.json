@@ -1,0 +1,67 @@
+{
+  "name": "@verse/cli",
+  "version": "1.0.0",
+  "description": "VERSE CLI - Command-line interface for VERSE semantic versioning engine",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "verse": "./bin/run.js"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json --outDir dist",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "keywords": [
+    "verse",
+    "cli",
+    "semantic-versioning",
+    "conventional-commits",
+    "version-engine",
+    "monorepo"
+  ],
+  "author": "tvcsantos",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tvcsantos/verse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tvcsantos/verse/issues"
+  },
+  "homepage": "https://github.com/tvcsantos/verse#readme",
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@oclif/core": "^4.8.0",
+    "@verse/core": "^1.0.0",
+    "oclif": "^4.14.0"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1.26.10",
+    "@types/debug": "^4.1.12",
+    "@types/node": "^20.19.23",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "oclif": {
+    "bin": "verse",
+    "commands": "./dist/commands",
+    "dirname": "verse",
+    "topicSeparator": " ",
+    "plugins": []
+  }
+}

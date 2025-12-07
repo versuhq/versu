@@ -26,3 +26,6 @@ coverage/
 .env
 .env.local
 .env.*.local
+
+dist/
+!packages/action/dist/
