@@ -1,6 +1,6 @@
 {
   "name": "verse",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "VERSE - Version Engine for Repo Semantic Evolution",
   "private": true,
   "workspaces": [
