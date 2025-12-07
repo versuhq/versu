@@ -1,9 +1,9 @@
 # Publishing guide
 
 This repository is a monorepo with three packages:
-- `packages/core` — `@verse/core` (business logic)
-- `packages/cli` — `@verse/cli` (CLI wrapper)
-- `packages/action` — `verse-action` (GitHub Action bundle)
+- `packages/core` — `@muverse/core` (business logic)
+- `packages/cli` — `@muverse/cli` (CLI wrapper)
+- `packages/action` — `@muverse/action` (GitHub Action bundle)
 
 Build all packages:
 

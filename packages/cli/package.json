@@ -1,11 +1,11 @@
 {
-  "name": "@verse/cli",
+  "name": "@muverse/cli",
   "version": "0.1.0",
-  "description": "VERSE CLI - Command-line interface for VERSE semantic versioning engine",
+  "description": "μVERSE CLI - Command-line interface for μVERSE semantic versioning engine",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "verse": "./bin/run.js"
+    "muverse": "./bin/run.js"
   },
   "scripts": {
     "build": "tsc --project tsconfig.json --outDir dist",
@@ -15,7 +15,7 @@
     "format": "prettier --write src/**/*.ts"
   },
   "keywords": [
-    "verse",
+    "muverse",
     "cli",
     "semantic-versioning",
     "conventional-commits",
@@ -26,19 +26,19 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tvcsantos/verse.git"
+    "url": "git+https://github.com/tvcsantos/muverse.git"
   },
   "bugs": {
-    "url": "https://github.com/tvcsantos/verse/issues"
+    "url": "https://github.com/tvcsantos/muverse/issues"
   },
-  "homepage": "https://github.com/tvcsantos/verse#readme",
+  "homepage": "https://github.com/tvcsantos/muverse#readme",
   "files": [
     "dist"
   ],
   "types": "dist/index.d.ts",
   "dependencies": {
     "@oclif/core": "^4.8.0",
-    "@verse/core": "^0.1.0",
+    "@muverse/core": "^0.1.0",
     "oclif": "^4.14.0"
   },
   "devDependencies": {
@@ -58,9 +58,9 @@
     "node": ">=20"
   },
   "oclif": {
-    "bin": "verse",
+    "bin": "muverse",
     "commands": "./dist/commands",
-    "dirname": "verse",
+    "dirname": "muverse",
     "topicSeparator": " ",
     "plugins": []
   }

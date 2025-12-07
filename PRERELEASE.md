@@ -56,7 +56,7 @@ When enabled for adapters that support snapshots (like Gradle), appends `-SNAPSH
 
 ### Basic Pre-release Mode
 ```yaml
-- uses: tvcsantos/verse@v1
+- uses: tvcsantos/muverse@v1
   with:
     prerelease-mode: 'true'
     prerelease-id: 'alpha'
@@ -66,7 +66,7 @@ When enabled for adapters that support snapshots (like Gradle), appends `-SNAPSH
 
 ### Development Builds with Unchanged Modules
 ```yaml
-- uses: tvcsantos/verse@v1
+- uses: tvcsantos/muverse@v1
   with:
     prerelease-mode: 'true'
     prerelease-id: 'dev'
@@ -77,7 +77,7 @@ When enabled for adapters that support snapshots (like Gradle), appends `-SNAPSH
 
 ### Build Metadata with Short SHA
 ```yaml
-- uses: tvcsantos/verse@v1
+- uses: tvcsantos/muverse@v1
   with:
     add-build-metadata: 'true'
 ```
@@ -86,7 +86,7 @@ When enabled for adapters that support snapshots (like Gradle), appends `-SNAPSH
 
 ### Alpha/Beta Releases
 ```yaml
-- uses: tvcsantos/verse@v1
+- uses: tvcsantos/muverse@v1
   with:
     prerelease-mode: 'true'
     prerelease-id: 'alpha'
@@ -96,7 +96,7 @@ When enabled for adapters that support snapshots (like Gradle), appends `-SNAPSH
 
 ### Timestamp-based Versions
 ```yaml
-- uses: tvcsantos/verse@v1
+- uses: tvcsantos/muverse@v1
   with:
     prerelease-mode: 'true'
     prerelease-id: 'alpha'
@@ -108,7 +108,7 @@ When enabled for adapters that support snapshots (like Gradle), appends `-SNAPSH
 
 ### Complete CI/CD Pipeline Example
 ```yaml
-- uses: tvcsantos/verse@v1
+- uses: tvcsantos/muverse@v1
   with:
     prerelease-mode: 'true'
     prerelease-id: 'ci'
@@ -156,7 +156,7 @@ The timestamp format `YYYYMMDD.HHMM` uses UTC time to ensure consistency across 
 Create pre-release versions for every commit to development branches:
 ```yaml
 if: github.ref == 'refs/heads/develop'
-uses: tvcsantos/verse@v1
+uses: tvcsantos/muverse@v1
 with:
   prerelease-mode: 'true'
   prerelease-id: 'alpha'
@@ -167,7 +167,7 @@ with:
 Generate alpha versions for feature branches:
 ```yaml
 if: startsWith(github.ref, 'refs/heads/feature/')
-uses: tvcsantos/verse@v1
+uses: tvcsantos/muverse@v1
 with:
   prerelease-mode: 'true'
   prerelease-id: 'alpha'
@@ -177,7 +177,7 @@ with:
 Create release candidates before final releases:
 ```yaml
 if: github.ref == 'refs/heads/release'
-uses: tvcsantos/verse@v1
+uses: tvcsantos/muverse@v1
 with:
   prerelease-mode: 'true'
   prerelease-id: 'rc'
@@ -186,7 +186,7 @@ with:
 ### 4. Development Builds
 Perfect for continuous integration and development builds:
 ```yaml
-uses: tvcsantos/verse@v1
+uses: tvcsantos/muverse@v1
 with:
   adapter: 'gradle'
   prerelease-mode: 'true'
@@ -197,7 +197,7 @@ with:
 ### 5. Build Metadata for Unique Versions
 Create unique versions for every commit using build metadata:
 ```yaml
-uses: tvcsantos/verse@v1
+uses: tvcsantos/muverse@v1
 with:
   add-build-metadata: 'true'
 ```
@@ -205,7 +205,7 @@ with:
 ### 6. Combined Mode: Pre-release + Build Metadata
 Get the best of both worlds:
 ```yaml
-uses: tvcsantos/verse@v1
+uses: tvcsantos/muverse@v1
 with:
   prerelease-mode: 'true'
   prerelease-id: 'alpha'
@@ -217,7 +217,7 @@ with:
 ### 7. Snapshot Versions
 Apply snapshot suffix to all modules:
 ```yaml
-uses: tvcsantos/verse@v1
+uses: tvcsantos/muverse@v1
 with:
   append-snapshot: 'true'
 ```
@@ -233,13 +233,13 @@ The `push-changes` input parameter controls whether the action commits and pushe
 
 ```yaml
 # Enable git operations (default)
-uses: tvcsantos/verse@v1
+uses: tvcsantos/muverse@v1
 with:
   prerelease-mode: 'true'
   push-changes: 'true'      # Commits and pushes version changes
 
 # Disable git operations  
-uses: tvcsantos/verse@v1
+uses: tvcsantos/muverse@v1
 with:
   prerelease-mode: 'true'
   push-changes: 'false'     # No commits/pushes, just updates files
@@ -262,7 +262,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
       - name: Pre-release version
-        uses: tvcsantos/verse@v1
+        uses: tvcsantos/muverse@v1
         with:
           prerelease-mode: 'true'
           prerelease-id: 'alpha'
@@ -283,7 +283,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Validate versions
-        uses: tvcsantos/verse@v1
+        uses: tvcsantos/muverse@v1
         with:
           prerelease-mode: 'true'
           dry-run: 'true'             # Don't make changes
@@ -303,7 +303,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Generate release versions
-        uses: tvcsantos/verse@v1
+        uses: tvcsantos/muverse@v1
         with:
           prerelease-mode: 'true'
           prerelease-id: 'rc'

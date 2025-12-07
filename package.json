@@ -1,7 +1,7 @@
 {
-  "name": "verse",
+  "name": "muverse",
   "version": "0.1.0",
-  "description": "VERSE - Version Engine for Repo Semantic Evolution",
+  "description": "μVERSE - Version Engine for Repo Semantic Evolution",
   "private": true,
   "workspaces": [
     "packages/core",
@@ -16,7 +16,7 @@
     "format": "prettier --write packages/*/src/**/*.ts"
   },
   "keywords": [
-    "verse",
+    "muverse",
     "github-action",
     "cli",
     "monorepo",

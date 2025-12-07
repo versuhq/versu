@@ -1,4 +1,4 @@
-# VERSE configuration in YAML format
+# μVERSE configuration in YAML format
 defaultBump: patch
 
 commitTypes:

@@ -1,5 +1,5 @@
 import { Args, Command, Flags } from "@oclif/core";
-import { VerseRunner, RunnerOptions, initLogger } from "@verse/core";
+import { VerseRunner, RunnerOptions, initLogger } from "@muverse/core";
 import { OclifLogger } from "../logger.js";
 
 export default class Version extends Command {

@@ -1,6 +1,6 @@
-# @verse/cli
+# @muverse/cli
 
-Command-line interface for `@verse/core`.
+Command-line interface for `@muverse/core`.
 
 Build
 

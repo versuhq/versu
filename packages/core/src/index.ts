@@ -1,4 +1,4 @@
-// Core VERSE exports - business logic without GitHub Actions dependency
+// Core μVERSE exports - business logic without GitHub Actions dependency
 
 // Configuration
 export * from './config/index.js';

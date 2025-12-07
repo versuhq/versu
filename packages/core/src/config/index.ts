@@ -51,7 +51,7 @@ export const configSchema = z.object({
 });
 
 /**
- * Configuration for VERSE version bumping behavior.
+ * Configuration for μVERSE version bumping behavior.
  * Controls commit type handling, dependency cascade rules, and adapter-specific settings.
  */
 export type Config = z.infer<typeof configSchema>;
@@ -68,7 +68,7 @@ export type DependencyRules = z.infer<typeof dependencyRulesSchema>;
 export type NodeJSConfig = z.infer<typeof nodeJSConfigSchema>;
 
 /**
- * Default VERSE configuration following Conventional Commits specification.
+ * Default μVERSE configuration following Conventional Commits specification.
  * Maps common commit types to semantic version bumps and defines dependency cascade rules.
  */
 export const DEFAULT_CONFIG: Config = {

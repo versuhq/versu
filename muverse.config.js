@@ -1,4 +1,4 @@
-// VERSE configuration in JavaScript format
+// μVERSE configuration in JavaScript format
 module.exports = {
   defaultBump: 'patch',
   commitTypes: {

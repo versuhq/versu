@@ -1,11 +1,11 @@
-# VERSE Monorepo
+# μVERSE Monorepo
 
-This is a monorepo structure for VERSE (Version Engine for Repo Semantic Evolution) containing three main packages:
+This is a monorepo structure for μVERSE (Version Engine for Repo Semantic Evolution) containing three main packages:
 
 ## 📦 Packages
 
-### 1. **@verse/core** (`packages/core`)
-The core business logic that powers VERSE - completely independent of GitHub Actions or CLI frameworks.
+### 1. **@muverse/core** (`packages/core`)
+The core business logic that powers μVERSE - completely independent of GitHub Actions or CLI frameworks.
 
 **Features:**
 - Semantic version calculation and management
@@ -26,29 +26,29 @@ The core business logic that powers VERSE - completely independent of GitHub Act
 
 **Use this package when:**
 - Building tools that need semantic versioning
-- Integrating VERSE into other projects
+- Integrating μVERSE into other projects
 - Running as a library in your own applications
 
-### 2. **@verse/cli** (`packages/cli`)
-Command-line interface for VERSE using [oclif](https://oclif.io/).
+### 2. **@muverse/cli** (`packages/cli`)
+Command-line interface for μVERSE using [oclif](https://oclif.io/).
 
 **Features:**
-- `verse version` - Main command to calculate and apply version updates
+- `muverse version` - Main command to calculate and apply version updates
 - Full flag-based configuration matching the action inputs
 - Human-friendly CLI output
 - All features from core available through the command line
 
 **Dependencies:**
-- `@verse/core` - Core versioning engine
+- `@muverse/core` - Core versioning engine
 - `oclif` - CLI framework
 
 **Use this package when:**
-- You want to use VERSE locally or in custom CI/CD systems
+- You want to use μVERSE locally or in custom CI/CD systems
 - You need a standalone CLI tool for version management
-- You want to integrate VERSE into non-GitHub workflows
+- You want to integrate μVERSE into non-GitHub workflows
 
-### 3. **verse-action** (`packages/action`)
-GitHub Actions wrapper for VERSE core.
+### 3. **@muverse/action** (`packages/action`)
+GitHub Actions wrapper for μVERSE core.
 
 **Features:**
 - GitHub Actions integration
@@ -57,19 +57,19 @@ GitHub Actions wrapper for VERSE core.
 - Automatic deployment to GitHub Actions Marketplace
 
 **Dependencies:**
-- `@verse/core` - Core versioning engine
+- `@muverse/core` - Core versioning engine
 - `@actions/core` - GitHub Actions toolkit
 - `@actions/exec` - For executing shell commands
 - `@actions/github` - For GitHub API access
 
 **Use this package when:**
-- Running VERSE as a GitHub Action in workflows
+- Running μVERSE as a GitHub Action in workflows
 - You want automatic version management in GitHub
 
 ## 📂 Project Structure
 
 ```
-verse-monorepo/
+muverse-monorepo/
 ├── packages/
 │   ├── core/              # Core library (reusable everywhere)
 │   │   ├── src/
@@ -121,9 +121,9 @@ npm run build
 ### Building Individual Packages
 
 ```bash
-npm run -w @verse/core build
-npm run -w @verse/cli build
-npm run -w verse-action build
+npm run -w @muverse/core build
+npm run -w @muverse/cli build
+npm run -w @muverse/action build
 ```
 
 ### Running Tests
@@ -131,7 +131,7 @@ npm run -w verse-action build
 ```bash
 npm test                          # All tests
 npm run test:coverage            # With coverage
-npm run -w @verse/core test      # Specific package
+npm run -w @muverse/core test      # Specific package
 ```
 
 ### Linting & Formatting
@@ -143,9 +143,9 @@ npm run format                    # Format all packages
 
 ## 🔄 Package Dependencies
 
-- `@verse/cli` depends on `@verse/core`
-- `verse-action` depends on `@verse/core`
-- `@verse/core` has no internal dependencies (only external packages)
+- `@muverse/cli` depends on `@muverse/core`
+- `@muverse/actions` depends on `@muverse/core`
+- `@muverse/core` has no internal dependencies (only external packages)
 
 This ensures:
 - ✅ Clean separation of concerns
@@ -173,18 +173,18 @@ Each package can be published independently to npm:
 
 ```bash
 # Publish core
-npm publish -w @verse/core
+npm publish -w @muverse/core
 
 # Publish CLI
-npm publish -w @verse/cli
+npm publish -w @muverse/cli
 
 # Publish action (also works on GitHub Actions Marketplace)
-npm publish -w verse-action
+npm publish -w @muverse/action
 ```
 
 ## 📝 Configuration
 
-All packages use the same configuration schema. See `@verse/core` for configuration details.
+All packages use the same configuration schema. See `@muverse/core` for configuration details.
 
 ## 🐛 Troubleshooting
 
@@ -195,7 +195,7 @@ Make sure you've run `npm install` from the monorepo root.
 Run `npm run clean` (if available) and then `npm run build` again.
 
 ### Type errors in imports
-Ensure the package.json in each workspace has the correct dependencies and that imports use the correct paths (e.g., `@verse/core` not relative paths).
+Ensure the package.json in each workspace has the correct dependencies and that imports use the correct paths (e.g., `@muverse/core` not relative paths).
 
 ## 📄 License
 

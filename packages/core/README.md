@@ -1,6 +1,6 @@
-# @verse/core
+# @muverse/core
 
-Core business logic for VERSE — independent of GitHub Actions.
+Core business logic for μVERSE — independent of GitHub Actions.
 
 Build
 

@@ -1,5 +1,5 @@
 /**
- * Git operations module for VERSE version management.
+ * Git operations module for μVERSE version management.
  * Provides interfaces for commit analysis, tagging, and conventional commit parsing.
  * Supports monorepo and multi-module projects with module-specific tag management.
  */
@@ -452,7 +452,7 @@ function getModuleTagPattern(moduleName: string): string {
  * Parses a git tag name to extract module and version components.
  *
  * This internal utility function handles multiple tag naming conventions used in
- * VERSE and returns a structured object with extracted metadata. It supports:
+ * μVERSE and returns a structured object with extracted metadata. It supports:
  * - **Module tags**: `moduleName@version` (monorepo convention)
  * - **Version tags**: `v{version}` or `{version}` (single repo convention)
  * - **Custom tags**: Returns empty object for unrecognized formats

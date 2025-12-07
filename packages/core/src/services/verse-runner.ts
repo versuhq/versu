@@ -93,7 +93,7 @@ export class VerseRunner {
     logger.info("🌌 Version Engine for Repo Semantic Evolution");
     logger.info("   Orchestrating your monorepo multiverse...");
     logger.info("");
-    logger.info("🚀 Starting VERSE engine...");
+    logger.info("🚀 Starting μVERSE engine...");
     logger.info(`Repository: ${this.options.repoRoot}`);
     logger.info(`Adapter: ${this.options.adapter || "(auto-detect)"}`);
     logger.info(`Dry run: ${this.options.dryRun}`);
@@ -107,7 +107,7 @@ export class VerseRunner {
     logger.info(`Append snapshot: ${this.options.appendSnapshot}`);
     logger.info(`Push changes: ${this.options.pushChanges}`);
     logger.info(`Generate changelog: ${this.options.generateChangelog}`);
-    logger.info("🏃 Running VERSE semantic evolution...");
+    logger.info("🏃 Running μVERSE semantic evolution...");
   }
 
   private logShutdownInfo(result: RunnerResult | null): void {
@@ -138,7 +138,7 @@ export class VerseRunner {
     }
 
     logger.info("");
-    logger.info("🎯 VERSE completed successfully!");
+    logger.info("🎯 μVERSE completed successfully!");
     logger.info("   Your multiverse has evolved semantically ✨");
   }
 
@@ -274,7 +274,7 @@ export class VerseRunner {
     const createdTags =
       await this.gitOperations.createAndPushTags(changedModules);
 
-    logger.info("✅ VERSE semantic evolution completed successfully!");
+    logger.info("✅ μVERSE semantic evolution completed successfully!");
 
     return {
       bumped: true,

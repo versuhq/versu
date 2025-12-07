@@ -1,4 +1,4 @@
-name: 'VERSE - Version Engine for Repo Semantic Evolution'
+name: 'μVERSE - Version Engine for Repo Semantic Evolution'
 description: 'Intelligent semantic version management engine for monorepo projects with dependency cascade evolution'
 author: 'Your Organization'
 inputs:

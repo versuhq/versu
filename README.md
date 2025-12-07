@@ -1,8 +1,8 @@
-![VERSE - Version Engine for Repo Semantic Evolution](docs/assets/images/verse.png)
+![μVERSE - Version Engine for Repo Semantic Evolution](docs/assets/images/verse.png)
 
-# VERSE - Version Engine for Repo Semantic Evolution
+# μVERSE - Version Engine for Repo Semantic Evolution
 
-**VERSE** orchestrates the multiverse of your monorepo, where each module exists as an independent universe with its own semantic evolution timeline. Like cosmic events rippling through space-time, changes in one module intelligently cascade through dependency relationships, ensuring your entire codebase multiverse remains harmoniously synchronized.
+**μVERSE** orchestrates the multiverse of your monorepo, where each module exists as an independent universe with its own semantic evolution timeline. Like cosmic events rippling through space-time, changes in one module intelligently cascade through dependency relationships, ensuring your entire codebase multiverse remains harmoniously synchronized.
 
 This powerful TypeScript GitHub Action harnesses Conventional Commits to automatically evolve semantic versions across your project multiverse, maintaining perfect dimensional stability while allowing each module universe to grow at its own pace.
 
@@ -34,12 +34,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: VERSE Semantic Evolution
+      - name: μVERSE Semantic Evolution
         id: versioner
-        uses: tvcsantos/verse@v1
+        uses: tvcsantos/muverse@v1
         with:
           dry-run: false
-          # adapter: gradle  # Optional - VERSE will auto-detect your project type
+          # adapter: gradle  # Optional - μVERSE will auto-detect your project type
       - name: Print results
         run: |
           echo "Bumped: ${{ steps.versioner.outputs.bumped }}"
@@ -48,16 +48,16 @@ jobs:
 
 ### Adapter Auto-Detection
 
-VERSE automatically detects your project type based on the files present in your repository. You don't need to specify the `adapter` input in most cases:
+μVERSE automatically detects your project type based on the files present in your repository. You don't need to specify the `adapter` input in most cases:
 
 - **Gradle Projects**: Detected by presence of `build.gradle`, `build.gradle.kts`, `settings.gradle`, or `settings.gradle.kts`
 - **Future Adapters**: More project types will be supported in future releases
 
-If auto-detection fails, VERSE will throw an error asking you to explicitly specify the `adapter` input:
+If auto-detection fails, μVERSE will throw an error asking you to explicitly specify the `adapter` input:
 
 ```yaml
-- name: VERSE Semantic Evolution
-  uses: tvcsantos/verse@v1
+- name: μVERSE Semantic Evolution
+  uses: tvcsantos/muverse@v1
   with:
     adapter: gradle  # Required if auto-detection fails
 ```
@@ -82,7 +82,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create pre-release versions
-        uses: tvcsantos/verse@v1
+        uses: tvcsantos/muverse@v1
         with:
           adapter: gradle
           prerelease-mode: true
@@ -109,7 +109,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create timestamp versions
-        uses: tvcsantos/verse@v1
+        uses: tvcsantos/muverse@v1
         with:
           adapter: gradle
           prerelease-mode: true
@@ -141,7 +141,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create Gradle SNAPSHOT versions
-        uses: tvcsantos/verse@v1
+        uses: tvcsantos/muverse@v1
         with:
           adapter: gradle
           append-snapshot: true
@@ -185,7 +185,7 @@ For workflows where you want to handle git operations manually:
 
 ```yaml
 - name: Version modules (no git operations)
-  uses: tvcsantos/verse@v1
+  uses: tvcsantos/muverse@v1
   with:
     adapter: gradle
     push-changes: false    # Disable automatic commit/push
@@ -225,18 +225,18 @@ steps:
 
 ## Configuration
 
-VERSE uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for flexible configuration loading and [Zod](https://github.com/colinhacks/zod) for type-safe validation. It automatically searches for configuration in multiple formats and locations using standard naming conventions, validates the configuration against a schema, and provides detailed error messages if validation fails.
+μVERSE uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for flexible configuration loading and [Zod](https://github.com/colinhacks/zod) for type-safe validation. It automatically searches for configuration in multiple formats and locations using standard naming conventions, validates the configuration against a schema, and provides detailed error messages if validation fails.
 
 ### Supported Configuration Files
 
-VERSE will automatically search for configuration in the following order:
+μVERSE will automatically search for configuration in the following order:
 
-1. `package.json` (in a `"verse"` property)
-2. `.verserc` (JSON or YAML)
-3. `.verserc.json`
-4. `.verserc.yaml` / `.verserc.yml`
-5. `.verserc.js` (JavaScript)
-6. `verse.config.js` (JavaScript)
+1. `package.json` (in a `"muverse"` property)
+2. `.muverserc` (JSON or YAML)
+3. `.muverserc.json`
+4. `.muverserc.yaml` / `.muverserc.yml`
+5. `.muverserc.js` (JavaScript)
+6. `muverse.config.js` (JavaScript)
 
 ### Configuration Options
 
@@ -249,7 +249,7 @@ VERSE will automatically search for configuration in the following order:
 
 ### Configuration Examples
 
-#### JSON Format (`.verserc.json`)
+#### JSON Format (`.muverserc.json`)
 ```json
 {
   "defaultBump": "patch",
@@ -270,7 +270,7 @@ VERSE will automatically search for configuration in the following order:
 }
 ```
 
-#### YAML Format (`.verserc.yaml`)
+#### YAML Format (`.muverserc.yaml`)
 ```yaml
 defaultBump: patch
 
@@ -289,7 +289,7 @@ dependencyRules:
   onPatchOfDependency: none
 ```
 
-#### JavaScript Format (`verse.config.js`)
+#### JavaScript Format (`muverse.config.js`)
 ```javascript
 module.exports = {
   defaultBump: 'patch',
@@ -315,7 +315,7 @@ module.exports = {
 ```json
 {
   "name": "my-project",
-  "verse": {
+  "muverse": {
     "defaultBump": "patch",
     "commitTypes": {
       "feat": "minor",
@@ -330,8 +330,8 @@ module.exports = {
 ### Usage Example
 
 ```yaml
-- name: VERSE Semantic Evolution
-  uses: tvcsantos/verse@v1
+- name: μVERSE Semantic Evolution
+  uses: tvcsantos/muverse@v1
   with:
     adapter: gradle
 ```
@@ -345,7 +345,7 @@ All configuration files are validated using [Zod](https://github.com/colinhacks/
 - **Runtime Validation**: Catches configuration errors before execution
 - **Schema Enforcement**: Ensures only valid values are accepted
 
-If validation fails, VERSE will provide a detailed error message indicating which configuration fields are invalid, making it easy to identify and fix issues.
+If validation fails, μVERSE will provide a detailed error message indicating which configuration fields are invalid, making it easy to identify and fix issues.
 
 ## Gradle Project Structure
 
@@ -380,7 +380,7 @@ api.version=1.5.0
 
 ### Version Management
 
-VERSE manages all module versions through the **root** `gradle.properties` file:
+μVERSE manages all module versions through the **root** `gradle.properties` file:
 
 - **All module versions** must be declared in the root `gradle.properties` file
 - **Root module** version uses the `version` property

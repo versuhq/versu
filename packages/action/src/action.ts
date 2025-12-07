@@ -1,10 +1,10 @@
 import * as core from '@actions/core';
-import { VerseRunner, RunnerOptions, initLogger } from '@verse/core';
+import { VerseRunner, RunnerOptions, initLogger } from '@muverse/core';
 import { ActionsLogger } from './logger.js';
 import { parseBooleanInput } from './utils/actions.js';
 
 /**
- * Main entry point for VERSE GitHub Action
+ * Main entry point for μVERSE GitHub Action
  */
 export async function run(): Promise<void> {
   try {
@@ -41,7 +41,7 @@ export async function run(): Promise<void> {
       pushChanges,
       generateChangelog,
     };
-    // Run VERSE engine
+    // Run μVERSE engine
     const runner = new VerseRunner(options);
     const result = await runner.run();
 
