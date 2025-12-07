@@ -24,6 +24,7 @@ import { createAdapterIdentifierRegistry } from "../factories/adapter-identifier
 import { Module } from "../adapters/project-information.js";
 import { ConfigurationValidator } from "./configuration-validator.js";
 import { banner } from "../utils/banner.js";
+import path from "path";
 
 export type RunnerOptions = {
   readonly repoRoot: string;
@@ -67,7 +68,10 @@ export class VerseRunner {
   private adapterMetadataProvider: AdapterMetadataProvider;
 
   constructor(options: RunnerOptions) {
-    this.options = options;
+    this.options = {
+      ...options,
+      repoRoot: path.resolve(options.repoRoot),
+    }
 
     // Initialize services
     this.configurationLoader = new ConfigurationLoader(
@@ -185,7 +189,7 @@ export class VerseRunner {
     // Log discovered modules through hierarchy manager
     const moduleIds = this.moduleRegistry.getModuleIds();
     logger.info(`Found ${moduleIds.length} modules: ${moduleIds.join(", ")}`);
-
+    
     // Analyze commits since last release
     this.commitAnalyzer = new CommitAnalyzer(
       this.moduleRegistry,
