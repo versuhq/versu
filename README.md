@@ -39,14 +39,6 @@ GitHub Actions integration for automated versioning in workflow pipelines.
 
 **Use when:** You want automated versioning in GitHub workflows.
 
-## Getting Started
-
-Choose the μVERSE package that best fits your needs:
-
-- **For GitHub workflows:** See [@muverse/action](packages/action) - GitHub Actions integration
-- **For local development or custom CI/CD:** See [@muverse/cli](packages/cli) - Command-line interface
-- **For library integration:** See [@muverse/core](packages/core) - Core library for custom tools
-
 For specific package setup, see individual package READMEs.
 
 ## Commit Message Format
