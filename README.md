@@ -62,31 +62,36 @@ To add support for new project types, see the [core package documentation](packa
 
 ## Development
 
+### Requirements
+
+- [nvm](https://github.com/nvm-sh/nvm) or [fnm](https://github.com/Schniz/fnm) (Node version manager)
+- Node.js (see [.nvmrc](.nvmrc))
+- npm
+
 ### Setup
 
 ```bash
-npm install
-npm run build
-npm test
+npm install    # Install dependencies
+npm run build  # Build all packages
+npm test       # Run tests
 ```
 
 ### Monorepo Structure
 
 ```
 packages/
-├── core/               # Core library
+├── core/      # Core library (@muverse/core)
 │   └── src/
-│       ├── adapters/          # Language adapters
-│       ├── services/          # Core services
-│       ├── config/            # Configuration
-│       └── ...
-├── cli/                # CLI tool
+│       ├── adapters/    # Project type adapters (Gradle, etc.)
+│       ├── services/    # Core services (versioning, git, changelog)
+│       └── config/      # Configuration system
+├── cli/       # CLI tool (@muverse/cli)
 │   └── src/
-└── action/             # GitHub Action
+└── action/    # GitHub Action (@muverse/action)
     └── src/
 ```
 
-For detailed development information, see individual package READMEs.
+Each package has its own README with detailed documentation. The monorepo uses npm workspaces for dependency management.
 
 ## License
 
