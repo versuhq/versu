@@ -19,43 +19,25 @@ A semantic versioning engine for monorepos that uses Conventional Commits to aut
 
 ## 📦 Packages
 
-μVERSE is organized as a monorepo with three main packages:
+μVERSE provides three packages for different use cases:
 
-### [@muverse/core](packages/core) - Core Library
-The core business logic powering μVERSE - completely independent of any framework or CI/CD system.
+### [@muverse/core](packages/core)
 
-**Key Features:**
-- Semantic version calculation and management
-- Multi-module project support with dependency cascade detection
-- Conventional commits parsing
-- Changelog generation
-- Git operations (commits, tags, pushes)
-- Extensible adapter system (Gradle, etc.)
-- Configuration loading and validation
+Core library with the `VerseRunner` API for programmatic version management. Framework-agnostic with adapters for different project types (Gradle, extensible).
 
-**Use when:** You need semantic versioning in your own tools or applications.
+**Use when:** Building custom tools or integrations that need version management.
 
-### [@muverse/cli](packages/cli) - Command-Line Interface
-CLI tool for μVERSE using oclif, perfect for local development and custom CI/CD systems.
+### [@muverse/cli](packages/cli)
 
-**Key Features:**
-- `muverse version` command for calculating and applying version updates
-- Full configuration support via flags
-- Human-friendly output
-- All core features available through the command line
+Command-line interface for interactive version management in local development and CI/CD pipelines.
 
-**Use when:** You want to use μVERSE locally or in non-GitHub CI/CD systems.
+**Use when:** You need CLI control or want to integrate with non-GitHub CI/CD systems.
 
-### [@muverse/action](packages/action) - GitHub Action
-GitHub Actions wrapper providing seamless integration with GitHub workflows.
+### [@muverse/action](packages/action)
 
-**Key Features:**
-- GitHub Actions integration
-- Automatic action inputs/outputs
-- GitHub-specific functionality
-- Automatic deployment to GitHub Actions Marketplace
+GitHub Actions integration for automated versioning in workflow pipelines.
 
-**Use when:** You want to run μVERSE as a GitHub Action in your workflows.
+**Use when:** You want automated versioning in GitHub workflows.
 
 ## Getting Started
 
