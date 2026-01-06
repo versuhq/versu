@@ -2,12 +2,12 @@ import groovy.json.JsonOutput
 import groovy.json.JsonGenerator
 
 /**
- * Computes the qualified version property name for the project.
- * Checks for "<projectName>.version" first, then falls back to "version".
+ * Retrieves the qualified version property name for the project.
+ * Checks for properties in the order: "<projectName>.version", "<rootProjectName>.version", "version".
  */
 fun Project.qualifiedVersionProperty(): String {
-    val candidates = listOf("${name}.version", "version")
-    return candidates.firstOrNull(::hasProperty) ?: "version"
+    val candidates = listOf("${name}.version", "${rootProject.name}.version", "version")
+    return candidates.first(::hasProperty)
 }
 
 /**
