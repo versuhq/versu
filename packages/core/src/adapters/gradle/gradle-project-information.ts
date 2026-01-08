@@ -92,24 +92,30 @@ export function getProjectInformation(projectInformation: RawProjectInformation)
 
   // Find root module by looking for the one with type 'root'
   let rootModule: string | undefined;
-  for (const [moduleId, module] of Object.entries(projectInformation)) {
-    if (module.type === 'root') {
+  for (const [moduleId, rawModule] of Object.entries(projectInformation)) {
+    if (rawModule.type === 'root') {
       rootModule = moduleId;
     }
     
     // Create normalized Module object
-    modules.set(moduleId, {
+    const module: Module = {
       id: moduleId,
-      name: module.name,
-      path: module.path,
-      type: module.type,
-      affectedModules: new Set(module.affectedModules),
+      name: rawModule.name,
+      path: rawModule.path,
+      type: rawModule.type,
+      affectedModules: new Set(rawModule.affectedModules),
       // Parse version if present, otherwise create initial version
-      version: module.version === undefined ?
+      version: rawModule.version === undefined ?
         createInitialVersion() :
-        parseSemVer(module.version),
-      declaredVersion: module.declaredVersion,
-    });
+        parseSemVer(rawModule.version),
+      declaredVersion: rawModule.declaredVersion,
+    };
+
+    if ('versionProperty' in rawModule) {
+      module['versionProperty'] = rawModule.versionProperty;
+    }
+
+    modules.set(moduleId, module);
   }
 
   // Validate that a root module was found

@@ -63,7 +63,7 @@ export type RawModule = {
 
   /** Whether the version is explicitly declared in build configuration. */
   readonly declaredVersion: boolean;
-};
+} & Record<string, unknown>;
 
 /**
  * Raw project structure information as extracted from the build system.

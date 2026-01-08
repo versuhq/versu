@@ -1,6 +1,6 @@
 {
   "name": "muverse",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "Version Engine for Repo Semantic Evolution",
   "private": true,
   "workspaces": [
