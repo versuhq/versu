@@ -8,6 +8,7 @@ import fs from 'fs/promises';
 import crypto from 'crypto';
 import fg from 'fast-glob';
 import { parseProperties } from '../../utils/properties.js';
+import { logger } from '../../utils/logger.js';
 
 type Mutable<T> = {
   -readonly [P in keyof T]: T[P];
@@ -84,6 +85,7 @@ async function computeGradleFilesHash(projectRoot: string): Promise<string> {
  * @throws {Error} If initialization script not found or Gradle execution fails
  */
 async function executeGradleScript(projectRoot: string, outputFile: string): Promise<void> {
+  logger.info(`⚙️ Executing Gradle to collect project information...`);
   const gradlew = join(projectRoot, GRADLE_WRAPPER);
   const dirname = path.dirname(fileURLToPath(import.meta.url));
   const initScriptPath = join(dirname, GRADLE_INIT_SCRIPT);
@@ -119,6 +121,8 @@ async function executeGradleScript(projectRoot: string, outputFile: string): Pro
       `Gradle command failed with exit code ${result.exitCode}: ${result.stderr}`
     );
   }
+
+  logger.info(`✅ Gradle project information generated at ${outputFile}.`);
 }
 
 /**
@@ -140,6 +144,7 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
   const currentHash = await computeGradleFilesHash(projectRoot);
   
   if (fileExists) {
+    logger.info(`💾 Cached project information found at ${outputFile}. Validating cache...`);
     // Step 2: File exists, check cache validity
     try {
       const fileContent = await fs.readFile(outputFile, 'utf-8');
@@ -155,7 +160,7 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
       // Cache miss - hash mismatch, need to regenerate
     } catch (error) {
       // If there's any error reading/parsing cached file, regenerate
-      console.warn(`Failed to read cached project information: ${error}`);
+      logger.warning(`⚠️ Failed to read cached project information: ${error}`);
     }
   }
   
@@ -185,9 +190,11 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
 
   // Read gradle.properites and add version
   const projectInformation = await getInformationWithVersions(projectRoot, data);
-  
-  // Write back to file with hash for future cache validation
-  await fs.writeFile(outputFile, JSON.stringify(cachedData, null, 2), 'utf-8');
+
+  if (!executeScript) {
+    // Write back to file with hash for future cache validation
+    await fs.writeFile(outputFile, JSON.stringify(cachedData, null, 2), 'utf-8');
+  }
   
   return projectInformation;
 }

@@ -101,6 +101,7 @@ export class VerseRunner {
     logger.info("");
     logger.info("🚀 Starting μVERSE engine...");
     logger.info(`Repository: ${this.options.repoRoot}`);
+    logger.info(`Output file: ${this.options.outputFile}`);
     logger.info(`Adapter: ${this.options.adapter || "(auto-detect)"}`);
     logger.info(`Dry run: ${this.options.dryRun}`);
     logger.info(`Prerelease mode: ${this.options.prereleaseMode}`);
