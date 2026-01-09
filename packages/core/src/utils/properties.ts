@@ -2,6 +2,44 @@ import { promises as fs } from "fs";
 import { exists } from "./file.js";
 
 /**
+ * Parse a generic properties file into key-value pairs
+ * Supports both '=' and ':' as delimiters
+ * Skips comments (lines starting with # or !) and empty lines
+ * @param propertiesPath - Path to the properties file
+ * @returns Map of property keys to values
+ */
+export async function parseProperties(propertiesPath: string): Promise<Map<string, string>> {
+  const content = await fs.readFile(propertiesPath, 'utf8');
+  const properties = new Map<string, string>();
+  
+  // Parse all properties line by line
+  const lines = content.split('\n');
+  
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    
+    // Skip comments and empty lines
+    if (trimmedLine.startsWith('#') || trimmedLine.startsWith('!') || !trimmedLine) {
+      continue;
+    }
+    
+    // Parse property: key=value or key:value
+    const match = trimmedLine.match(/^([^=:]+)[=:]\s*(.+)$/);
+    if (!match) {
+      continue;
+    }
+    
+    const [, key, value] = match;
+    const trimmedKey = key.trim();
+    const trimmedValue = value.trim();
+    
+    properties.set(trimmedKey, trimmedValue);
+  }
+  
+  return properties;
+}
+
+/**
  * Updates or inserts a single property in a Java-style properties file.
  * @param propertiesPath - Path to the properties file
  * @param key - Property key to update or insert

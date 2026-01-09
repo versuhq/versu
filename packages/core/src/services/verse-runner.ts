@@ -72,7 +72,7 @@ export class VerseRunner {
     this.options = {
       ...options,
       repoRoot: path.resolve(options.repoRoot),
-      outputFile: path.resolve(options.outputFile)
+      outputFile: path.resolve(options.outputFile),
     };
 
     // Initialize services
@@ -183,7 +183,9 @@ export class VerseRunner {
 
     // Discover modules and get hierarchy manager
     logger.info("🔍 Discovering modules...");
-    const detector = this.moduleSystemFactory.createDetector(this.options.outputFile);
+    const detector = this.moduleSystemFactory.createDetector(
+      this.options.outputFile,
+    );
     this.moduleRegistry = await detector.detect();
 
     // Log discovered modules through hierarchy manager

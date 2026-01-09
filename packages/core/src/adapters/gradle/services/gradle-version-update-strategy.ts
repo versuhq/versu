@@ -34,7 +34,6 @@ export class GradleVersionUpdateStrategy implements VersionUpdateStrategy {
       const module = this.moduleRegistry.getModule(moduleId);
       const propertyName = module['versionProperty'] as string;
       propertyUpdates.set(propertyName, versionString);
-    
     }
     
     // Write all properties to gradle.properties file in one atomic operation

@@ -42,10 +42,9 @@ export type ProjectInformation = {
 };
 
 /**
- * Raw module data as extracted from the build system before processing.
- * Similar to Module but with arrays instead of Sets and optional string version.
+ * Base module data structure without the module ID and with version as a string.
  */
-export type RawModule = {
+export type BaseModule = {
   /** Human-readable name of the module. */
   readonly name: string;
 
@@ -63,7 +62,13 @@ export type RawModule = {
 
   /** Whether the version is explicitly declared in build configuration. */
   readonly declaredVersion: boolean;
-} & Record<string, unknown>;
+};
+
+/**
+ * Raw module data as extracted from the build system before processing.
+ * Similar to Module but with arrays instead of Sets and optional string version.
+ */
+export type RawModule = BaseModule & Record<string, unknown>;
 
 /**
  * Raw project structure information as extracted from the build system.

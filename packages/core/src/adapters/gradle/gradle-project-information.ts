@@ -1,12 +1,17 @@
 import path, { join } from 'path';
 import { createInitialVersion, parseSemVer } from '../../semver/index.js';
 import { exists } from '../../utils/file.js';
-import { Module, ProjectInformation, RawProjectInformation } from '../project-information.js';
+import { BaseModule, Module, ProjectInformation, RawModule, RawProjectInformation } from '../project-information.js';
 import { fileURLToPath } from 'url';
 import { execa } from 'execa';
 import fs from 'fs/promises';
 import crypto from 'crypto';
 import fg from 'fast-glob';
+import { parseProperties } from '../../utils/properties.js';
+
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
 
 /**
  * Name of the Gradle wrapper script file.
@@ -166,7 +171,10 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
   const projectInformationContent = await fs.readFile(outputFile, 'utf-8');
 
   // Parse JSON output from Gradle
-  const projectInformation: RawProjectInformation = JSON.parse(projectInformationContent.trim() || '{}');
+  const gradleProjectInformation: GradleProjectInformation = JSON.parse(projectInformationContent.trim() || '{}');
+
+  // Read gradle.properites and add version
+  const projectInformation = await getInformationWithVersions(projectRoot, gradleProjectInformation);
   
   // Compute hash and save with cache information
   const currentHash = await computeGradleFilesHash(projectRoot);
@@ -179,6 +187,47 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
   await fs.writeFile(outputFile, JSON.stringify(cachedData, null, 2), 'utf-8');
   
   return projectInformation;
+}
+
+// omit version and declaredVersion
+type GradleModule = Omit<BaseModule, 'version' | 'declaredVersion'> & {
+  versionProperty: string;
+}
+
+type GradleProjectInformation = {
+  [id: string]: GradleModule;
+};
+
+/**
+ * Reads gradle.properties to extract module versions and augment raw project information.
+ * @param projectRoot - Absolute path to the Gradle project root directory
+ * @param projectInformation - Gradle project information without versions
+ * @returns Promise resolving to augmented RawProjectInformation with versions
+ */
+async function getInformationWithVersions(
+  projectRoot: string, 
+  projectInformation: GradleProjectInformation
+): Promise<RawProjectInformation> {
+  const gradlePropertiesFile = join(projectRoot, 'gradle.properties');
+  const gradlePropertiesExists = await exists(gradlePropertiesFile);
+  const result: Mutable<RawProjectInformation> = {};
+  let moduleVersions = new Map<string, string>();
+
+  if (gradlePropertiesExists) {
+    moduleVersions = await parseProperties(gradlePropertiesFile);
+
+    for (const [moduleId, module] of Object.entries(projectInformation)) {
+      const version = moduleVersions.get(module.versionProperty);
+      const resultVersion = version ? version : undefined;
+      result[moduleId] = {
+        ...module,
+        version: resultVersion,
+        declaredVersion: resultVersion !== undefined
+      };
+    }
+  }
+
+  return result;
 }
 
 /**

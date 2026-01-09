@@ -127,10 +127,8 @@ gradle.rootProject {
                 mapOf(
                     "path" to projectInfo["path"],
                     "affectedModules" to affectedModules.toSortedSet(),
-                    "version" to projectInfo["version"],
                     "type" to projectInfo["type"],
                     "name" to projectInfo["name"],
-                    "declaredVersion" to projectInfo["declaredVersion"],
                     "versionProperty" to projectInfo["versionProperty"]
                 )
             }
