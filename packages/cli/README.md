@@ -33,6 +33,7 @@ muverse
 ```
 
 This will:
+
 1. Detect your project type (Gradle, etc.)
 2. Analyze commits since the last version
 3. Calculate version bumps based on Conventional Commits
@@ -70,12 +71,13 @@ muverse --adapter gradle
 Calculate and apply semantic version changes.
 
 **Arguments:**
+
 - `REPOSITORYROOT` - Path to the repository root (default: `.`)
 
 **Flags:**
 
 | Flag | Description | Default |
-|------|-------------|---------|
+| ------ | ------------- | --------- |
 | `--dry-run` | Run without writing or pushing changes | `false` |
 | `--adapter <value>` | Language adapter (e.g., gradle). Auto-detected if not provided | - |
 | `--push-tags` | Push tags to origin | `true` |
@@ -90,6 +92,7 @@ Calculate and apply semantic version changes.
 | `--no-push-changes` | Don't commit and push changes | - |
 | `--generate-changelog` | Generate or update changelog files for changed modules | `true` |
 | `--no-generate-changelog` | Don't generate changelogs | - |
+| `--output-file <value>` | Write calculated versions to a file in JSON format | - |
 
 > 📖 **Detailed Pre-release Documentation**: See [@muverse/core PRERELEASE.md](../core/PRERELEASE.md) for comprehensive examples and use cases.
 
@@ -171,6 +174,7 @@ Then manually review, commit, and push.
 ### Configuration Example
 
 `.muverserc.json`:
+
 ```json
 {
   "defaultBump": "patch",
@@ -204,7 +208,7 @@ The CLI supports Gradle projects with:
 
 ### Example Project Structure
 
-```
+```text
 myproject/
 ├── settings.gradle.kts
 ├── build.gradle.kts
@@ -230,7 +234,7 @@ api.version=1.5.0
 
 μVERSE uses [Conventional Commits](https://conventionalcommits.org/) to determine version bumps:
 
-```
+```text
 <type>[optional scope]: <description>
 
 [optional body]
@@ -239,6 +243,7 @@ api.version=1.5.0
 ```
 
 **Examples:**
+
 - `feat(api): add new endpoint` → **minor** bump
 - `fix(core): resolve memory leak` → **patch** bump  
 - `feat!: breaking API change` → **major** bump
@@ -249,7 +254,8 @@ Breaking changes trigger **major** version bumps:
 
 1. Using `!` after the type: `feat!: remove deprecated API`
 2. Using `BREAKING CHANGE:` in the footer:
-   ```
+
+   ```text
    feat: update API
    
    BREAKING CHANGE: The old API is removed
@@ -301,6 +307,7 @@ Add to your `package.json`:
 ```
 
 Then run:
+
 ```bash
 npm run version        # Dry run
 npm run version:release # Actual release

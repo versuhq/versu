@@ -13,13 +13,15 @@ export interface ModuleSystemFactory {
   /**
    * Creates a module detector for discovering modules.
    *
+   * @param outputFile - Path to the output file for project information
    * @returns {@link ModuleDetector} configured for this build system
    */
-  createDetector(): ModuleDetector;
+  createDetector(outputFile: string): ModuleDetector;
 
   /**
    * Creates a version update strategy for writing versions to build files.
    *
+   * @param moduleRegistry - ModuleRegistry containing all detected modules
    * @returns {@link VersionUpdateStrategy} configured for this build system
    */
   createVersionUpdateStrategy(

@@ -72,6 +72,10 @@ export default class Version extends Command {
       default: true,
       allowNo: true,
     }),
+    "output-file": Flags.string({
+      description: "Path to the output file for project information",
+      default: "project-information.json",
+    }),
   };
 
   async run(): Promise<void> {
@@ -93,6 +97,7 @@ export default class Version extends Command {
         appendSnapshot: flags["append-snapshot"],
         pushChanges: flags["push-changes"],
         generateChangelog: flags["generate-changelog"],
+        outputFile: flags["output-file"],
       };
 
       const runner = new VerseRunner(options);

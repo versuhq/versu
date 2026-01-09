@@ -5,6 +5,8 @@ import { Module, ProjectInformation, RawProjectInformation } from '../project-in
 import { fileURLToPath } from 'url';
 import { execa } from 'execa';
 import fs from 'fs/promises';
+import crypto from 'crypto';
+import fg from 'fast-glob';
 
 /**
  * Name of the Gradle wrapper script file.
@@ -19,13 +21,64 @@ const GRADLE_WRAPPER = 'gradlew'
 const GRADLE_INIT_SCRIPT = './init-project-information.gradle.kts'
 
 /**
- * Executes Gradle to collect raw project structure information.
- * Runs gradlew with init script to output JSON containing module hierarchy, versions, and dependencies.
+ * Cached project information structure with hash for validation.
+ */
+interface CachedProjectInformation {
+  hash: string;
+  data: RawProjectInformation;
+}
+
+/**
+ * Finds all Gradle build files recursively under the project root.
+ * Searches for settings.gradle, settings.gradle.kts, build.gradle, and build.gradle.kts files.
  * @param projectRoot - Absolute path to the Gradle project root directory
- * @returns Promise resolving to raw project information as JSON
+ * @returns Promise resolving to array of absolute paths to Gradle build files
+ */
+async function findGradleFiles(projectRoot: string): Promise<string[]> {
+  const patterns = [
+    '**/settings.gradle',
+    '**/settings.gradle.kts',
+    '**/build.gradle',
+    '**/build.gradle.kts'
+  ];
+
+  const files = await fg(patterns, {
+    cwd: projectRoot,
+    absolute: true,
+    ignore: ['**/node_modules/**', '**/build/**', '**/.gradle/**']
+  });
+
+  // Sort for consistent ordering
+  return files.sort();
+}
+
+/**
+ * Computes SHA-256 hash of all Gradle build files.
+ * Used to detect changes in project configuration that would invalidate cached information.
+ * @param projectRoot - Absolute path to the Gradle project root directory
+ * @returns Promise resolving to hexadecimal hash string
+ */
+async function computeGradleFilesHash(projectRoot: string): Promise<string> {
+  const files = await findGradleFiles(projectRoot);
+  const hash = crypto.createHash('sha256');
+
+  for (const file of files) {
+    const content = await fs.readFile(file, 'utf-8');
+    hash.update(file); // Include file path for uniqueness
+    hash.update(content);
+  }
+
+  return hash.digest('hex');
+}
+
+/**
+ * Executes the Gradle wrapper script to generate project information.
+ * Runs gradlew with initialization script to create the project-information.json file.
+ * @param projectRoot - Absolute path to the Gradle project root directory
+ * @param outputFile - Path to output JSON file to be generated
  * @throws {Error} If initialization script not found or Gradle execution fails
  */
-export async function getRawProjectInformation(projectRoot: string): Promise<RawProjectInformation> {
+async function executeGradleScript(projectRoot: string, outputFile: string): Promise<void> {
   const gradlew = join(projectRoot, GRADLE_WRAPPER);
   const dirname = path.dirname(fileURLToPath(import.meta.url));
   const initScriptPath = join(dirname, GRADLE_INIT_SCRIPT);
@@ -45,7 +98,8 @@ export async function getRawProjectInformation(projectRoot: string): Promise<Raw
     '--console=plain',        // Disable ANSI formatting
     '--init-script',          // Inject initialization script
     initScriptPath,
-    'structure'               // Custom task that outputs project structure
+    'structure',               // Custom task that outputs project structure
+    `-PprojectInfoOutput=${outputFile}`
   ];
 
   // Execute Gradle wrapper with the prepared arguments
@@ -60,23 +114,71 @@ export async function getRawProjectInformation(projectRoot: string): Promise<Raw
       `Gradle command failed with exit code ${result.exitCode}: ${result.stderr}`
     );
   }
+}
 
-  const file = join(projectRoot, 'build', 'project-information.json');
+/**
+ * Executes Gradle to collect raw project structure information.
+ * Runs gradlew with init script to output JSON containing module hierarchy, versions, and dependencies.
+ * @param projectRoot - Absolute path to the Gradle project root directory
+ * @param outputFile - Path to output JSON file to be generated
+ * @returns Promise resolving to raw project information as JSON
+ * @throws {Error} If initialization script not found or Gradle execution fails
+ */
+export async function getRawProjectInformation(projectRoot: string, outputFile: string): Promise<RawProjectInformation> {
+  // Step 1: Check if project-information.json exists
+  const fileExists = await exists(outputFile);
+  
+  if (fileExists) {
+    // Step 2: File exists, check cache validity
+    try {
+      const fileContent = await fs.readFile(outputFile, 'utf-8');
+      const cachedData: CachedProjectInformation = JSON.parse(fileContent);
+      
+      // Step 2.1 & 2.2: Compute hash of all Gradle build files
+      const currentHash = await computeGradleFilesHash(projectRoot);
+      
+      // Step 2.3 & 2.4: Compare hashes
+      if (cachedData.hash === currentHash) {
+        // Cache hit - return cached data
+        return cachedData.data;
+      }
+      
+      // Cache miss - hash mismatch, need to regenerate
+    } catch (error) {
+      // If there's any error reading/parsing cached file, regenerate
+      console.warn(`Failed to read cached project information: ${error}`);
+    }
+  }
+  
+  // Step 3: File doesn't exist or cache is invalid - execute Gradle script
+  await executeGradleScript(projectRoot, outputFile);
 
   // Verify that the output file was created
-  const fileExists = await exists(file);
-  if (!fileExists) {
+  const fileExistsAfterExec = await exists(outputFile);
+  if (!fileExistsAfterExec) {
     throw new Error(
-      `Expected output file not found at ${file}. ` +
+      `Expected output file not found at ${outputFile}. ` +
       `Ensure that the Gradle init script is correctly generating the project information.`
     );
   }
 
   // Read the output file content
-  const projectInformation = await fs.readFile(file, 'utf-8');
+  const projectInformationContent = await fs.readFile(outputFile, 'utf-8');
 
   // Parse JSON output from Gradle
-  return JSON.parse(projectInformation.trim() || '{}');
+  const projectInformation: RawProjectInformation = JSON.parse(projectInformationContent.trim() || '{}');
+  
+  // Compute hash and save with cache information
+  const currentHash = await computeGradleFilesHash(projectRoot);
+  const cachedData: CachedProjectInformation = {
+    hash: currentHash,
+    data: projectInformation
+  };
+  
+  // Write back to file with hash for future cache validation
+  await fs.writeFile(outputFile, JSON.stringify(cachedData, null, 2), 'utf-8');
+  
+  return projectInformation;
 }
 
 /**

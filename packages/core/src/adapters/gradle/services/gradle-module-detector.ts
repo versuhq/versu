@@ -11,7 +11,7 @@ import {
  */
 export class GradleModuleDetector implements ModuleDetector {
   /** Absolute path to the repository root directory. */
-  constructor(readonly repoRoot: string) {}
+  constructor(readonly repoRoot: string, readonly outputFile: string) {}
 
   /**
    * Detects and catalogs all modules in the Gradle project.
@@ -20,7 +20,7 @@ export class GradleModuleDetector implements ModuleDetector {
    */
   async detect(): Promise<ModuleRegistry> {
     // Step 1: Execute Gradle and collect raw project structure data
-    const rawProjectInformation = await getRawProjectInformation(this.repoRoot);
+    const rawProjectInformation = await getRawProjectInformation(this.repoRoot, this.outputFile);
     
     // Step 2: Parse and transform raw data into structured module information
     const projectInformation = getProjectInformation(rawProjectInformation);

@@ -104,12 +104,14 @@ interface RunnerResult {
 Built-in support for Gradle projects (Groovy & Kotlin DSL).
 
 **Features:**
+
 - Multi-module project detection
 - Version management through root `gradle.properties`
 - Dependency detection
 - Both Groovy and Kotlin DSL support
 
 **Version Format:**
+
 ```properties
 # Root module
 version=1.0.0

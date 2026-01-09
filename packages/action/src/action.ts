@@ -25,6 +25,7 @@ export async function run(): Promise<void> {
     const appendSnapshot = parseBooleanInput(core.getInput('append-snapshot'));
     const pushChanges = parseBooleanInput(core.getInput('push-changes'));
     const generateChangelog = parseBooleanInput(core.getInput('generate-changelog') || 'false');
+    const outputFile = core.getInput('output-file');
 
     // Create runner options
     const options: RunnerOptions = {
@@ -40,6 +41,7 @@ export async function run(): Promise<void> {
       appendSnapshot,
       pushChanges,
       generateChangelog,
+      outputFile,
     };
     // Run μVERSE engine
     const runner = new VerseRunner(options);

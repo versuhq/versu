@@ -107,6 +107,7 @@ jobs:
 ```
 
 This generates versions like: `1.2.3-alpha.20251208.1530+abc1234` where:
+
 - `alpha.20251208.1530` is the timestamp-based prerelease identifier (YYYYMMDD.HHMM format)
 - `abc1234` is the short SHA build metadata
 
@@ -139,7 +140,7 @@ This applies `-SNAPSHOT` suffix to **all** module versions, generating versions 
 ## Action Inputs
 
 | Input | Description | Default |
-|-------|-------------|---------|
+| ------- | ------------- | --------- |
 | `dry-run` | Run without writing or pushing | `false` |
 | `adapter` | Language adapter (auto-detected if not provided) | `` |
 | `push-tags` | Push tags to origin | `true` |
@@ -151,13 +152,14 @@ This applies `-SNAPSHOT` suffix to **all** module versions, generating versions 
 | `append-snapshot` | Add -SNAPSHOT suffix to all versions if supported by adapter (e.g. `gradle`) | `false` |
 | `push-changes` | Commit and push version changes and changelogs to remote | `true` |
 | `generate-changelog` | Generate or update changelog files for changed modules | `true` |
+| `output-file` | Path to output JSON file with project information | `project-information.json` |
 
 > 📖 **Detailed Pre-release Documentation**: See [PRERELEASE.md](../core/PRERELEASE.md) for comprehensive examples and use cases.
 
 ## Action Outputs
 
 | Output | Description |
-|--------|-------------|
+| ------- | ------------- |
 | `bumped` | Whether any module was bumped |
 | `changed-modules` | JSON array of changed modules |
 | `created-tags` | Comma-separated list of created tags |
@@ -188,6 +190,7 @@ The action automatically handles git operations as part of the versioning workfl
 ### Automatic Commit and Push
 
 By default (`push-changes: true`), the action will:
+
 1. **Generate** version updates and changelogs
 2. **Commit** all changed files with message: `"chore: update versions and changelogs"`  
 3. **Push** changes to the remote repository
@@ -207,6 +210,7 @@ For workflows where you want to handle git operations manually:
 ```
 
 This is useful when:
+
 - **Running in forks** or environments without write permissions
 - **Custom commit workflows** that require specific commit messages or signing
 - **Multi-step pipelines** where versioning is separated from publishing
@@ -246,7 +250,7 @@ steps:
 ### Configuration Options
 
 | Option | Type | Description | Default |
-|--------|------|-------------|---------|
+| ------- | ------ | ------------- | --------- |
 | `defaultBump` | `string` | Default version bump type when conventional commit types don't match | `patch` |
 | `commitTypes` | `object` | Maps conventional commit types to version bump types or `ignore` | See examples below |
 | `dependencyRules` | `object` | How to bump dependents when dependencies change | See examples below |
@@ -254,6 +258,7 @@ steps:
 ### Configuration Examples
 
 #### JSON Format (`.muverserc.json`)
+
 ```json
 {
   "defaultBump": "patch",
@@ -275,6 +280,7 @@ steps:
 ```
 
 #### YAML Format (`.muverserc.yaml`)
+
 ```yaml
 defaultBump: patch
 
@@ -294,6 +300,7 @@ dependencyRules:
 ```
 
 #### JavaScript Format (`muverse.config.js`)
+
 ```javascript
 module.exports = {
   defaultBump: 'patch',
@@ -316,6 +323,7 @@ module.exports = {
 ```
 
 #### Package.json Format
+
 ```json
 {
   "name": "my-project",
@@ -344,7 +352,7 @@ The Gradle adapter supports:
 
 ### Example Project Structure
 
-```
+```text
 myproject/
 ├── settings.gradle.kts
 ├── build.gradle.kts
@@ -380,7 +388,7 @@ api.version=1.5.0
 
 μVERSE uses [Conventional Commits](https://conventionalcommits.org/) to determine version bumps:
 
-```
+```text
 <type>[optional scope]: <description>
 
 [optional body]
@@ -389,6 +397,7 @@ api.version=1.5.0
 ```
 
 **Examples:**
+
 - `feat(api): add new endpoint` → **minor** bump
 - `fix(core): resolve memory leak` → **patch** bump  
 - `feat!: breaking API change` → **major** bump
@@ -396,9 +405,11 @@ api.version=1.5.0
 ### Breaking Changes
 
 Breaking changes can be indicated in two ways:
+
 1. Using `!` after the type: `feat!: remove deprecated API`
 2. Using `BREAKING CHANGE:` in the footer:
-   ```
+
+   ```text
    feat: update API
    
    BREAKING CHANGE: The old API is removed
@@ -493,6 +504,7 @@ If you get permission errors when pushing:
 
 1. Ensure `fetch-depth: 0` is set in checkout
 2. Use a token with write permissions:
+
    ```yaml
    - uses: actions/checkout@v4
      with:
@@ -513,6 +525,7 @@ If auto-detection fails:
 
 1. Verify your project has the expected build files
 2. Explicitly specify the adapter:
+
    ```yaml
    with:
      adapter: gradle
