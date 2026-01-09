@@ -152,9 +152,12 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
       
       // Step 2.1: Compare hashes
       if (cachedData.hash === currentHash) {
+        logger.info(`✅ Cache is valid. Using cached project information.`);
         // Cache hit - use cached data
         executeScript = false;
         data = cachedData.data;
+      } else {
+        logger.info(`🔄 Gradle files changed, regenerating project information...`);
       }
       
       // Cache miss - hash mismatch, need to regenerate
