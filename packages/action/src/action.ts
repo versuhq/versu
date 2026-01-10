@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import { VerseRunner, RunnerOptions, initLogger } from '@muverse/core';
 import { ActionsLogger } from './logger.js';
 import { parseBooleanInput } from './utils/actions.js';
+import { VERSION, PACKAGE_NAME } from './version.js';
 
 /**
  * Main entry point for μVERSE GitHub Action
@@ -9,6 +10,8 @@ import { parseBooleanInput } from './utils/actions.js';
 export async function run(): Promise<void> {
   try {
     initLogger(new ActionsLogger());
+    
+    core.info(`${PACKAGE_NAME} v${VERSION}`);
     
     // Get repository root (GitHub Actions sets GITHUB_WORKSPACE)
     const repoRoot = process.env.GITHUB_WORKSPACE || process.cwd();

@@ -1,17 +1,20 @@
 {
   "name": "@muverse/action",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Version Engine for Repo Semantic Evolution (GitHub Action)",
+  "type": "module",
   "main": "dist/index.js",
   "private": true,
   "scripts": {
-    "build": "npx rollup --config rollup.config.mjs && npm run copy-assets",
+    "prebuild": "node scripts/generate-version.js",
+    "build": "npx rollup --config rollup.config.mjs && npm run copy-assets && npm run copy-action-yml",
     "package": "npm run build",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",
-    "copy-assets": "cpx \"../core/src/adapters/gradle/init-project-information.gradle.kts\" \"dist/\""
+    "copy-assets": "cpx \"../core/src/adapters/gradle/init-project-information.gradle.kts\" \"dist/\"",
+    "copy-action-yml": "node scripts/copy-action-yml.js"
   },
   "keywords": [
     "muverse",
@@ -38,7 +41,7 @@
     "@actions/core": "^1.10.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.0",
-    "@muverse/core": "^0.2.6"
+    "@muverse/core": "^0.2.7"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.8",

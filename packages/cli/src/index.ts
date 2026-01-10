@@ -21,6 +21,7 @@ export default class Version extends Command {
   };
 
   static override flags = {
+    version: Flags.version({char: 'v'}),
     "dry-run": Flags.boolean({
       description: "Run without writing or pushing changes",
       default: false,

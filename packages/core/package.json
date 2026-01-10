@@ -1,6 +1,6 @@
 {
   "name": "@muverse/core",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Version Engine for Repo Semantic Evolution (Core Library)",
   "type": "module",
   "main": "dist/index.js",
@@ -11,6 +11,7 @@
     }
   },
   "scripts": {
+    "prebuild": "node scripts/generate-version.js",
     "build": "npm run build:esm",
     "build:esm": "tsc --project tsconfig.json --outDir dist && npm run copy-assets",
     "build:cjs": "tsc --project tsconfig.cjs.json --outDir dist && npm run copy-assets",

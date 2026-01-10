@@ -1,3 +1,7 @@
+import { VERSION, PACKAGE_NAME } from "./version.js";
+
+const info = `${PACKAGE_NAME} v${VERSION}`;
+
 export const banner: string = `
 ██╗   ██╗███████╗██████╗ ███████╗███████╗
 ██║   ██║██╔════╝██╔══██╗██╔════╝██╔════╝
@@ -5,4 +9,6 @@ export const banner: string = `
 ╚██╗ ██╔╝██╔══╝  ██╔══██╗╚════██║██╔══╝  
  ╚████╔╝ ███████╗██║  ██║███████║███████╗
   ╚═══╝  ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝
+
+${info.padStart(44)}
 `;
