@@ -173,19 +173,20 @@ export async function getRawProjectInformation(projectRoot: string, outputFile: 
     // Step 3: File doesn't exist or cache is invalid - execute Gradle script
     const outputFile = join(projectRoot, 'build', 'project-information.json');
     await executeGradleScript(projectRoot, outputFile);
+    
+    // Verify that the output file was created
+    const fileExistsAfterExec = await exists(outputFile);
+    if (!fileExistsAfterExec) {
+      throw new Error(
+        `Expected output file not found at ${outputFile}. ` +
+        `Ensure that the Gradle init script is correctly generating the project information.`
+      );
+    }
+
     // Read the output file content
     const fileContent = await fs.readFile(outputFile, 'utf-8');
     // Parse JSON output from Gradle
     data = JSON.parse(fileContent.trim() || '{}');
-  }
-
-  // Verify that the output file was created
-  const fileExistsAfterExec = await exists(outputFile);
-  if (!fileExistsAfterExec) {
-    throw new Error(
-      `Expected output file not found at ${outputFile}. ` +
-      `Ensure that the Gradle init script is correctly generating the project information.`
-    );
   }
   
   // Compute hash and save with cache information
