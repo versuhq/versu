@@ -1,5 +1,5 @@
+import { Commit } from "conventional-commits-parser";
 import { getBumpTypeForCommit, Config } from "../config/index.js";
-import { CommitInfo } from "../git/index.js";
 import { BumpType, maxBumpType } from "../semver/index.js";
 
 /**
@@ -10,7 +10,7 @@ import { BumpType, maxBumpType } from "../semver/index.js";
  * @returns The highest BumpType required across all commits
  */
 export function calculateBumpFromCommits(
-  commits: CommitInfo[],
+  commits: Commit[],
   config: Config,
 ): BumpType {
   // Collect bump types for all commits
@@ -18,7 +18,7 @@ export function calculateBumpFromCommits(
 
   // Analyze each commit and determine its version impact
   for (const commit of commits) {
-    const bumpType = getBumpTypeForCommit(commit.type, commit.breaking, config);
+    const bumpType = getBumpTypeForCommit(commit, config);
 
     // Only include commits that require a version bump
     if (bumpType !== "none") {

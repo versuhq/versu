@@ -1,6 +1,6 @@
 {
   "name": "@muverse/core",
-  "version": "0.2.11",
+  "version": "0.3.0",
   "description": "Version Engine for Repo Semantic Evolution (Core Library)",
   "type": "module",
   "main": "dist/index.js",
@@ -45,6 +45,7 @@
   ],
   "types": "dist/index.d.ts",
   "dependencies": {
+    "conventional-changelog-writer": "^8.2.0",
     "conventional-commits-parser": "^6.2.1",
     "cosmiconfig": "^9.0.0",
     "deepmerge": "^4.3.1",

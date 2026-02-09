@@ -4,7 +4,7 @@
  * Supports monorepo and multi-module projects with module-specific tag management.
  */
 
-import { CommitParser } from "conventional-commits-parser";
+import { Commit, CommitParser } from "conventional-commits-parser";
 import { logger } from "../utils/logger.js";
 import { execa } from "execa";
 import { Module } from "../index.js";
@@ -91,6 +91,8 @@ export type CommitInfo = {
    * Not currently extracted by the parser but reserved for future use.
    */
   readonly module?: string;
+
+  readonly parsed?: Commit;
 };
 
 /**
@@ -105,7 +107,7 @@ export async function getCommitsSinceLastTag(
   projectInfo: Module,
   options: GitOptions = {},
   excludePaths: string[] = [],
-): Promise<CommitInfo[]> {
+): Promise<{ commits: Commit[]; lastTag: string | null }> {
   // Resolve the working directory, defaulting to current process directory
   const cwd = options.cwd || process.cwd();
 
@@ -127,11 +129,23 @@ export async function getCommitsSinceLastTag(
     // If tag exists: 'tag..HEAD' means commits after tag up to HEAD
     // If no tag: empty string means all commits in history
     const range = lastTag ? `${lastTag}..HEAD` : "";
-    return getCommitsInRange(range, projectInfo.path, { cwd }, excludePaths);
+    const commits = await getCommitsInRange(
+      range,
+      projectInfo.path,
+      { cwd },
+      excludePaths,
+    );
+    return { commits, lastTag };
   } catch (error) {
     // If tag lookup fails for any reason, fall back to all commits
     // This ensures we always have commit history for version determination
-    return getCommitsInRange("", projectInfo.path, { cwd }, excludePaths);
+    const commits = await getCommitsInRange(
+      "",
+      projectInfo.path,
+      { cwd },
+      excludePaths,
+    );
+    return { commits, lastTag: null };
   }
 }
 
@@ -149,7 +163,7 @@ export async function getCommitsInRange(
   pathFilter?: string,
   options: GitOptions = {},
   excludePaths: string[] = [],
-): Promise<CommitInfo[]> {
+): Promise<Commit[]> {
   // Resolve working directory, defaulting to current directory
   const cwd = options.cwd || process.cwd();
 
@@ -160,7 +174,10 @@ export async function getCommitsInRange(
   try {
     // Build git log command with custom format for easy parsing
     // Format: hash, subject, body, delimiter
-    const args = ["log", "--format=%H%n%s%n%b%n---COMMIT-END---"];
+    const args = [
+      "log",
+      "--format=%s%n%b%n-hash-%n%H%n-decorations-%n%D%n-authorName-%n%an%n-authorEmail-%n%ae%n-committerName-%n%cn%n-committerEmail-%n%ce%n---COMMIT-END---",
+    ];
 
     // Only add range if it's not empty
     // Empty range means "all commits" which is valid
@@ -204,13 +221,13 @@ export async function getCommitsInRange(
 }
 
 /**
- * Parses raw git log output into structured CommitInfo objects with Conventional Commits analysis.
+ * Parses raw git log output into structured Commit objects with Conventional Commits analysis.
  * Resilient to parsing failures - classifies non-conventional commits as 'unknown' type.
  * @param output - Raw git log output using custom format
- * @returns Array of parsed CommitInfo objects (empty if no valid commits)
+ * @returns Array of parsed Commit objects (empty if no valid commits)
  * @internal
  */
-function parseGitLog(output: string): CommitInfo[] {
+function parseGitLog(output: string): Commit[] {
   // Early return for empty output - no commits to parse
   if (!output.trim()) {
     return [];
@@ -218,7 +235,7 @@ function parseGitLog(output: string): CommitInfo[] {
 
   logger.debug(`Raw git log output:\n${output}`);
 
-  const commits: CommitInfo[] = [];
+  const commits: Commit[] = [];
 
   // Split output into individual commit blocks using custom delimiter
   // Filter removes empty blocks (trailing delimiters, etc.)
@@ -227,56 +244,24 @@ function parseGitLog(output: string): CommitInfo[] {
     .filter((block) => block.trim());
 
   for (const block of commitBlocks) {
-    // Split block into lines: [hash, subject, body...]
-    const lines = block.trim().split("\n");
+    const parsed = commitParser.parse(block);
 
-    // Skip malformed blocks (need at least hash and subject)
-    if (lines.length < 2) {
-      logger.debug(`Skipping malformed commit block:\n${block}`);
-      continue;
+    if (!parsed.hash) {
+      throw new Error("Parsed commit is missing hash");
     }
 
-    // Extract structured data from the block
-    const hash = lines[0]; // Line 1: commit SHA
-    const subject = lines[1]; // Line 2: commit message subject
-    const body = lines.slice(2).join("\n").trim(); // Remaining: commit body
+    logger.debug(`Parsed commit ${parsed.hash}: ${JSON.stringify(parsed)}`);
 
-    logger.debug(`Processing commit ${hash} with subject: ${subject}`);
-    logger.debug(`Commit body:\n${body}`);
-
-    try {
-      // Parse using Conventional Commits specification
-      // Combines subject and body for full context (breaking changes may be in body)
-      const parsed = commitParser.parse(subject + "\n\n" + body);
-
-      logger.debug(`Parsed commit ${hash}: ${JSON.stringify(parsed)}`);
-
-      // Build CommitInfo from parsed data
-      commits.push({
-        hash,
-        type: parsed.type || "unknown", // Default to 'unknown' if type missing
-        scope: parsed.scope || undefined,
-        subject: parsed.subject || subject, // Fallback to raw subject if parsing fails
-        body: body || undefined,
-        // Check if any note has title 'BREAKING CHANGE'
-        breaking:
-          parsed.notes?.some((note) => note.title === "BREAKING CHANGE") ||
-          false,
-      });
-    } catch (error) {
-      // If conventional commits parsing fails, treat as unknown type
-      // This ensures non-conventional commits don't break the system
-      commits.push({
-        hash,
-        type: "unknown",
-        subject,
-        body: body || undefined,
-        breaking: false,
-      });
-    }
+    commits.push(parsed);
   }
 
   return commits;
+}
+
+export function isBreakingCommit(commit: Commit): boolean {
+  return (
+    commit?.notes?.some((note) => note.title === "BREAKING CHANGE") || false
+  );
 }
 
 /**
@@ -771,4 +756,166 @@ export async function hasChangesToCommit(
     // Throw on error (unlike isWorkingDirectoryClean which returns false)
     throw new Error(`Failed to check git status: ${error}`);
   }
+}
+
+export async function getCurrentRepoUrl(
+  options: GitOptions = {},
+): Promise<string> {
+  // Resolve working directory
+  const cwd = options.cwd || process.cwd();
+
+  try {
+    // Get the URL of the 'origin' remote
+    const { stdout } = await execa("git", ["remote", "get-url", "origin"], {
+      cwd,
+    });
+
+    return stdout.trim();
+  } catch (error) {
+    throw new Error(`Failed to get repository URL: ${error}`);
+  }
+}
+
+/**
+ * Parses a git repository URL (SSH or HTTP/HTTPS) and extracts its components.
+ *
+ * Supports multiple URL formats:
+ * - SSH: `git@github.com:owner/repo.git`
+ * - HTTPS: `https://github.com/owner/repo.git`
+ * - HTTP: `http://github.com/owner/repo.git`
+ *
+ * @param repoUrl - The repository URL to parse
+ * @returns Object containing host, owner, and repo name
+ * @throws {Error} If URL format is invalid or cannot be parsed
+ * @internal
+ */
+export function parseRepoUrl(repoUrl: string): {
+  host: string;
+  owner: string;
+  repo: string;
+} {
+  // Handle SSH format: git@github.com:owner/repo.git
+  const sshMatch = repoUrl.match(/^git@([^:]+):(.+?)\/([^/]+?)(\.git)?$/);
+  if (sshMatch) {
+    return {
+      host: sshMatch[1],
+      owner: sshMatch[2],
+      repo: sshMatch[3],
+    };
+  }
+
+  // Handle HTTP/HTTPS format: https://github.com/owner/repo.git
+  const httpsMatch = repoUrl.match(
+    /^https?:\/\/([^/]+)\/(.+?)\/([^/]+?)(\.git)?$/,
+  );
+  if (httpsMatch) {
+    return {
+      host: httpsMatch[1],
+      owner: httpsMatch[2],
+      repo: httpsMatch[3],
+    };
+  }
+
+  throw new Error(`Invalid repository URL format: ${repoUrl}`);
+}
+
+/**
+ * Retrieves the current repository URL and converts it to HTTPS format.
+ *
+ * This function is useful for:
+ * - Generating consistent HTTPS URLs for documentation
+ * - Creating web links to the repository
+ * - CI/CD systems that prefer HTTPS over SSH
+ *
+ * Converts SSH URLs (git@github.com:owner/repo.git) to HTTPS format
+ * (https://github.com/owner/repo.git).
+ *
+ * @param options - Git operation options, primarily for specifying working directory.
+ *
+ * @returns Promise resolving to the repository URL in HTTPS format.
+ *
+ * @throws {Error} If:
+ *                 - Unable to get remote URL
+ *                 - URL format is invalid
+ *                 - Not in a git repository
+ */
+export async function getRepoUrlAsHttps(
+  options: GitOptions = {},
+): Promise<string> {
+  const repoUrl = await getCurrentRepoUrl(options);
+  const { host, owner, repo } = parseRepoUrl(repoUrl);
+  return `https://${host}/${owner}/${repo}.git`;
+}
+
+/**
+ * Extracts the hostname from the current repository's remote URL.
+ *
+ * Returns the hosting service domain (e.g., 'github.com', 'gitlab.com',
+ * 'bitbucket.org', or custom Git server hostname).
+ *
+ * Supports both SSH and HTTP/HTTPS URL formats.
+ *
+ * @param options - Git operation options, primarily for specifying working directory.
+ *
+ * @returns Promise resolving to the repository host (e.g., 'github.com').
+ *
+ * @throws {Error} If:
+ *                 - Unable to get remote URL
+ *                 - URL format is invalid
+ *                 - Not in a git repository
+ */
+export async function getRepoHost(options: GitOptions = {}): Promise<string> {
+  const repoUrl = await getCurrentRepoUrl(options);
+  const { host } = parseRepoUrl(repoUrl);
+  return host;
+}
+
+/**
+ * Extracts the repository owner/organization name from the current repository's remote URL.
+ *
+ * Returns the account or organization that owns the repository.
+ * For example:
+ * - `git@github.com:microsoft/vscode.git` → 'microsoft'
+ * - `https://github.com/facebook/react.git` → 'facebook'
+ *
+ * Supports both SSH and HTTP/HTTPS URL formats.
+ *
+ * @param options - Git operation options, primarily for specifying working directory.
+ *
+ * @returns Promise resolving to the repository owner name.
+ *
+ * @throws {Error} If:
+ *                 - Unable to get remote URL
+ *                 - URL format is invalid
+ *                 - Not in a git repository
+ */
+export async function getRepoOwner(options: GitOptions = {}): Promise<string> {
+  const repoUrl = await getCurrentRepoUrl(options);
+  const { owner } = parseRepoUrl(repoUrl);
+  return owner;
+}
+
+/**
+ * Extracts the repository name from the current repository's remote URL.
+ *
+ * Returns the name of the repository without the owner prefix or .git suffix.
+ * For example:
+ * - `git@github.com:microsoft/vscode.git` → 'vscode'
+ * - `https://github.com/facebook/react.git` → 'react'
+ *
+ * Supports both SSH and HTTP/HTTPS URL formats.
+ *
+ * @param options - Git operation options, primarily for specifying working directory.
+ *
+ * @returns Promise resolving to the repository name.
+ *
+ * @throws {Error} If:
+ *                 - Unable to get remote URL
+ *                 - URL format is invalid
+ *                 - Not in a git repository
+ */
+export async function getRepoName(options: GitOptions = {}): Promise<string> {
+  const repoUrl = await getCurrentRepoUrl(options);
+  const { repo } = parseRepoUrl(repoUrl);
+  return repo;
 }

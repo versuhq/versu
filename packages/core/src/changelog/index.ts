@@ -1,219 +1,115 @@
 import { promises as fs } from "fs";
-import { join } from "path";
+import path, { join } from "path";
 import { ModuleChangeResult } from "../services/version-applier.js";
-import { CommitInfo } from "../git/index.js";
-
-export type ChangelogEntry = {
-  readonly moduleResult: ModuleChangeResult;
-  readonly version: string;
-  readonly date: string;
-  readonly changes: {
-    readonly breaking: CommitInfo[];
-    readonly features: CommitInfo[];
-    readonly fixes: CommitInfo[];
-    readonly other: CommitInfo[];
-  };
-};
-
-export type ChangelogOptions = {
-  readonly includeCommitHashes: boolean;
-  readonly includeScopes: boolean;
-  readonly groupByType: boolean;
-};
-
-/** Generate changelog content for a module. */
-export async function generateChangelog(
-  moduleResult: ModuleChangeResult,
-  commits: CommitInfo[],
-  options: ChangelogOptions = {
-    includeCommitHashes: false,
-    includeScopes: true,
-    groupByType: true,
-  },
-): Promise<string> {
-  const entry: ChangelogEntry = {
-    moduleResult,
-    version: moduleResult.to,
-    date: new Date().toISOString().split("T")[0], // YYYY-MM-DD format
-    changes: {
-      breaking: [],
-      features: [],
-      fixes: [],
-      other: [],
-    },
-  };
-
-  // Categorize commits
-  for (const commit of commits) {
-    if (commit.breaking) {
-      entry.changes.breaking.push(commit);
-    } else if (commit.type === "feat") {
-      entry.changes.features.push(commit);
-    } else if (commit.type === "fix") {
-      entry.changes.fixes.push(commit);
-    } else if (["perf", "refactor", "style"].includes(commit.type)) {
-      entry.changes.other.push(commit);
-    }
-  }
-
-  return formatChangelogEntry(entry, options);
-}
-
-/**
- * Format changelog entry as markdown
- */
-function formatChangelogEntry(
-  entry: ChangelogEntry,
-  options: ChangelogOptions,
-): string {
-  const version = entry.version;
-  let changelog = `## [${version}] - ${entry.date}\n\n`;
-
-  // Breaking changes first
-  if (entry.changes.breaking.length > 0) {
-    changelog += "### 💥 BREAKING CHANGES\n\n";
-    for (const commit of entry.changes.breaking) {
-      changelog += formatCommitLine(commit, options) + "\n";
-    }
-    changelog += "\n";
-  }
-
-  // Features
-  if (entry.changes.features.length > 0) {
-    changelog += "### ✨ Features\n\n";
-    for (const commit of entry.changes.features) {
-      changelog += formatCommitLine(commit, options) + "\n";
-    }
-    changelog += "\n";
-  }
-
-  // Bug fixes
-  if (entry.changes.fixes.length > 0) {
-    changelog += "### 🐛 Bug Fixes\n\n";
-    for (const commit of entry.changes.fixes) {
-      changelog += formatCommitLine(commit, options) + "\n";
-    }
-    changelog += "\n";
-  }
-
-  // Other changes
-  if (entry.changes.other.length > 0) {
-    changelog += "### 🔧 Other Changes\n\n";
-    for (const commit of entry.changes.other) {
-      changelog += formatCommitLine(commit, options) + "\n";
-    }
-    changelog += "\n";
-  }
-
-  return changelog;
-}
-
-/**
- * Format a single commit line
- */
-function formatCommitLine(
-  commit: CommitInfo,
-  options: ChangelogOptions,
-): string {
-  let line = "- ";
-
-  // Add scope if available and enabled
-  if (options.includeScopes && commit.scope) {
-    line += `**${commit.scope}**: `;
-  }
-
-  // Add subject
-  line += commit.subject;
-
-  // Add hash if enabled
-  if (options.includeCommitHashes) {
-    line += ` (${commit.hash.substring(0, 7)})`;
-  }
-
-  return line;
-}
+import { writeChangelogString } from "conventional-changelog-writer";
+import { logger } from "../utils/logger.js";
+import { Commit } from "conventional-commits-parser";
+import { exists } from "../utils/file.js";
+import { getCurrentRepoUrl, GitOptions, parseRepoUrl } from "../git/index.js";
 
 /** Update or create a changelog file for a module. */
 export async function updateChangelogFile(
-  moduleResult: ModuleChangeResult,
   changelogContent: string,
-  repoRoot: string,
-): Promise<string> {
-  const changelogPath = join(repoRoot, moduleResult.path, "CHANGELOG.md");
-
-  try {
+  changelogPath: string,
+  prependPlaceholder: string,
+): Promise<void> {
+  let fileContent = changelogContent;
+  if (await exists(changelogPath)) {
+    logger.info(`Updating existing changelog at ${changelogPath}...`);
     // Try to read existing changelog
     const existingContent = await fs.readFile(changelogPath, "utf8");
+    const newContent = prependPlaceholder + "\n\n" + changelogContent;
 
-    // Insert new content after the first heading
-    const lines = existingContent.split("\n");
-    let insertIndex = 0;
-
-    // Find the first ## heading or the end of initial content
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith("## ")) {
-        insertIndex = i;
-        break;
-      }
-      if (i === 0 && lines[i].startsWith("# ")) {
-        // Skip the main heading
-        continue;
-      }
-    }
-
-    // Insert the new changelog entry
-    const beforeInsert = lines.slice(0, insertIndex);
-    const afterInsert = lines.slice(insertIndex);
-
-    const updatedContent = [
-      ...beforeInsert,
-      changelogContent.trim(),
-      "",
-      ...afterInsert,
-    ].join("\n");
-
-    await fs.writeFile(changelogPath, updatedContent, "utf8");
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      "code" in error &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (error as any).code === "ENOENT"
-    ) {
-      // Create new changelog file
-      const moduleName =
-        moduleResult.id === "root" ? "Root Module" : moduleResult.id;
-      const newContent = `# Changelog - ${moduleName}\n\n${changelogContent}`;
-      await fs.writeFile(changelogPath, newContent, "utf8");
-    } else {
-      throw error;
-    }
+    fileContent = existingContent.replace(prependPlaceholder, newContent);
   }
+  await fs.writeFile(changelogPath, fileContent, "utf8");
+}
 
-  return changelogPath;
+type ContextRepository = {
+  repoUrl: string;
+  host: string;
+  owner: string;
+  repository: string;
+};
+
+async function buildContextRepository(
+  options: GitOptions = {},
+): Promise<ContextRepository> {
+  const repoUrl = await getCurrentRepoUrl(options);
+  const { host, owner, repo } = parseRepoUrl(repoUrl);
+  return {
+    repoUrl: `https://${host}/${owner}/${repo}`,
+    host: `https://${host}`,
+    owner,
+    repository: repo,
+  };
 }
 
 /** Generate changelog for multiple modules. */
 export async function generateChangelogsForModules(
   moduleResults: ModuleChangeResult[],
-  getCommitsForModule: (moduleId: string) => Promise<CommitInfo[]>,
+  getCommitsForModule: (
+    moduleId: string,
+  ) => Promise<{ commits: Commit[]; lastTag: string | null }>,
   repoRoot: string,
-  options?: ChangelogOptions,
 ): Promise<string[]> {
   const changelogPaths: string[] = [];
 
+  const configPath = path.resolve(repoRoot, "changelog.config.js");
+
+  if (!(await exists(configPath))) {
+    throw new Error(
+      `Missing required changelog configuration file at ${configPath}`,
+    );
+  }
+
+  logger.info(`Loading changelog configuration from ${configPath}...`);
+  const userConfig = (await import(configPath)).default;
+
+  const prependPlaceholder = userConfig.context.prependPlaceholder;
+
+  if (!prependPlaceholder) {
+    throw new Error(
+      "Missing required context property 'prependPlaceholder' in changelog.config.js",
+    );
+  }
+
+  const contextRepository = await buildContextRepository({ cwd: repoRoot });
+
   for (const moduleResult of moduleResults) {
-    const commits = await getCommitsForModule(moduleResult.id);
-    const changelogContent = await generateChangelog(
-      moduleResult,
+    const { commits, lastTag } = await getCommitsForModule(moduleResult.id);
+
+    if (commits.length === 0) {
+      logger.info(
+        `No commits to include in changelog for module ${moduleResult.id}, skipping...`,
+      );
+      continue;
+    }
+
+    const changelogPath = join(repoRoot, moduleResult.path, "CHANGELOG.md");
+
+    let prepend = true;
+    if (await exists(changelogPath)) {
+      prepend = false;
+    }
+
+    const changelogContent = await writeChangelogString(
       commits,
-      options,
+      {
+        lastTag: lastTag || undefined,
+        ...contextRepository,
+        ...userConfig.context,
+        prepend,
+      },
+      userConfig.options,
     );
 
-    const changelogPath = await updateChangelogFile(
-      moduleResult,
+    logger.info(changelogContent);
+
+    await updateChangelogFile(
       changelogContent,
-      repoRoot,
+      changelogPath,
+      prependPlaceholder,
     );
 
     changelogPaths.push(changelogPath);

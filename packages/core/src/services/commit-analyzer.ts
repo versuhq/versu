@@ -1,6 +1,7 @@
 import { logger } from "../utils/logger.js";
-import { CommitInfo, getCommitsSinceLastTag } from "../git/index.js";
+import { getCommitsSinceLastTag } from "../git/index.js";
 import { ModuleRegistry } from "./module-registry.js";
+import { Commit } from "conventional-commits-parser";
 
 /**
  * Analyzes git commits for each module, preventing double-counting in hierarchical structures.
@@ -24,13 +25,18 @@ export class CommitAnalyzer {
   /**
    * Analyzes commits since the last release for all modules.
    *
-   * @returns Map of module ID to array of {@link CommitInfo} objects
+   * @returns Map of module ID to array of {@link Commit} objects
    * @throws {Error} If git operations fail
    */
-  async analyzeCommitsSinceLastRelease(): Promise<Map<string, CommitInfo[]>> {
+  async analyzeCommitsSinceLastRelease(): Promise<
+    Map<string, { commits: Commit[]; lastTag: string | null }>
+  > {
     logger.info("📝 Analyzing commits since last release...");
 
-    const moduleCommits = new Map<string, CommitInfo[]>();
+    const moduleCommits = new Map<
+      string,
+      { commits: Commit[]; lastTag: string | null }
+    >();
 
     // Iterate through all registered modules
     for (const [projectId, projectInfo] of this.moduleRegistry.getModules()) {
@@ -42,14 +48,14 @@ export class CommitAnalyzer {
       );
 
       // Retrieve commits for this module, excluding child modules
-      const commits = await getCommitsSinceLastTag(
+      const { commits, lastTag } = await getCommitsSinceLastTag(
         projectInfo,
         { cwd: this.repoRoot },
         childModulePaths,
       );
 
       // Store commits for this module
-      moduleCommits.set(projectId, commits);
+      moduleCommits.set(projectId, { commits, lastTag });
 
       // Log exclusions for debugging
       if (childModulePaths.length > 0) {
@@ -61,7 +67,7 @@ export class CommitAnalyzer {
 
     // Calculate and log summary statistics
     const totalCommits = Array.from(moduleCommits.values()).reduce(
-      (sum, commits) => sum + commits.length,
+      (sum, info) => sum + info.commits.length,
       0,
     );
     logger.info(

@@ -1,10 +1,7 @@
 import { logger } from "../utils/logger.js";
-import {
-  generateChangelogsForModules,
-  generateRootChangelog,
-} from "../changelog/index.js";
+import { generateChangelogsForModules } from "../changelog/index.js";
 import { ModuleChangeResult } from "./version-applier.js";
-import { CommitInfo } from "../git/index.js";
+import { Commit } from "conventional-commits-parser";
 
 export type ChangelogGeneratorOptions = {
   generateChangelog: boolean;
@@ -17,7 +14,7 @@ export class ChangelogGenerator {
 
   async generateChangelogs(
     moduleResults: ModuleChangeResult[],
-    moduleCommits: Map<string, CommitInfo[]>,
+    moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
   ): Promise<string[]> {
     if (!this.options.generateChangelog) {
       logger.info(
@@ -36,16 +33,17 @@ export class ChangelogGenerator {
     // Generate individual module changelogs
     const changelogPaths = await generateChangelogsForModules(
       moduleResults,
-      async (moduleId) => moduleCommits.get(moduleId) || [],
+      async (moduleId) =>
+        moduleCommits.get(moduleId) || { commits: [], lastTag: null },
       this.options.repoRoot,
     );
 
-    // Generate root changelog
+    /*// Generate root changelog
     const rootChangelogPath = await generateRootChangelog(
       moduleResults,
       this.options.repoRoot,
     );
-    changelogPaths.push(rootChangelogPath);
+    changelogPaths.push(rootChangelogPath);*/
 
     logger.info(`📝 Generated ${changelogPaths.length} changelog files`);
     return changelogPaths;

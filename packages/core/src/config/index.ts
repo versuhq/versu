@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { BumpType } from "../semver/index.js";
+import { Commit } from "conventional-commits-parser";
+import { isBreakingCommit } from "../git/index.js";
 
 /**
  * Zod schema for BumpType values.
@@ -94,19 +96,17 @@ export const DEFAULT_CONFIG: Config = {
 
 /**
  * Determines the bump type for a commit based on its type and breaking change flag.
- * @param commitType - The Conventional Commit type (e.g., 'feat', 'fix', 'chore')
- * @param isBreaking - Whether the commit contains breaking changes
+ * @param commit - The commit to evaluate
  * @param config - Configuration containing commit type mappings
  * @returns The bump type to apply ('major', 'minor', 'patch', or 'none')
  */
-export function getBumpTypeForCommit(
-  commitType: string,
-  isBreaking: boolean,
-  config: Config,
-): BumpType {
+export function getBumpTypeForCommit(commit: Commit, config: Config): BumpType {
+  const isBreaking = isBreakingCommit(commit);
   if (isBreaking) {
     return "major";
   }
+
+  const commitType = commit.type || "unknown";
 
   const configuredBump = config.commitTypes[commitType];
 

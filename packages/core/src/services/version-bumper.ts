@@ -17,11 +17,12 @@ import {
   maxBumpType,
   BumpType,
 } from "../semver/index.js";
-import { CommitInfo, getCurrentCommitShortSha } from "../git/index.js";
+import { getCurrentCommitShortSha } from "../git/index.js";
 import { SemVer } from "semver";
 import { AdapterMetadata } from "./adapter-identifier.js";
 import { applySnapshotSuffix } from "../utils/versioning.js";
 import { Module } from "../adapters/project-information.js";
+import { Commit } from "conventional-commits-parser";
 
 /**
  * Configuration options for the version bumper service.
@@ -120,7 +121,7 @@ export class VersionBumper {
    * @throws {Error} If git operations fail
    */
   async calculateVersionBumps(
-    moduleCommits: Map<string, CommitInfo[]>,
+    moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
   ): Promise<ProcessedModuleChange[]> {
     logger.info("🔢 Calculating version bumps from commits...");
 
@@ -182,13 +183,13 @@ export class VersionBumper {
    * @returns Array of processing module changes for all modules in the registry
    */
   private calculateInitialBumps(
-    moduleCommits: Map<string, CommitInfo[]>,
+    moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
   ): ProcessingModuleChange[] {
     const processingModuleChanges: ProcessingModuleChange[] = [];
 
     // Iterate through ALL modules in the registry
     for (const [projectId, projectInfo] of this.moduleRegistry.getModules()) {
-      const commits = moduleCommits.get(projectId) || [];
+      const commits = moduleCommits.get(projectId)?.commits || [];
 
       // Determine bump type from commits only
       // Uses Conventional Commits spec to analyze commit types
