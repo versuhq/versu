@@ -63,7 +63,7 @@ export class PluginLoader {
     }
 
     logger.info(`Plugins to load: ${pluginNames.join(", ")}`);
-    pluginNames.forEach(async (pluginName) => {
+    for (const pluginName of pluginNames) {
       // Construct the absolute path to the specific package
       const pluginPath = path.join(globalRoot, pluginName);
 
@@ -75,7 +75,7 @@ export class PluginLoader {
         );
         logger.warning(`   Run 'npm install -g ${pluginName}' to fix this.`);
       }
-    });
+    }
   }
 
   /**
@@ -85,7 +85,12 @@ export class PluginLoader {
     try {
       // Dynamic require using the absolute path
       // Note: If using ESM (import), use await import(absolutePath)
-      const rawModule = await import(absolutePath);
+      // For directory imports, we need to resolve to the main entry point
+      const pluginEntryPoint = path.join(absolutePath, "dist/index.js");
+      const importPath = (await exists(pluginEntryPoint))
+        ? pluginEntryPoint
+        : absolutePath;
+      const rawModule = await import(importPath);
 
       // Handle both "export default" and "module.exports"
       const plugin: PluginContract = rawModule.default;
@@ -110,9 +115,13 @@ export class PluginLoader {
       this._plugins.set(plugin.id, plugin);
       logger.info(`✅ Loaded: ${plugin.name}`);
     } catch (err) {
-      logger.error(`❌ Failed to load plugin at ${absolutePath}`, {
-        error: err,
-      });
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      logger.error(
+        `❌ Failed to load plugin at ${absolutePath} ${errorMessage}`,
+        {
+          error: err,
+        },
+      );
     }
   }
 
