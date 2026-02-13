@@ -116,6 +116,7 @@ export class PluginLoader {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private isValidPlugin(plugin: any): plugin is PluginContract {
     return plugin && typeof plugin.onInit === "function";
   }

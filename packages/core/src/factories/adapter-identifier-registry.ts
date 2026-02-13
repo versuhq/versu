@@ -11,7 +11,9 @@ import { PluginContract } from "../plugins/plugin-loader.js";
  * Central point for registering all supported project adapters.
  * To add a new adapter, implement {@link AdapterIdentifier} and add it to the array.
  */
-export function createAdapterIdentifierRegistry(plugins: PluginContract[]): AdapterIdentifierRegistry {
+export function createAdapterIdentifierRegistry(
+  plugins: PluginContract[],
+): AdapterIdentifierRegistry {
   // Array of all registered adapter identifiers
   // Order matters: first matching adapter is selected during auto-detection
   const identifiers: AdapterIdentifier[] = [
@@ -19,7 +21,9 @@ export function createAdapterIdentifierRegistry(plugins: PluginContract[]): Adap
     // new MavenAdapterIdentifier(),
     // new NodeJSAdapterIdentifier(),
     // new PythonAdapterIdentifier(),
-    ...plugins.flatMap((plugin) => plugin.adapters.map(adapter => adapter.adapterIdentifier())),
+    ...plugins.flatMap((plugin) =>
+      plugin.adapters.map((adapter) => adapter.adapterIdentifier()),
+    ),
   ];
 
   // Create and return the registry with all registered identifiers

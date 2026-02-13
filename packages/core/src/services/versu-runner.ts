@@ -157,9 +157,7 @@ export class VersuRunner {
     await this.pluginLoader.loadSelectedPlugins(this.config.plugins);
     const plugins = this.pluginLoader.plugins;
 
-    this.adapterIdentifierRegistry = createAdapterIdentifierRegistry(
-      plugins
-    );
+    this.adapterIdentifierRegistry = createAdapterIdentifierRegistry(plugins);
 
     this.adapterMetadataProvider = new AdapterMetadataProvider(
       this.adapterIdentifierRegistry,

@@ -1,6 +1,13 @@
-import * as fs from 'fs/promises';
-import { GRADLE_PROPERTIES_FILE, GRADLE_BUILD_FILE, GRADLE_BUILD_KTS_FILE, GRADLE_SETTINGS_FILE, GRADLE_SETTINGS_KTS_FILE, GRADLE_ID } from '../constants.js';
-import { AdapterIdentifier, exists, logger } from '@versu/core';
+import * as fs from "fs/promises";
+import {
+  GRADLE_PROPERTIES_FILE,
+  GRADLE_BUILD_FILE,
+  GRADLE_BUILD_KTS_FILE,
+  GRADLE_SETTINGS_FILE,
+  GRADLE_SETTINGS_KTS_FILE,
+  GRADLE_ID,
+} from "../constants.js";
+import { AdapterIdentifier, exists, logger } from "@versu/core";
 
 /** List of file names that indicate a Gradle project. */
 const GRADLE_FILES = [
@@ -8,7 +15,7 @@ const GRADLE_FILES = [
   GRADLE_BUILD_FILE,
   GRADLE_BUILD_KTS_FILE,
   GRADLE_SETTINGS_FILE,
-  GRADLE_SETTINGS_KTS_FILE
+  GRADLE_SETTINGS_KTS_FILE,
 ];
 
 /**
@@ -20,8 +27,8 @@ export class GradleAdapterIdentifier implements AdapterIdentifier {
   readonly metadata = {
     id: GRADLE_ID,
     capabilities: {
-      supportsSnapshots: true
-    }
+      supportsSnapshots: true,
+    },
   };
 
   /**
@@ -41,10 +48,10 @@ export class GradleAdapterIdentifier implements AdapterIdentifier {
 
     // Read directory contents (only top-level files)
     const files = await fs.readdir(projectRoot);
-    
+
     // Check if any known Gradle file is present in the directory
-    const hasGradleFile = GRADLE_FILES.some(file => files.includes(file));
-    
+    const hasGradleFile = GRADLE_FILES.some((file) => files.includes(file));
+
     return hasGradleFile;
   }
 }
