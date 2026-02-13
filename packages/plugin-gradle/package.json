@@ -1,6 +1,6 @@
 {
   "name": "@versu/plugin-gradle",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "VERSU Gradle Plugin",
   "type": "module",
   "main": "dist/index.js",
@@ -46,10 +46,9 @@
   ],
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@versu/core": "^0.6.3",
+    "@versu/core": "^0.6.4",
     "execa": "^9.6.1",
-    "fast-glob": "^3.3.3",
-    "semver": "^7.7.4"
+    "fast-glob": "^3.3.3"
   },
   "devDependencies": {
     "@types/node": "^20.19.23",
