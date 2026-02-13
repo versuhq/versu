@@ -46,14 +46,14 @@
   ],
   "types": "dist/index.d.ts",
   "dependencies": {
+    "@versu/core": "^0.6.2",
     "execa": "^9.6.1",
     "fast-glob": "^3.3.3",
-    "semver": "^7.5.4",
-    "@versu/core": "^0.6.2"
+    "semver": "^7.7.4"
   },
   "devDependencies": {
     "@types/node": "^20.19.23",
-    "@types/semver": "^7.5.6",
+    "@types/semver": "^7.7.1",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "@vitest/coverage-v8": "^1.1.0",

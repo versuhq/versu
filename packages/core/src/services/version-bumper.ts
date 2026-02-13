@@ -399,6 +399,9 @@ export class VersionBumper {
         } else if (change.bumpType !== "none" && !this.options.prereleaseMode) {
           // Scenario 2: Commits with changes in normal mode
           // Standard semantic version bump (major.minor.patch)
+          logger.info(
+            `Bumping module ${change.module.id} from version ${change.fromVersion.version} with bump type ${change.bumpType}`,
+          );
           newVersion = bumpSemVer(change.fromVersion, change.bumpType);
         } else if (change.reason === "prerelease-unchanged") {
           // Scenario 3: No changes but force prerelease bump (bumpUnchanged enabled)
