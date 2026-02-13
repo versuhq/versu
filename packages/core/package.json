@@ -1,6 +1,6 @@
 {
   "name": "@versu/core",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "VERSU (Core Library)",
   "type": "module",
   "main": "dist/index.js",
@@ -52,7 +52,8 @@
     "fast-glob": "^3.3.3",
     "semver": "^7.5.4",
     "yaml": "^2.3.4",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@types/node": "^20.19.23",
@@ -63,7 +64,6 @@
     "cpx": "^1.5.0",
     "eslint": "^8.56.0",
     "prettier": "^3.1.1",
-    "typescript": "^5.3.3",
     "vitest": "^1.1.0"
   },
   "engines": {
