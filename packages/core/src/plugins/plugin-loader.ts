@@ -28,9 +28,8 @@ export type PluginLoaderOptions = {
 
 export class PluginLoader {
   private readonly pluginsMap: Map<string, PluginContract> = new Map();
-  private readonly pluginValidator = ConfigurationValidatorFactory.create<PluginContract>(
-    pluginContractSchema,
-  );
+  private readonly pluginValidator =
+    ConfigurationValidatorFactory.create<PluginContract>(pluginContractSchema);
 
   get plugins(): PluginContract[] {
     return Array.from(this.pluginsMap.values());

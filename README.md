@@ -13,7 +13,7 @@ A semantic versioning engine for monorepos that uses Conventional Commits to aut
 ✅ **Conventional Commits Parsing** - Automatically determines version bumps based on commit messages<br>
 ✅ **Multi-Module Support** - Each module can be versioned independently<br>
 ✅ **Dependency Cascade** - When a dependency changes, dependents are automatically bumped<br>
-✅ **Gradle Adapter** - First-class support for Gradle (Groovy & Kotlin DSL)<br>
+✅ **Plugin Architecture** - Extensible design with plugin architecture for supporting any build system or ecosystem<br>
 ✅ **Extensible Architecture** - Easy to add adapters for other ecosystems<br>
 ✅ **Changelog Generation** - Automatic per-module changelog generation (to be added)<br>
 ✅ **Pre-release Support** - Generate alpha, beta, rc, or custom pre-release versions<br>
@@ -22,11 +22,11 @@ A semantic versioning engine for monorepos that uses Conventional Commits to aut
 
 ## 📦 Packages
 
-VERSU provides three packages for different use cases. For more details, see the individual package READMEs.
+VERSU provides four packages for different use cases. For more details, see the individual package READMEs.
 
 ### [@versu/core](packages/core)
 
-Core library with the `VersuRunner` API for programmatic version management. Framework-agnostic with adapters for different project types (Gradle, extensible).
+Core library with the `VersuRunner` API for programmatic version management. Framework-agnostic and extensible through plugins.
 
 **Use when:** Building custom tools or integrations that need version management.
 
@@ -41,6 +41,12 @@ Command-line interface for interactive version management in local development a
 GitHub Actions integration for automated versioning in workflow pipelines.
 
 **Use when:** You want automated versioning in GitHub workflows.
+
+### [@versu/plugin-gradle](packages/plugin-gradle)
+
+Gradle adapter plugin that provides support for detecting and updating versions in Gradle projects (Groovy & Kotlin DSL).
+
+**Use when:** Working with Gradle-based projects and need version management support.
 
 ## Commit Message Format
 
@@ -64,7 +70,7 @@ VERSU uses [Conventional Commits](https://conventionalcommits.org/) to automatic
 
 ## Extending
 
-To add support for new project types, see the [core package documentation](packages/core#creating-custom-adapters) for instructions on implementing custom adapters.
+To add support for new project types, see the [core package documentation](packages/core#creating-custom-adapters) for instructions on creating custom adapter plugins. Reference [@versu/plugin-gradle](packages/plugin-gradle) as an example implementation.
 
 ## Development
 
@@ -88,12 +94,14 @@ npm test       # Run tests
 packages/
 ├── core/                # Core library (@versu/core)
 │   └── src/
-│       ├── adapters/    # Project type adapters (Gradle, etc.)
+│       ├── adapters/    # Core adapter interfaces and types
 │       ├── services/    # Core services (versioning, git, changelog)
 │       └── config/      # Configuration system
 ├── cli/                 # CLI tool (@versu/cli)
 │   └── src/
-└── action/              # GitHub Action (@versu/action)
+├── action/              # GitHub Action (@versu/action)
+│   └── src/
+└── plugin-gradle/       # Gradle plugin (@versu/plugin-gradle)
     └── src/
 ```
 

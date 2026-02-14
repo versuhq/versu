@@ -1,8 +1,11 @@
-import type { Module, ProjectInformation } from "../adapters/project-information.js";
+import type {
+  Module,
+  ProjectInformation,
+} from "../adapters/project-information.js";
 
 /**
  * Registry interface for managing and accessing modules within the application.
- * 
+ *
  * This interface provides methods to query, retrieve, and check the existence of modules
  * by their unique identifiers. It serves as a central point for module management.
  */

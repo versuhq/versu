@@ -92,7 +92,6 @@ Calculate and apply semantic version changes.
 | `--no-push-changes` | Don't commit and push changes | - |
 | `--generate-changelog` | Generate or update changelog files for changed modules | `true` |
 | `--no-generate-changelog` | Don't generate changelogs | - |
-| `--output-file <value>` | Write calculated versions to a file in JSON format | - |
 
 > 📖 **Detailed Pre-release Documentation**: See [@versu/core PRERELEASE.md](../core/PRERELEASE.md) for comprehensive examples and use cases.
 
@@ -177,27 +176,71 @@ VERSU CLI uses the same configuration system as the core library. Configuration 
 
 ```json
 {
-  "defaultBump": "patch",
-  "commitTypes": {
-    "feat": "minor",
-    "fix": "patch",
-    "perf": "patch",
-    "refactor": "patch",
-    "docs": "ignore",
-    "test": "ignore",
-    "chore": "ignore"
+  "versionRules": {
+    "defaultBump": "patch",
+    "commitTypeBumps": {
+      "feat": "minor",
+      "fix": "patch",
+      "perf": "patch",
+      "refactor": "patch",
+      "docs": "ignore",
+      "test": "ignore",
+      "chore": "ignore"
+    },
+    "dependencyBumps": {
+      "major": "major",
+      "minor": "minor",
+      "patch": "patch"
+    }
   },
-  "dependencyRules": {
-    "onMajorOfDependency": "minor",
-    "onMinorOfDependency": "patch",
-    "onPatchOfDependency": "none"
+  "changelog": {
+    "root": {
+      "context": {
+        "prependPlaceholder": "<!-- CHANGELOG -->"
+      }
+    },
+    "module": {
+      "context": {
+        "prependPlaceholder": "<!-- CHANGELOG -->"
+      }
+    }
   }
 }
 ```
 
 For more configuration examples, see the [core package documentation](../core).
 
+**Advanced Changelog Configuration:**
+
+VERSU supports [conventional-changelog-writer](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer) options for customizing changelog generation. For advanced customization with functions (transforms, sorting, templates), use JavaScript configuration files:
+
+```javascript
+// versu.config.js
+module.exports = {
+  versionRules: {
+    // ... version rules
+  },
+  changelog: {
+    module: {
+      options: {
+        groupBy: 'type',
+        commitsGroupsSort: (a, b) => {
+          const order = { feat: 1, fix: 2, perf: 3 };
+          return (order[a.title] || 99) - (order[b.title] || 99);
+        },
+        transform: (commit, context) => {
+          // Custom commit transformation
+          return commit;
+        }
+      }
+    }
+  }
+};
+```
+
 ## Gradle Project Support
+
+Gradle support is provided by the **[@versu/plugin-gradle](../plugin-gradle)** package.
 
 The CLI supports Gradle projects with:
 
@@ -269,6 +312,11 @@ Breaking changes trigger **major** version bumps:
 - name: Install VERSU CLI
   run: npm install -g @versu/cli
 
+- name: Install Adapter
+  run: |
+    # install required adapters
+    npm install -g @versu/plugin-gradle
+
 - name: Version modules
   run: versu --adapter gradle
 ```
@@ -279,6 +327,7 @@ Breaking changes trigger **major** version bumps:
 version:
   script:
     - npm install -g @versu/cli
+    - npm install -g @versu/plugin-gradle
     - versu --adapter gradle
 ```
 
@@ -288,6 +337,7 @@ version:
 stage('Version') {
   steps {
     sh 'npm install -g @versu/cli'
+    sh 'npm install -g @versu/plugin-gradle'
     sh 'versu --adapter gradle'
   }
 }
@@ -380,6 +430,7 @@ npm publish --workspace packages/cli --access public
 
 - **[@versu/core](../core)** - Core library for custom integrations
 - **[@versu/action](../action)** - GitHub Actions integration
+- **[@versu/plugin-gradle](../plugin-gradle)** - Gradle adapter plugin
 
 ## License
 

@@ -35,10 +35,7 @@ jobs:
 
 ### Adapter Auto-Detection
 
-VERSU automatically detects your project type based on the files present in your repository. You don't need to specify the `adapter` input in most cases:
-
-- **Gradle Projects**: Detected by presence of `build.gradle`, `build.gradle.kts`, `settings.gradle`, or `settings.gradle.kts`
-- **Future Adapters**: More project types will be supported in future releases
+VERSU automatically detects your project type based when supporting adapters plugins are installed and configured. It analyzes the repository structure and files to determine which adapter to use for versioning. For example for Gradle projects, it looks for `build.gradle`, `build.gradle.kts`, `settings.gradle`, or `settings.gradle.kts` files.
 
 If auto-detection fails, VERSU will throw an error asking you to explicitly specify the `adapter` input:
 
@@ -49,7 +46,7 @@ If auto-detection fails, VERSU will throw an error asking you to explicitly spec
     adapter: gradle  # Required if auto-detection fails
 ```
 
-**Supported Adapters**: `gradle`
+If the specified adapter is not supported or not properly configured, VERSU will provide a clear error message indicating the issue.
 
 ### Pre-release Versions
 
@@ -68,6 +65,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Install gradle adapter
+        run: npm install -g @versu/plugin-gradle
+
       - name: Create pre-release versions
         uses: tvcsantos/versu@v0
         with:
@@ -95,6 +96,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Install gradle adapter
+        run: npm install -g @versu/plugin-gradle
+
       - name: Create timestamp versions
         uses: tvcsantos/versu@v0
         with:
@@ -128,6 +133,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Install gradle adapter
+        run: npm install -g @versu/plugin-gradle
+
       - name: Create Gradle SNAPSHOT versions
         uses: tvcsantos/versu@v0
         with:
@@ -152,7 +161,6 @@ This applies `-SNAPSHOT` suffix to **all** module versions, generating versions 
 | `append-snapshot` | Add -SNAPSHOT suffix to all versions if supported by adapter (e.g. `gradle`) | `false` |
 | `push-changes` | Commit and push version changes and changelogs to remote | `true` |
 | `generate-changelog` | Generate or update changelog files for changed modules | `true` |
-| `output-file` | Path to output JSON file with project information | `project-information.json` |
 
 > 📖 **Detailed Pre-release Documentation**: See [PRERELEASE.md](../core/PRERELEASE.md) for comprehensive examples and use cases.
 
@@ -251,9 +259,11 @@ VERSU will automatically search for configuration in the following order:
 
 | Option | Type | Description | Default |
 | ------- | ------ | ------------- | --------- |
-| `defaultBump` | `string` | Default version bump type when conventional commit types don't match | `patch` |
-| `commitTypes` | `object` | Maps conventional commit types to version bump types or `ignore` | See examples below |
-| `dependencyRules` | `object` | How to bump dependents when dependencies change | See examples below |
+| `versionRules.defaultBump` | `string` | Default version bump type when conventional commit types don't match | `patch` |
+| `versionRules.commitTypeBumps` | `object` | Maps conventional commit types to version bump types or `ignore` | See examples below |
+| `versionRules.dependencyBumps` | `object` | How to bump dependents when dependencies change (keys: `major`, `minor`, `patch`) | See examples below |
+| `changelog.root` | `object` | Configuration for root-level changelog generation | Optional |
+| `changelog.module` | `object` | Configuration for per-module changelog generation | Optional |
 
 ### Configuration Examples
 
@@ -261,20 +271,34 @@ VERSU will automatically search for configuration in the following order:
 
 ```json
 {
-  "defaultBump": "patch",
-  "commitTypes": {
-    "feat": "minor",
-    "fix": "patch",
-    "perf": "patch",
-    "refactor": "patch",
-    "docs": "ignore",
-    "test": "ignore",
-    "chore": "ignore"
+  "versionRules": {
+    "defaultBump": "patch",
+    "commitTypeBumps": {
+      "feat": "minor",
+      "fix": "patch",
+      "perf": "patch",
+      "refactor": "patch",
+      "docs": "ignore",
+      "test": "ignore",
+      "chore": "ignore"
+    },
+    "dependencyBumps": {
+      "major": "major",
+      "minor": "minor",
+      "patch": "patch"
+    }
   },
-  "dependencyRules": {
-    "onMajorOfDependency": "minor",
-    "onMinorOfDependency": "patch",
-    "onPatchOfDependency": "none"
+  "changelog": {
+    "root": {
+      "context": {
+        "prependPlaceholder": "<!-- CHANGELOG -->"
+      }
+    },
+    "module": {
+      "context": {
+        "prependPlaceholder": "<!-- CHANGELOG -->"
+      }
+    }
   }
 }
 ```
@@ -282,42 +306,63 @@ VERSU will automatically search for configuration in the following order:
 #### YAML Format (`.versurc.yaml`)
 
 ```yaml
-defaultBump: patch
+versionRules:
+  defaultBump: patch
+  commitTypeBumps:
+    feat: minor
+    fix: patch
+    perf: patch
+    refactor: patch
+    docs: ignore
+    test: ignore
+    chore: ignore
+  dependencyBumps:
+    major: major
+    minor: minor
+    patch: patch
 
-commitTypes:
-  feat: minor
-  fix: patch
-  perf: patch
-  refactor: patch
-  docs: ignore
-  test: ignore
-  chore: ignore
-
-dependencyRules:
-  onMajorOfDependency: minor
-  onMinorOfDependency: patch
-  onPatchOfDependency: none
+changelog:
+  root:
+    context:
+      prependPlaceholder: "<!-- CHANGELOG -->"
+  module:
+    context:
+      prependPlaceholder: "<!-- CHANGELOG -->"
 ```
 
 #### JavaScript Format (`versu.config.js`)
 
 ```javascript
 module.exports = {
-  defaultBump: 'patch',
-  commitTypes: {
-    feat: 'minor',
-    fix: 'patch',
-    // Dynamic configuration based on environment
-    ...(process.env.NODE_ENV === 'production' ? {
-      docs: 'patch'
-    } : {
-      docs: 'ignore'
-    })
+  versionRules: {
+    defaultBump: 'patch',
+    commitTypeBumps: {
+      feat: 'minor',
+      fix: 'patch',
+      // Dynamic configuration based on environment
+      ...(process.env.NODE_ENV === 'production' ? {
+        docs: 'patch'
+      } : {
+        docs: 'ignore'
+      })
+    },
+    dependencyBumps: {
+      major: 'major',
+      minor: 'minor',
+      patch: 'patch'
+    }
   },
-  dependencyRules: {
-    onMajorOfDependency: 'minor',
-    onMinorOfDependency: 'patch',
-    onPatchOfDependency: 'none'
+  changelog: {
+    root: {
+      context: {
+        prependPlaceholder: '<!-- CHANGELOG -->'
+      }
+    },
+    module: {
+      context: {
+        prependPlaceholder: '<!-- CHANGELOG -->'
+      }
+    }
   }
 };
 ```
@@ -328,10 +373,12 @@ module.exports = {
 {
   "name": "my-project",
   "versu": {
-    "defaultBump": "patch",
-    "commitTypes": {
-      "feat": "minor",
-      "fix": "patch"
+    "versionRules": {
+      "defaultBump": "patch",
+      "commitTypeBumps": {
+        "feat": "minor",
+        "fix": "patch"
+      }
     }
   }
 }
@@ -341,7 +388,13 @@ module.exports = {
 
 All configuration files are validated using [Zod](https://github.com/colinhacks/zod) schemas to ensure correctness and consistency. If validation fails, VERSU will provide a detailed error message indicating which configuration fields are invalid.
 
+### Advanced Changelog Configuration
+
+VERSU integrates with [conventional-changelog-writer](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer) for powerful changelog generation. All options from conventional-changelog-writer are supported through the `changelog.options` field. For advanced customization requiring functions (like custom transforms, sorting logic, or templates), use JavaScript configuration files in your repository.
+
 ## Gradle Project Support
+
+Gradle support is provided by the **[@versu/plugin-gradle](../plugin-gradle)** package.
 
 The Gradle adapter supports:
 
@@ -445,6 +498,9 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
       
+      - name: Install gradle adapter
+        run: npm install -g @versu/plugin-gradle
+
       # Production releases
       - name: Release version
         if: github.ref == 'refs/heads/main'
@@ -535,6 +591,7 @@ If auto-detection fails:
 
 - **[@versu/core](../core)** - Core library for custom integrations
 - **[@versu/cli](../cli)** - CLI tool for local development
+- **[@versu/plugin-gradle](../plugin-gradle)** - Gradle adapter plugin
 
 ## License
 

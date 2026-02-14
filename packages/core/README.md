@@ -82,26 +82,49 @@ VERSU core uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for 
 
 ```json
 {
-  "defaultBump": "patch",
-  "commitTypes": {
-    "feat": "minor",
-    "fix": "patch",
-    "perf": "patch",
-    "docs": "ignore"
+  "versionRules": {
+    "defaultBump": "patch",
+    "commitTypeBumps": {
+      "feat": "minor",
+      "fix": "patch",
+      "perf": "patch",
+      "docs": "ignore"
+    },
+    "dependencyBumps": {
+      "major": "major",
+      "minor": "minor",
+      "patch": "patch"
+    }
   },
-  "dependencyRules": {
-    "onMajorOfDependency": "minor",
-    "onMinorOfDependency": "patch",
-    "onPatchOfDependency": "none"
+  "changelog": {
+    "root": {
+      "context": {
+        "prependPlaceholder": "<!-- CHANGELOG -->"
+      }
+    },
+    "module": {
+      "context": {
+        "prependPlaceholder": "<!-- CHANGELOG -->"
+      }
+    }
   }
 }
 ```
+
+**Changelog Configuration:**
+
+- `changelog.root` - Configuration for root-level CHANGELOG.md generation
+- `changelog.module` - Configuration for per-module CHANGELOG.md generation
+- `context.prependPlaceholder` - Placeholder string in changelog files where new entries are inserted
+- `options` - Advanced changelog generation options (templates, grouping, sorting)
+
+VERSU uses [conventional-changelog-writer](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer) for changelog generation. You can pass any options supported by conventional-changelog-writer through the `options` field. For advanced customization with functions (like `transform`, `commitsGroupsSort`), use JavaScript configuration files (`.versurc.js` or `versu.config.js`).
 
 ## Adapters
 
 ### Gradle Adapter
 
-Built-in support for Gradle projects (Groovy & Kotlin DSL).
+Gradle support is provided by the **[@versu/plugin-gradle](../plugin-gradle)** package.
 
 **Features:**
 
@@ -123,7 +146,7 @@ api.version=1.5.0
 
 ### Creating Custom Adapters
 
-To add support for new project types, implement a language adapter following the pattern in `src/adapters/gradle/`:
+To add support for new project types, create a plugin package that implements the adapter interfaces:
 
 ```typescript
 import { 
@@ -190,10 +213,30 @@ class MyModuleSystemFactory implements ModuleSystemFactory {
 }
 ```
 
-Then register your adapter:
+Then create a plugin:
 
-1. Add to `src/factories/module-system-factory.ts` in the `createModuleSystemFactory` function
-2. Add to `src/services/adapter-identifier-registry.ts` in the registry initialization
+```typescript
+import type { PluginContract } from '@versu/core';
+
+const myPlugin: PluginContract = {
+  id: 'my-adapter',
+  name: 'My Adapter',
+  description: 'Support for my build system',
+  version: '1.0.0',
+  author: 'Your Name',
+  adapters: [
+    {
+      id: 'my-adapter',
+      adapterIdentifier: () => new MyAdapterIdentifier(),
+      moduleSystemFactory: (repoRoot: string) => new MyModuleSystemFactory(repoRoot),
+    },
+  ],
+};
+
+export default myPlugin;
+```
+
+See [@versu/plugin-gradle](../plugin-gradle) for a complete implementation example.
 
 ## Development
 
@@ -230,6 +273,7 @@ npm publish --workspace packages/core --access public
 
 - **[@versu/cli](../cli)** - Command-line interface
 - **[@versu/action](../action)** - GitHub Actions integration
+- **[@versu/plugin-gradle](../plugin-gradle)** - Gradle adapter plugin
 
 ## Requirements
 
