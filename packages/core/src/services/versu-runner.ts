@@ -190,7 +190,6 @@ export class VersuRunner {
     // Log discovered modules through hierarchy manager
     const moduleIds = this.moduleRegistry.getModuleIds();
     logger.info("Module discovery completed", {
-      count: moduleIds.length,
       modules: moduleIds,
     });
 
