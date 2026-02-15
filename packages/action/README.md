@@ -1,3 +1,9 @@
+<!-- markdownlint-disable MD041 -->
+
+![versu](../../docs/assets/images/versu_4.png)
+
+<!-- markdownlint-enable MD041 -->
+
 # @versu/action - GitHub Action
 
 GitHub Actions wrapper for VERSU. This action provides seamless integration with GitHub workflows for automatic semantic versioning across your monorepo projects.

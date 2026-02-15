@@ -1,3 +1,9 @@
+<!-- markdownlint-disable MD041 -->
+
+![versu](../../docs/assets/images/versu_4.png)
+
+<!-- markdownlint-enable MD041 -->
+
 # @versu/plugin-gradle - Gradle Adapter Plugin
 
 Gradle adapter plugin for VERSU. Provides first-class support for versioning Gradle projects (Groovy & Kotlin DSL) in monorepo environments with automatic dependency detection and cascading version updates.

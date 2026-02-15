@@ -76,22 +76,16 @@ function formatMessage(
 export class OclifLogger implements Logger {
   private spinner: Ora | null = null;
   private groupDepth = 0;
-  private verbose: boolean;
 
   constructor(
     private readonly cmd: Command,
     private readonly context: Record<string, unknown> = {},
-    verbose = false,
   ) {
-    this.verbose = verbose;
   }
 
   debug(message: string, context?: Record<string, unknown>): void {
-    // Debug messages only shown in verbose mode
-    if (this.verbose) {
-      const baseIndent = this.groupDepth * 2;
-      debug(formatMessage(message, { ...this.context, ...context }, baseIndent));
-    }
+    const baseIndent = this.groupDepth * 2;
+    debug(formatMessage(message, { ...this.context, ...context }, baseIndent));
   }
 
   /**
@@ -157,7 +151,7 @@ export class OclifLogger implements Logger {
   }
 
   child(context: Record<string, unknown>): Logger {
-    return new OclifLogger(this.cmd, { ...this.context, ...context }, this.verbose);
+    return new OclifLogger(this.cmd, { ...this.context, ...context });
   }
 
   startGroup(name: string): void {

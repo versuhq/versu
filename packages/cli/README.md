@@ -1,3 +1,9 @@
+<!-- markdownlint-disable MD041 -->
+
+![versu](../../docs/assets/images/versu_4.png)
+
+<!-- markdownlint-enable MD041 -->
+
 # @versu/cli - Command-Line Interface
 
 Command-line interface for VERSU. This CLI provides all the power of VERSU's semantic versioning engine through an easy-to-use command-line tool, perfect for local development and custom CI/CD systems.

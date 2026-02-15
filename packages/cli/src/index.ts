@@ -22,10 +22,6 @@ export default class Version extends Command {
 
   static override flags = {
     version: Flags.version({char: 'v'}),
-    verbose: Flags.boolean({
-      description: "Show detailed debug output",
-      default: false,
-    }),
     "dry-run": Flags.boolean({
       description: "Run without writing or pushing changes",
       default: false,
@@ -82,7 +78,7 @@ export default class Version extends Command {
   async run(): Promise<void> {
     const { flags, args } = await this.parse(Version);
 
-    initLogger(new OclifLogger(this, {}, flags.verbose));
+    initLogger(new OclifLogger(this));
 
     try {
       const options: RunnerOptions = {
