@@ -6,10 +6,50 @@ function formatMessage(
   context?: Record<string, unknown>,
 ): string {
   const result = message instanceof Error ? message.toString() : message;
-  const contextString = context && Object.keys(context).length > 0 
-    ? ` ${JSON.stringify(context, null, 0)}` 
-    : "";
-  return `${result}${contextString}`;
+  
+  if (!context || Object.keys(context).length === 0) {
+    return result;
+  }
+
+  const entries = Object.entries(context);
+  
+  // Calculate inline length
+  const totalLength = entries.reduce((sum, [key, value]) => {
+    const valueStr = Array.isArray(value) 
+      ? value.join(", ") 
+      : typeof value === "object" && value !== null
+      ? JSON.stringify(value)
+      : String(value);
+    return sum + key.length + valueStr.length;
+  }, 0);
+  
+  // Use inline format for simple cases: <= 3 keys and reasonable total length
+  if (entries.length <= 3 && totalLength < 80) {
+    const inline = entries
+      .map(([key, value]) => {
+        const valueStr = Array.isArray(value)
+          ? value.join(", ")
+          : typeof value === "object" && value !== null
+          ? JSON.stringify(value)
+          : String(value);
+        return `${key}=${valueStr}`;
+      })
+      .join(" ");
+    return `${result} (${inline})`;
+  }
+  
+  // Use multi-line format for complex cases
+  const multiline = entries
+    .map(([key, value]) => {
+      const valueStr = Array.isArray(value)
+        ? value.join(", ")
+        : typeof value === "object" && value !== null
+        ? JSON.stringify(value)
+        : String(value);
+      return `  ${key}: ${valueStr}`;
+    })
+    .join("\n");
+  return `${result}\n${multiline}`;
 }
 
 export class ActionsLogger implements Logger {
