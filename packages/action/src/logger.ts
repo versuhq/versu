@@ -6,7 +6,9 @@ function formatMessage(
   context?: Record<string, unknown>,
 ): string {
   const result = message instanceof Error ? message.toString() : message;
-  const contextString = context && Object.keys(context).length > 0 ? ` ${JSON.stringify(context)}` : "";
+  const contextString = context && Object.keys(context).length > 0 
+    ? ` ${JSON.stringify(context, null, 0)}` 
+    : "";
   return `${result}${contextString}`;
 }
 
