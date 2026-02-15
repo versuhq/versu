@@ -59,10 +59,11 @@ export class CommitAnalyzer {
 
       // Log exclusions for debugging
       if (childModulePaths.length > 0) {
-        logger.debug(
-          "Module excludes child modules",
-          { moduleId: projectInfo.id, childCount: childModulePaths.length, childPaths: childModulePaths }
-        );
+        logger.debug("Module excludes child modules", {
+          moduleId: projectInfo.id,
+          childCount: childModulePaths.length,
+          childPaths: childModulePaths,
+        });
       }
     }
 
@@ -71,10 +72,10 @@ export class CommitAnalyzer {
       (sum, info) => sum + info.commits.length,
       0,
     );
-    logger.info(
-      "Commit analysis completed",
-      { totalCommits, moduleCount: moduleCommits.size }
-    );
+    logger.info("Commit analysis completed", {
+      totalCommits,
+      moduleCount: moduleCommits.size,
+    });
 
     return moduleCommits;
   }
@@ -89,10 +90,7 @@ export class CommitAnalyzer {
   private findChildModulePaths(modulePath: string, moduleId: string): string[] {
     const childPaths: string[] = [];
 
-    logger.debug(
-      "Finding child modules",
-      { moduleId, modulePath }
-    );
+    logger.debug("Finding child modules", { moduleId, modulePath });
 
     // Iterate through all modules to find children
     for (const [otherId, otherInfo] of this.moduleRegistry.getModules()) {
@@ -105,10 +103,11 @@ export class CommitAnalyzer {
       }
     }
 
-    logger.debug(
-      "Child modules found",
-      { moduleId, childCount: childPaths.length, childPaths }
-    );
+    logger.debug("Child modules found", {
+      moduleId,
+      childCount: childPaths.length,
+      childPaths,
+    });
 
     return childPaths;
   }

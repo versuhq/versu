@@ -4,9 +4,7 @@ import { exists } from "../utils/file.js";
 import { logger } from "../utils/logger.js";
 import type { AdapterIdentifier } from "../services/adapter-identifier.js";
 import type { ModuleSystemFactory } from "../services/module-system-factory.js";
-import {
-  ConfigurationValidator,
-} from "../services/configuration-validator.js";
+import { ConfigurationValidator } from "../services/configuration-validator.js";
 
 export type PluginContract = {
   id: string;
@@ -105,7 +103,8 @@ export class PluginLoader {
    */
   private async loadSinglePlugin(absolutePath: string) {
     try {
-      logger.info("Attempting to load plugin", { path: absolutePath });
+      logger.info("Attempting to load plugin");
+      logger.debug("Loading plugin", { path: absolutePath });
 
       // Dynamic require using the absolute path
       // Note: If using ESM (import), use await import(absolutePath)

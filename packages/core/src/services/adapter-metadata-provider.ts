@@ -71,7 +71,9 @@ export class AdapterMetadataProvider {
       );
     }
 
-    logger.info("Using explicitly provided adapter", { adapter: this.adapterId });
+    logger.info("Using explicitly provided adapter", {
+      adapter: this.adapterId,
+    });
 
     return identifier;
   }

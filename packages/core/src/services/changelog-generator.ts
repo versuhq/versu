@@ -26,15 +26,13 @@ export class ChangelogGenerator {
     moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
   ): Promise<string[]> {
     if (!this.options.generateChangelog) {
-      logger.info(
-        "Changelog generation disabled, skipping"
-      );
+      logger.info("Changelog generation disabled, skipping");
       return [];
     }
 
     if (moduleResults.length === 0) {
       logger.info(
-        "No modules with declared versions, skipping changelog generation"
+        "No modules with declared versions, skipping changelog generation",
       );
       return [];
     }
@@ -65,7 +63,9 @@ export class ChangelogGenerator {
       changelogPaths.push(rootChangelogPath);
     }
 
-    logger.info("Changelog generation completed", { fileCount: changelogPaths.length });
+    logger.info("Changelog generation completed", {
+      fileCount: changelogPaths.length,
+    });
     return changelogPaths;
   }
 }

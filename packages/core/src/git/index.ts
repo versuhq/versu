@@ -111,10 +111,10 @@ export async function getCommitsSinceLastTag(
   // Resolve the working directory, defaulting to current process directory
   const cwd = options.cwd || process.cwd();
 
-  logger.debug(
-    "Getting commits for module since last tag",
-    { moduleName: projectInfo.name, modulePath: projectInfo.path }
-  );
+  logger.debug("Getting commits for module since last tag", {
+    moduleName: projectInfo.name,
+    modulePath: projectInfo.path,
+  });
 
   try {
     // Find the most recent tag for this module
@@ -122,10 +122,11 @@ export async function getCommitsSinceLastTag(
     // For submodules, this finds module-specific tags (module@1.0.0)
     const lastTag = await getLastTagForModule(projectInfo, { cwd });
 
-    logger.debug(
-      "Last tag for module found",
-      { moduleName: projectInfo.name, moduleType: projectInfo.type, lastTag }
-    );
+    logger.debug("Last tag for module found", {
+      moduleName: projectInfo.name,
+      moduleType: projectInfo.type,
+      lastTag,
+    });
 
     // Build the git revision range
     // If tag exists: 'tag..HEAD' means commits after tag up to HEAD
@@ -191,10 +192,7 @@ export async function getCommitsInRange(
   // Resolve working directory, defaulting to current directory
   const cwd = options.cwd || process.cwd();
 
-  logger.debug(
-    "Getting commits in range",
-    { range, pathFilter, excludePaths }
-  );
+  logger.debug("Getting commits in range", { range, pathFilter, excludePaths });
 
   try {
     // Build git log command with custom format for easy parsing
@@ -301,10 +299,10 @@ export async function getLastTagForModule(
   // Resolve working directory, defaulting to current directory
   const cwd = options.cwd || process.cwd();
 
-  logger.debug(
-    "Finding last tag for module",
-    { moduleName: projectInfo.name, moduleType: projectInfo.type }
-  );
+  logger.debug("Finding last tag for module", {
+    moduleName: projectInfo.name,
+    moduleType: projectInfo.type,
+  });
 
   try {
     // Generate glob pattern for module-specific tags (e.g., 'api@*')
@@ -316,10 +314,9 @@ export async function getLastTagForModule(
       // Search for module-specific tags with version sorting
       // --sort=-version:refname: Sort by version in descending order (newest first)
 
-      logger.debug(
-        "Executing git command",
-        { command: `git tag -l ${moduleTagPattern} --sort=-version:refname` }
-      );
+      logger.debug("Executing git command", {
+        command: `git tag -l ${moduleTagPattern} --sort=-version:refname`,
+      });
 
       const { stdout } = await execa(
         "git",
@@ -343,10 +340,9 @@ export async function getLastTagForModule(
       // --tags: Consider all tags (not just annotated)
       // --abbrev=0: Don't show commit hash suffix
 
-      logger.debug(
-        "Executing git command",
-        { command: "git describe --tags --abbrev=0 HEAD" }
-      );
+      logger.debug("Executing git command", {
+        command: "git describe --tags --abbrev=0 HEAD",
+      });
 
       const { stdout: fallbackOutput } = await execa(
         "git",
@@ -384,10 +380,9 @@ export async function getAllTags(options: GitOptions = {}): Promise<GitTag[]> {
     // %(refname:short): Tag name without refs/tags/ prefix
     // %(objectname): Full commit SHA that the tag points to
 
-    logger.debug(
-      "Executing git command",
-      { command: "git tag -l --format=%(refname:short) %(objectname)" }
-    );
+    logger.debug("Executing git command", {
+      command: "git tag -l --format=%(refname:short) %(objectname)",
+    });
 
     const { stdout } = await execa(
       "git",

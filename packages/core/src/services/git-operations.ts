@@ -30,7 +30,9 @@ export class GitOperations {
 
     if (this.options.dryRun) {
       const commitMessage = this.createCommitMessage(moduleChangeResults);
-      logger.info("Dry run enabled, skipping commit and push", { message: commitMessage });
+      logger.info("Dry run enabled, skipping commit and push", {
+        message: commitMessage,
+      });
       return;
     }
 
@@ -90,10 +92,9 @@ export class GitOperations {
     );
 
     if (disabledBy) {
-      logger.info(
-        "Tag push disabled, skipping tag creation and push",
-        { disabledBy }
-      );
+      logger.info("Tag push disabled, skipping tag creation and push", {
+        disabledBy,
+      });
 
       for (const change of modulesWithDeclaredVersions) {
         const tagName = `${change.name}@${change.to}`;

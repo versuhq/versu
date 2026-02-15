@@ -94,7 +94,9 @@ async function executeGradleScript(
   projectRoot: string,
   outputFile: string,
 ): Promise<void> {
-  logger.info("Executing Gradle to collect project information", { projectRoot });
+  logger.info("Executing Gradle to collect project information", {
+    projectRoot,
+  });
   const gradlew = join(projectRoot, GRADLE_WRAPPER);
   const dirname = path.dirname(fileURLToPath(import.meta.url));
   const initScriptPath = join(dirname, GRADLE_INIT_SCRIPT);
@@ -157,10 +159,7 @@ export async function getRawProjectInformation(
   logger.debug("Computed Gradle files hash", { hash: currentHash });
 
   if (fileExists) {
-    logger.info(
-      "Cached project information found",
-      { cacheFile: outputFile }
-    );
+    logger.info("Cached project information found", { cacheFile: outputFile });
     // Step 2: File exists, check cache validity
     try {
       const fileContent = await fs.readFile(outputFile, "utf-8");
@@ -173,10 +172,11 @@ export async function getRawProjectInformation(
         executeScript = false;
         data = cachedData.data;
       } else {
-        logger.debug("Cache is invalid", { cachedHash: cachedData.hash, currentHash });
-        logger.info(
-          "Gradle files changed, regenerating project information"
-        );
+        logger.debug("Cache is invalid", {
+          cachedHash: cachedData.hash,
+          currentHash,
+        });
+        logger.info("Gradle files changed, regenerating project information");
       }
 
       // Cache miss - hash mismatch, need to regenerate

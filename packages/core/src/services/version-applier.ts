@@ -78,17 +78,19 @@ export class VersionApplier {
   private logPlannedChanges(
     processedModuleChanges: ProcessedModuleChange[],
   ): void {
-    logger.info(
-      "Planning version updates",
-      { moduleCount: processedModuleChanges.length }
-    );
+    logger.info("Planning version updates", {
+      moduleCount: processedModuleChanges.length,
+    });
     for (const change of processedModuleChanges) {
       const from = formatSemVer(change.fromVersion);
       const to = change.toVersion;
-      logger.debug(
-        "Version update planned",
-        { moduleId: change.module.id, from, to, bumpType: change.bumpType, reason: change.reason }
-      );
+      logger.debug("Version update planned", {
+        moduleId: change.module.id,
+        from,
+        to,
+        bumpType: change.bumpType,
+        reason: change.reason,
+      });
     }
   }
 
@@ -98,15 +100,22 @@ export class VersionApplier {
     for (const change of processedModuleChanges) {
       // Use toVersion directly (now includes all transformations like Gradle snapshots)
       this.versionManager.updateVersion(change.module.id, change.toVersion);
-      logger.debug("Version staged", { moduleId: change.module.id, version: change.toVersion });
+      logger.debug("Version staged", {
+        moduleId: change.module.id,
+        version: change.toVersion,
+      });
     }
-    logger.info("Staged new versions", { count: processedModuleChanges.length });
+    logger.info("Staged new versions", {
+      count: processedModuleChanges.length,
+    });
   }
 
   private async commitVersions(): Promise<void> {
     logger.info("Committing version updates to files");
     const pendingUpdatesCount = this.versionManager.getPendingUpdatesCount();
     await this.versionManager.commit();
-    logger.info("Version updates committed", { updateCount: pendingUpdatesCount });
+    logger.info("Version updates committed", {
+      updateCount: pendingUpdatesCount,
+    });
   }
 }

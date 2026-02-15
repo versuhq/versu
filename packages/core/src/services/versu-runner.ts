@@ -195,7 +195,7 @@ export class VersuRunner {
 
     // Log discovered modules through hierarchy manager
     const moduleIds = this.moduleRegistry.getModuleIds();
-    logger.info("Modules discovered", {
+    logger.info("Module discovery completed", {
       count: moduleIds.length,
       modules: moduleIds,
     });
@@ -210,7 +210,7 @@ export class VersuRunner {
   }
 
   private async calculatingBumpsAndApplyingChanges(
-    moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>
+    moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
   ): Promise<{
     discoveredModules: Array<Module>;
     changedModules: ModuleChangeResult[];
@@ -309,17 +309,16 @@ export class VersuRunner {
   }
 
   private async doRun(): Promise<RunnerResult> {
-    
     logger.startGroup("Loading configuration");
-    
+
     await this.loadConfiguration();
-    
+
     logger.endGroup();
 
     logger.startGroup("Loading plugins and resolving adapter");
-    
+
     await this.loadPluginsAndResolveAdapter();
-    
+
     logger.endGroup();
 
     // Check if working directory is clean

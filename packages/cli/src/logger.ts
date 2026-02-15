@@ -17,34 +17,43 @@ function indent(str: string, spaces: number): string {
 function formatContext(context?: Record<string, unknown>, baseIndent = 0): string {
   if (!context || Object.keys(context).length === 0) return "";
 
-  // Base indent for context lines (accounts for group depth + icon "ℹ ")
-  const linePrefix = " ".repeat(baseIndent + 2);
-
-  const entries = Object.entries(context)
-    .map(([key, value]) => {
-      let formattedValue: string;
-      
-      if (typeof value === "object" && value !== null) {
-        const jsonStr = JSON.stringify(value, null, 2);
-        const lines = jsonStr.split("\n");
-        
-        // First line stays on same line as key, subsequent lines get base indent only
-        formattedValue = lines
-          .map((line, i) => {
-            if (i === 0) return line;
-            // Just add linePrefix - JSON.stringify already has proper indentation
-            return linePrefix + line;
-          })
-          .join("\n");
+  const entries = Object.entries(context).map(([key, value]) => {
+    let formattedValue: string;
+    
+    if (Array.isArray(value)) {
+      if (value.length === 0) {
+        formattedValue = "none";
       } else {
-        formattedValue = String(value);
+        formattedValue = value.join(", ");
       }
-      
-      return `${linePrefix}${chalk.dim(key)}: ${chalk.white(formattedValue)}`;
-    })
-    .join("\n");
+    } else if (typeof value === "object" && value !== null) {
+      formattedValue = JSON.stringify(value);
+    } else {
+      formattedValue = String(value);
+    }
+    
+    return { key, formattedValue, length: key.length + formattedValue.length };
+  });
 
-  return "\n" + entries;
+  // Calculate total inline length
+  const totalLength = entries.reduce((sum, e) => sum + e.length, 0);
+  const hasLongValue = entries.some(e => e.formattedValue.length > 50);
+  
+  // Use inline format for simple cases: <= 3 keys and reasonable total length
+  if (entries.length <= 3 && totalLength < 80 && !hasLongValue) {
+    const inline = entries
+      .map(e => `${chalk.dim(e.key)}=${chalk.cyan(e.formattedValue)}`)
+      .join(" ");
+    return ` ${chalk.dim("(")}${inline}${chalk.dim(")")}`;
+  }
+  
+  // Use multi-line format for complex cases
+  // Account for base indentation + icon (2 chars: "ℹ ")
+  const lineIndent = " ".repeat(baseIndent + 2);
+  const multiline = entries
+    .map(e => `${lineIndent}${chalk.dim(e.key)}: ${chalk.cyan(e.formattedValue)}`)
+    .join("\n");
+  return "\n" + multiline;
 }
 
 /**

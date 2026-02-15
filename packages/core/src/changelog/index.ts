@@ -79,7 +79,7 @@ export async function generateChangelogsForModules(
     if (!moduleResult.declaredVersion) {
       logger.debug(
         "Module has no declared version, skipping changelog generation",
-        { moduleId: moduleResult.id }
+        { moduleId: moduleResult.id },
       );
       continue;
     }
@@ -87,10 +87,9 @@ export async function generateChangelogsForModules(
     const { commits, lastTag } = await getCommitsForModule(moduleResult.id);
 
     if (commits.length === 0) {
-      logger.info(
-        "No commits found, skipping changelog",
-        { moduleId: moduleResult.id }
-      );
+      logger.info("No commits found, skipping changelog", {
+        moduleId: moduleResult.id,
+      });
       continue;
     }
 
@@ -123,10 +122,9 @@ export async function generateChangelogsForModules(
     );
 
     if (dryRun) {
-      logger.debug(
-        "Dry run enabled, skipping writing changelog to file",
-        { moduleId: moduleResult.id }
-      );
+      logger.debug("Dry run enabled, skipping writing changelog to file", {
+        moduleId: moduleResult.id,
+      });
     } else {
       await updateChangelogFile(
         changelogContent,
@@ -174,10 +172,9 @@ export async function generateRootChangelog(
   const { commits, lastTag } = await getCommitsForModule(moduleResult.id);
 
   if (commits.length === 0) {
-    logger.info(
-      "No commits found, skipping root changelog",
-      { moduleId: moduleResult.id }
-    );
+    logger.info("No commits found, skipping root changelog", {
+      moduleId: moduleResult.id,
+    });
     return;
   }
 
@@ -211,10 +208,9 @@ export async function generateRootChangelog(
   );
 
   if (dryRun) {
-    logger.info(
-      "Dry run enabled, skipping writing root changelog to file",
-      { moduleId: moduleResult.id }
-    );
+    logger.info("Dry run enabled, skipping writing root changelog to file", {
+      moduleId: moduleResult.id,
+    });
   } else {
     await updateChangelogFile(
       changelogContent,

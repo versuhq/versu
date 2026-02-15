@@ -30,7 +30,9 @@ export class ConfigurationLoader {
    */
   async load(repoRoot: string): Promise<Config> {
     try {
-      logger.info("Searching configuration file", { repoRoot });
+      logger.info("Searching configuration file");
+
+      logger.debug("Configuration loading options", { repoRoot });
 
       // Search for config in standard locations
       const result = await this.explorer.search(repoRoot);
@@ -39,10 +41,9 @@ export class ConfigurationLoader {
 
       if (result?.config) {
         // Configuration found - merge, validate, and use it
-        const configSource = result.filepath
-          ? `from ${result.filepath}`
-          : "from package.json";
-        logger.info("Configuration loaded", { source: configSource });
+        logger.info("Configuration loaded", {
+          source: result.filepath,
+        });
 
         const userConfig = result.config;
         const validatedConfig = mergeWithDefaults(userConfig);
