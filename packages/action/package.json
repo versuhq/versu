@@ -29,7 +29,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tvcsantos/versu.git"
+    "url": "git+https://github.com/tvcsantos/versu.git",
+    "directory": "packages/action"
   },
   "bugs": {
     "url": "https://github.com/tvcsantos/versu/issues"
