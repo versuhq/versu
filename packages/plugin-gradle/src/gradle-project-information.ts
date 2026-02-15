@@ -94,7 +94,7 @@ async function executeGradleScript(
   projectRoot: string,
   outputFile: string,
 ): Promise<void> {
-  logger.info(`⚙️ Executing Gradle to collect project information...`);
+  logger.info("Executing Gradle to collect project information", { projectRoot });
   const gradlew = join(projectRoot, GRADLE_WRAPPER);
   const dirname = path.dirname(fileURLToPath(import.meta.url));
   const initScriptPath = join(dirname, GRADLE_INIT_SCRIPT);
@@ -131,7 +131,7 @@ async function executeGradleScript(
     );
   }
 
-  logger.info(`✅ Gradle project information generated at ${outputFile}.`);
+  logger.info("Gradle project information generated", { outputFile });
 }
 
 /**
@@ -154,11 +154,12 @@ export async function getRawProjectInformation(
 
   // Compute hash of all Gradle build files
   const currentHash = await computeGradleFilesHash(projectRoot);
-  logger.debug(`🔍 Computed Gradle files hash: ${currentHash}`);
+  logger.debug("Computed Gradle files hash", { hash: currentHash });
 
   if (fileExists) {
     logger.info(
-      `💾 Cached project information found at ${outputFile}. Validating cache...`,
+      "Cached project information found",
+      { cacheFile: outputFile }
     );
     // Step 2: File exists, check cache validity
     try {
@@ -167,21 +168,21 @@ export async function getRawProjectInformation(
 
       // Step 2.1: Compare hashes
       if (cachedData.hash === currentHash) {
-        logger.info(`✅ Cache is valid. Using cached project information.`);
+        logger.info("Cache validated, using cached project information");
         // Cache hit - use cached data
         executeScript = false;
         data = cachedData.data;
       } else {
-        logger.debug(`❌ Cache is invalid. Cached hash: ${cachedData.hash}`);
+        logger.debug("Cache is invalid", { cachedHash: cachedData.hash, currentHash });
         logger.info(
-          `🔄 Gradle files changed, regenerating project information...`,
+          "Gradle files changed, regenerating project information"
         );
       }
 
       // Cache miss - hash mismatch, need to regenerate
     } catch (error) {
       // If there's any error reading/parsing cached file, regenerate
-      logger.warning(`⚠️ Failed to read cached project information: ${error}`);
+      logger.warning("Failed to read cached project information", { error });
     }
   }
 

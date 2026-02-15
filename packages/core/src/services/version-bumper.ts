@@ -123,7 +123,7 @@ export class VersionBumper {
   async calculateVersionBumps(
     moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
   ): Promise<ProcessedModuleChange[]> {
-    logger.info("🔢 Calculating version bumps from commits...");
+    logger.info("Calculating version bumps from commits");
 
     // Generate timestamp-based prerelease ID if timestamp versions are enabled
     let effectivePrereleaseId = this.options.prereleaseId;
@@ -132,7 +132,8 @@ export class VersionBumper {
         this.options.prereleaseId,
       );
       logger.info(
-        `🕐 Generated timestamp prerelease ID: ${effectivePrereleaseId}`,
+        "Generated timestamp prerelease ID",
+        { prereleaseId: effectivePrereleaseId }
       );
     }
 
@@ -140,20 +141,20 @@ export class VersionBumper {
     let shortSha: string | undefined;
     if (this.options.addBuildMetadata) {
       shortSha = await getCurrentCommitShortSha({ cwd: this.options.repoRoot });
-      logger.info(`📋 Build metadata will include short SHA: ${shortSha}`);
+      logger.info("Build metadata will include short SHA", { shortSha });
     }
 
     // Step 1: Calculate initial bump types for all modules
     const processingModuleChanges = this.calculateInitialBumps(moduleCommits);
 
     // Step 2: Calculate cascade effects
-    logger.info("🌊 Calculating cascade effects...");
+    logger.info("Calculating cascade effects");
     const cascadedChanges = this.calculateCascadeEffects(
       processingModuleChanges,
     );
 
     // Step 3: Apply version calculations and transformations
-    logger.info("🔢 Calculating actual versions...");
+    logger.info("Calculating actual versions");
     return this.applyVersionCalculations(
       cascadedChanges,
       effectivePrereleaseId,
@@ -271,7 +272,8 @@ export class VersionBumper {
       // No processing needed, mark as processed
       if (!currentChange.needsProcessing || currentChange.bumpType === "none") {
         logger.debug(
-          `🔄 Skipping module ${currentChange.module.id} - no processing needed`,
+          "No processing needed, skipping module",
+          { moduleId: currentChange.module.id }
         );
         processed.add(currentChange.module.id);
         continue;
@@ -280,7 +282,8 @@ export class VersionBumper {
       // Skip if already processed
       if (processed.has(currentChange.module.id)) {
         logger.debug(
-          `🔄 Skipping module ${currentChange.module.id} - already processed`,
+          "Module already processed, skipping",
+          { moduleId: currentChange.module.id }
         );
         continue;
       }
@@ -294,14 +297,16 @@ export class VersionBumper {
       // Iterate through all modules that depend on the current module
       for (const dependentName of currentModuleInfo.affectedModules) {
         logger.debug(
-          `➡️ Processing dependent module ${dependentName} affected by ${currentChange.module.id} with bump ${currentChange.bumpType}`,
+          "Processing dependent module",
+          { dependentName, affectedBy: currentChange.module.id, bumpType: currentChange.bumpType }
         );
 
         // Get the dependent module using O(1) lookup
         const existingChange = moduleMap.get(dependentName);
         if (!existingChange) {
           logger.debug(
-            `⚠️ Dependent module ${dependentName} not found in module changes list`,
+            "Dependent module not found in changes list",
+            { dependentName }
           );
           continue; // Module not found in our module list
         }
@@ -315,7 +320,8 @@ export class VersionBumper {
 
         if (requiredBump === "none") {
           logger.debug(
-            `➡️ No cascade bump needed for module ${dependentName} from ${currentChange.module.id}`,
+            "Dependency change requires no cascade",
+            { dependentName, affectedBy: currentChange.module.id }
           );
           continue; // No cascade needed
         }
@@ -325,7 +331,8 @@ export class VersionBumper {
         const mergedBump = maxBumpType([existingChange.bumpType, requiredBump]);
         if (mergedBump !== existingChange.bumpType) {
           logger.debug(
-            `🔄 Cascading bump for module ${dependentName} from ${existingChange.bumpType} to ${mergedBump} due to ${currentChange.module.id}`,
+            "Cascading bump for module",
+            { dependentName, from: existingChange.bumpType, to: mergedBump, triggeredBy: currentChange.module.id }
           );
           // Update the module change in place
           existingChange.bumpType = mergedBump;
@@ -337,7 +344,8 @@ export class VersionBumper {
           queue.push(existingChange);
         } else {
           logger.debug(
-            `🔄 No changes needed for module ${dependentName} - already at ${existingChange.bumpType}`,
+            "Module already at required bump level",
+            { dependentName, bumpType: existingChange.bumpType }
           );
         }
       }
@@ -399,8 +407,9 @@ export class VersionBumper {
         } else if (change.bumpType !== "none" && !this.options.prereleaseMode) {
           // Scenario 2: Commits with changes in normal mode
           // Standard semantic version bump (major.minor.patch)
-          logger.info(
-            `Bumping module ${change.module.id} from version ${change.fromVersion.version} with bump type ${change.bumpType}`,
+          logger.debug(
+            "Bumping module version",
+            { moduleId: change.module.id, from: change.fromVersion.version, bumpType: change.bumpType }
           );
           newVersion = bumpSemVer(change.fromVersion, change.bumpType);
         } else if (change.reason === "prerelease-unchanged") {
@@ -454,7 +463,8 @@ export class VersionBumper {
     }
 
     logger.info(
-      `📈 Calculated versions for ${processedModuleChanges.length} modules requiring updates`,
+      "Calculated versions for modules requiring updates",
+      { moduleCount: processedModuleChanges.length }
     );
     return processedModuleChanges;
   }

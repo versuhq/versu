@@ -21,7 +21,7 @@ export async function updateChangelogFile(
 ): Promise<void> {
   let fileContent = changelogContent;
   if (await exists(changelogPath)) {
-    logger.info(`Updating existing changelog at ${changelogPath}...`);
+    logger.info("Updating existing changelog", { path: changelogPath });
     // Try to read existing changelog
     const existingContent = await fs.readFile(changelogPath, "utf8");
     const newContent = `${prependPlaceholder}\n\n${changelogContent.trimEnd()}`;
@@ -77,8 +77,9 @@ export async function generateChangelogsForModules(
 
   for (const moduleResult of moduleResults) {
     if (!moduleResult.declaredVersion) {
-      logger.info(
-        `Module ${moduleResult.id} has no declared version, skipping changelog generation...`,
+      logger.debug(
+        "Module has no declared version, skipping changelog generation",
+        { moduleId: moduleResult.id }
       );
       continue;
     }
@@ -87,7 +88,8 @@ export async function generateChangelogsForModules(
 
     if (commits.length === 0) {
       logger.info(
-        `No commits to include in changelog for module ${moduleResult.id}, skipping...`,
+        "No commits found, skipping changelog",
+        { moduleId: moduleResult.id }
       );
       continue;
     }
@@ -121,8 +123,9 @@ export async function generateChangelogsForModules(
     );
 
     if (dryRun) {
-      logger.info(
-        `🏃‍♂️ Dry run mode - skipping writing changelog for module ${moduleResult.id} to file`,
+      logger.debug(
+        "Dry run enabled, skipping writing changelog to file",
+        { moduleId: moduleResult.id }
       );
     } else {
       await updateChangelogFile(
@@ -150,7 +153,7 @@ export async function generateRootChangelog(
   const moduleResult = moduleResults.find((result) => result.type === "root");
 
   if (!moduleResult) {
-    logger.info("No root module found, skipping root changelog generation...");
+    logger.info("No root module found, skipping root changelog generation");
     return;
   }
 
@@ -158,7 +161,7 @@ export async function generateRootChangelog(
     throw new Error(`Missing required changelog configuration`);
   }
 
-  logger.info(`Loading root changelog configuration...`);
+  logger.info("Loading root changelog configuration");
 
   const prependPlaceholder = config?.context.prependPlaceholder;
 
@@ -172,7 +175,8 @@ export async function generateRootChangelog(
 
   if (commits.length === 0) {
     logger.info(
-      `No commits to include in changelog for module ${moduleResult.id}, skipping...`,
+      "No commits found, skipping root changelog",
+      { moduleId: moduleResult.id }
     );
     return;
   }
@@ -208,7 +212,8 @@ export async function generateRootChangelog(
 
   if (dryRun) {
     logger.info(
-      `🏃‍♂️ Dry run mode - skipping writing changelog for module ${moduleResult.id} to file`,
+      "Dry run enabled, skipping writing root changelog to file",
+      { moduleId: moduleResult.id }
     );
   } else {
     await updateChangelogFile(

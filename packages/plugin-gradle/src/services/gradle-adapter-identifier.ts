@@ -42,7 +42,7 @@ export class GradleAdapterIdentifier implements AdapterIdentifier {
 
     if (!projectRootExists) {
       // Log for debugging and return false immediately
-      logger.debug(`Project root does not exist: ${projectRoot}`);
+      logger.debug("Project root does not exist", { projectRoot });
       return false;
     }
 

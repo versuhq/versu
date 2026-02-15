@@ -82,56 +82,57 @@ export class VersuRunner {
   private logStartupInfo(): void {
     logger.info(banner);
     logger.info(
-      "Composing the history of your code, one version at a time....",
+      "Composing the history of your code, one version at a time",
     );
-    logger.info("");
-    logger.info("🚀 Starting VERSU engine...");
-    logger.info(`Repository: ${this.options.repoRoot}`);
-    logger.info(`Adapter: ${this.options.adapter || "(auto-detect)"}`);
-    logger.info(`Dry run: ${this.options.dryRun}`);
-    logger.info(`Prerelease mode: ${this.options.prereleaseMode}`);
-    if (this.options.prereleaseMode) {
-      logger.info(`Prerelease ID: ${this.options.prereleaseId}`);
-      logger.info(`Bump unchanged modules: ${this.options.bumpUnchanged}`);
-    }
-    logger.info(`Add build metadata: ${this.options.addBuildMetadata}`);
-    logger.info(`Timestamp versions: ${this.options.timestampVersions}`);
-    logger.info(`Append snapshot: ${this.options.appendSnapshot}`);
-    logger.info(`Push changes: ${this.options.pushChanges}`);
-    logger.info(`Generate changelog: ${this.options.generateChangelog}`);
-    logger.info("🏃 Running VERSU semantic evolution...");
+    logger.info("Starting versioning engine", {
+      repository: this.options.repoRoot,
+      adapter: this.options.adapter || "(auto-detect)",
+      dryRun: this.options.dryRun,
+      prereleaseMode: this.options.prereleaseMode,
+      prereleaseId: this.options.prereleaseMode ? this.options.prereleaseId : undefined,
+      bumpUnchanged: this.options.prereleaseMode ? this.options.bumpUnchanged : undefined,
+      addBuildMetadata: this.options.addBuildMetadata,
+      timestampVersions: this.options.timestampVersions,
+      appendSnapshot: this.options.appendSnapshot,
+      pushChanges: this.options.pushChanges,
+      generateChangelog: this.options.generateChangelog,
+    });
   }
 
   private logShutdownInfo(result: RunnerResult | null): void {
     if (!result) return;
     if (result.bumped) {
       logger.info(
-        `✅ Successfully updated ${result.changedModules.length} modules`,
+        "Version updates completed",
+        { moduleCount: result.changedModules.length }
       );
       for (const module of result.changedModules) {
-        logger.info(
-          `  ${module.id}: ${module.from} → ${module.to} (${module.bumpType})`,
+        logger.debug(
+          "Module updated",
+          { moduleId: module.id, from: module.from, to: module.to, bumpType: module.bumpType }
         );
       }
 
       if (result.createdTags.length > 0) {
         logger.info(
-          `🏷️  Created ${result.createdTags.length} tags: ${result.createdTags.join(", ")}`,
+          "Tags created",
+          { tagCount: result.createdTags.length }
         );
+        logger.debug("Tag details", { tags: result.createdTags });
       }
 
       if (result.changelogPaths.length > 0) {
         logger.info(
-          `📚 Generated ${result.changelogPaths.length} changelog files`,
+          "Changelog files generated",
+          { fileCount: result.changelogPaths.length }
         );
+        logger.debug("Changelog paths", { paths: result.changelogPaths });
       }
     } else {
-      logger.info("✨ No version changes needed");
+      logger.info("All versions up to date");
     }
 
-    logger.info("");
-    logger.info("🎯 VERSU completed successfully!");
-    logger.info("   Your multiverse has evolved semantically ✨");
+    logger.info("Completed successfully");
   }
 
   async run(): Promise<RunnerResult> {
@@ -150,6 +151,8 @@ export class VersuRunner {
     // Load configuration
     const configDirectory = path.join(this.options.repoRoot, ".versu");
     this.config = await this.configurationLoader.load(configDirectory);
+
+    logger.startGroup("Loading plugins and resolving adapter");
 
     this.pluginLoader = new PluginLoader();
     await this.pluginLoader.loadSelectedPlugins(this.config.plugins);
@@ -174,6 +177,8 @@ export class VersuRunner {
       this.options.repoRoot,
     );
 
+    logger.endGroup();
+
     // Check if working directory is clean
     if (
       !this.options.dryRun &&
@@ -184,8 +189,9 @@ export class VersuRunner {
       );
     }
 
+    logger.startGroup("Discovering modules and analyzing commits");
+    
     // Discover modules and get hierarchy manager
-    logger.info("🔍 Discovering modules...");
     const detector = this.moduleSystemFactory.createDetector(
       path.resolve(path.join(configDirectory, "project-information.json")),
     );
@@ -193,7 +199,7 @@ export class VersuRunner {
 
     // Log discovered modules through hierarchy manager
     const moduleIds = this.moduleRegistry.getModuleIds();
-    logger.info(`Found ${moduleIds.length} modules: ${moduleIds.join(", ")}`);
+    logger.info("Modules discovered", { count: moduleIds.length, modules: moduleIds });
 
     // Analyze commits since last release
     this.commitAnalyzer = new CommitAnalyzer(
@@ -202,6 +208,8 @@ export class VersuRunner {
     );
     const moduleCommits =
       await this.commitAnalyzer.analyzeCommitsSinceLastRelease();
+
+    logger.endGroup();
 
     // Initialize version bumper service
     const versionBumperOptions: VersionBumperOptions = {
@@ -229,7 +237,7 @@ export class VersuRunner {
     );
 
     if (processedModuleChanges.length === 0) {
-      logger.info("✨ No version changes needed");
+      logger.info("All versions up to date");
       return {
         bumped: false,
         discoveredModules,
@@ -290,7 +298,7 @@ export class VersuRunner {
     const createdTags =
       await this.gitOperations.createAndPushTags(changedModules);
 
-    logger.info("✅ VERSU semantic evolution completed successfully!");
+    logger.info("Semantic evolution completed successfully");
 
     return {
       bumped: true,

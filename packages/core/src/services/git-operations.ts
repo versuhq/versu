@@ -24,19 +24,17 @@ export class GitOperations {
     moduleChangeResults: ModuleChangeResult[],
   ): Promise<void> {
     if (!this.options.pushChanges) {
-      logger.info(
-        "📦 Skipping commit and push (disabled by push-changes input)",
-      );
+      logger.info("Push disabled, skipping commit and push");
       return;
     }
 
     if (this.options.dryRun) {
       const commitMessage = this.createCommitMessage(moduleChangeResults);
-      logger.info(`📦 Dry run mode - would commit and push: ${commitMessage}`);
+      logger.info("Dry run enabled, skipping commit and push", { message: commitMessage });
       return;
     }
 
-    logger.info("📦 Committing and pushing changes...");
+    logger.info("Committing and pushing changes");
 
     try {
       // Add all changed files to staging area
@@ -53,16 +51,16 @@ export class GitOperations {
 
         // Commit changes
         await commitChanges(commitMessage, { cwd: this.options.repoRoot });
-        logger.info(`  Committed changes: ${commitMessage}`);
+        logger.info("Changes committed", { message: commitMessage });
 
         // Push commits to remote
         await pushCommits({ cwd: this.options.repoRoot });
-        logger.info("  Pushed commits to remote");
+        logger.info("Commits pushed to remote");
       } else {
-        logger.info("  No changes to commit");
+        logger.info("Nothing staged for commit");
       }
     } catch (error) {
-      logger.warning(`Failed to commit and push changes: ${error}`);
+      logger.warning("Failed to commit and push changes", { error });
       // Continue execution - don't fail the entire process if git operations fail
     }
   }
@@ -73,9 +71,7 @@ export class GitOperations {
     const createdTags: string[] = [];
 
     if (this.options.isTemporaryVersion) {
-      logger.info(
-        "🏷️ Skipping tag creation and push (temporary version enabled)",
-      );
+      logger.info("Temporary version detected, skipping tag creation and push");
       return createdTags;
     }
 
@@ -87,7 +83,7 @@ export class GitOperations {
       .filter(Boolean)
       .join(", ");
 
-    logger.info("🔍 Filtering modules with declared versions...");
+    logger.info("Filtering modules with declared versions");
 
     const modulesWithDeclaredVersions = moduleChangeResults.filter(
       (change) => change.declaredVersion,
@@ -95,32 +91,33 @@ export class GitOperations {
 
     if (disabledBy) {
       logger.info(
-        `🏷️ Skipping tag creation and push (disabled by ${disabledBy} input(s))`,
+        "Tag push disabled, skipping tag creation and push",
+        { disabledBy }
       );
 
       for (const change of modulesWithDeclaredVersions) {
         const tagName = `${change.name}@${change.to}`;
         createdTags.push(tagName);
-        logger.info(`  Would create tag: ${tagName}`);
+        logger.info("Would create tag (dry run)", { tag: tagName });
       }
 
       return createdTags;
     }
 
-    logger.info("🏷️ Creating tags...");
     for (const change of modulesWithDeclaredVersions) {
       const tagName = `${change.name}@${change.to}`;
       const message = `Release ${change.name} v${change.to}`;
 
       createTag(tagName, message, { cwd: this.options.repoRoot });
       createdTags.push(tagName);
-      logger.info(`  Created tag: ${tagName}`);
+      logger.debug("Tag created", { tag: tagName });
     }
+    logger.info("Created tags", { count: createdTags.length });
 
     // Push tags
-    logger.info("📤 Pushing tags...");
+    logger.info("Pushing tags");
     pushTags({ cwd: this.options.repoRoot });
-    logger.info(`✅ Pushed ${createdTags.length} tags to remote`);
+    logger.info("Tags pushed to remote", { tagCount: createdTags.length });
 
     return createdTags;
   }

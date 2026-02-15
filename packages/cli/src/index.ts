@@ -1,5 +1,5 @@
 import { Args, Command, Flags } from "@oclif/core";
-import { VersuRunner, RunnerOptions, initLogger } from "@versu/core";
+import { VersuRunner, RunnerOptions, initLogger, logger } from "@versu/core";
 import { OclifLogger } from "./logger.js";
 
 export default class Version extends Command {
@@ -22,6 +22,10 @@ export default class Version extends Command {
 
   static override flags = {
     version: Flags.version({char: 'v'}),
+    verbose: Flags.boolean({
+      description: "Show detailed debug output",
+      default: false,
+    }),
     "dry-run": Flags.boolean({
       description: "Run without writing or pushing changes",
       default: false,
@@ -78,7 +82,7 @@ export default class Version extends Command {
   async run(): Promise<void> {
     const { flags, args } = await this.parse(Version);
 
-    initLogger(new OclifLogger(this));
+    initLogger(new OclifLogger(this, {}, flags.verbose));
 
     try {
       const options: RunnerOptions = {
@@ -101,7 +105,7 @@ export default class Version extends Command {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
-      this.error(`❌ Command failed: ${errorMessage}`);
+      logger.error("Command failed", { error: errorMessage });
     }
   }
 }

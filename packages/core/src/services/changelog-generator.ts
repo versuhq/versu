@@ -27,12 +27,12 @@ export class ChangelogGenerator {
   ): Promise<string[]> {
     if (!this.options.generateChangelog) {
       logger.info(
-        "📚 Skipping changelog generation (disabled by generate-changelog input)",
+        "Changelog generation disabled, skipping"
       );
       return [];
     }
 
-    logger.info("📚 Generating changelogs...");
+    logger.info("Generating changelogs");
 
     // Generate individual module changelogs
     const changelogPaths = await generateChangelogsForModules(
@@ -58,7 +58,7 @@ export class ChangelogGenerator {
       changelogPaths.push(rootChangelogPath);
     }
 
-    logger.info(`📝 Generated ${changelogPaths.length} changelog files`);
+    logger.info("Changelog generation completed", { fileCount: changelogPaths.length });
     return changelogPaths;
   }
 }

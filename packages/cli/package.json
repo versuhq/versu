@@ -39,7 +39,9 @@
   "dependencies": {
     "@oclif/core": "^4.8.0",
     "@versu/core": "^0.6.7",
-    "oclif": "^4.14.0"
+    "chalk": "^5.6.2",
+    "oclif": "^4.14.0",
+    "ora": "^9.3.0"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1.26.10",

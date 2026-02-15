@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { VersuRunner, RunnerOptions, initLogger } from '@versu/core';
+import { VersuRunner, RunnerOptions, initLogger, logger } from '@versu/core';
 import { ActionsLogger } from './logger.js';
 import { parseBooleanInput } from './utils/actions.js';
 import { VERSION, PACKAGE_NAME } from './version.js';
@@ -11,7 +11,7 @@ export async function run(): Promise<void> {
   try {
     initLogger(new ActionsLogger());
     
-    core.info(`${PACKAGE_NAME} v${VERSION}`);
+    logger.info("Starting action", { package: PACKAGE_NAME, version: VERSION });
     
     // Get repository root (GitHub Actions sets GITHUB_WORKSPACE)
     const repoRoot = process.env.GITHUB_WORKSPACE || process.cwd();
@@ -56,10 +56,10 @@ export async function run(): Promise<void> {
     core.setOutput('changelog-paths', result.changelogPaths.join(','));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    core.setFailed(`❌ Action failed: ${errorMessage}`);
+    core.setFailed(`Action failed: ${errorMessage}`);
     
     if (error instanceof Error && error.stack) {
-      core.debug(`Stack trace: ${error.stack}`);
+      logger.debug("Stack trace", { stack: error.stack });
     }
   }
 }

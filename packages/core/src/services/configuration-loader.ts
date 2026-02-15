@@ -30,7 +30,7 @@ export class ConfigurationLoader {
    */
   async load(repoRoot: string): Promise<Config> {
     try {
-      logger.info(`🔍 Searching for VERSU configuration...`);
+      logger.info("Searching for configuration file");
 
       // Search for config in standard locations
       const result = await this.explorer.search(repoRoot);
@@ -42,18 +42,16 @@ export class ConfigurationLoader {
         const configSource = result.filepath
           ? `from ${result.filepath}`
           : "from package.json";
-        logger.info(`📋 Configuration loaded ${configSource}`);
+        logger.info("Configuration loaded", { source: configSource });
 
         const userConfig = result.config;
         const validatedConfig = mergeWithDefaults(userConfig);
         config = this.configurationValidator.validate(validatedConfig);
       } else {
         // No configuration found - use defaults
-        logger.info(`No configuration found, using defaults`);
+        logger.info("No configuration found, using defaults");
         config = DEFAULT_CONFIG;
       }
-
-      logger.info(`✅ Configuration loaded successfully`);
 
       return config;
     } catch (error) {

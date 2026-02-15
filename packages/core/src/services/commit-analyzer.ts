@@ -31,7 +31,7 @@ export class CommitAnalyzer {
   async analyzeCommitsSinceLastRelease(): Promise<
     Map<string, { commits: Commit[]; lastTag: string | null }>
   > {
-    logger.info("📝 Analyzing commits since last release...");
+    logger.info("Analyzing commits since last release");
 
     const moduleCommits = new Map<
       string,
@@ -60,7 +60,8 @@ export class CommitAnalyzer {
       // Log exclusions for debugging
       if (childModulePaths.length > 0) {
         logger.debug(
-          `🔍 Module ${projectInfo.id} excludes ${childModulePaths.length} child module(s): ${childModulePaths.join(", ")}`,
+          "Module excludes child modules",
+          { moduleId: projectInfo.id, childCount: childModulePaths.length, childPaths: childModulePaths }
         );
       }
     }
@@ -71,7 +72,8 @@ export class CommitAnalyzer {
       0,
     );
     logger.info(
-      `📊 Analyzed ${totalCommits} commits across ${moduleCommits.size} modules`,
+      "Commit analysis completed",
+      { totalCommits, moduleCount: moduleCommits.size }
     );
 
     return moduleCommits;
@@ -88,7 +90,8 @@ export class CommitAnalyzer {
     const childPaths: string[] = [];
 
     logger.debug(
-      `🔎 Finding child modules for ${moduleId} at path '${modulePath}'`,
+      "Finding child modules",
+      { moduleId, modulePath }
     );
 
     // Iterate through all modules to find children
@@ -103,10 +106,9 @@ export class CommitAnalyzer {
     }
 
     logger.debug(
-      `✅ Found ${childPaths.length} child module(s) for ${moduleId}`,
+      "Child modules found",
+      { moduleId, childCount: childPaths.length, childPaths }
     );
-
-    logger.debug(`Child module paths: ${childPaths.join(", ")}`);
 
     return childPaths;
   }

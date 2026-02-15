@@ -112,7 +112,8 @@ export async function getCommitsSinceLastTag(
   const cwd = options.cwd || process.cwd();
 
   logger.debug(
-    `🔍 Getting commits for module '${projectInfo.name}' at path '${projectInfo.path}' since last tag...`,
+    "Getting commits for module since last tag",
+    { moduleName: projectInfo.name, modulePath: projectInfo.path }
   );
 
   try {
@@ -122,7 +123,8 @@ export async function getCommitsSinceLastTag(
     const lastTag = await getLastTagForModule(projectInfo, { cwd });
 
     logger.debug(
-      `🔍 Last tag for module '${projectInfo.name}' of type '${projectInfo.type}': ${lastTag}`,
+      "Last tag for module found",
+      { moduleName: projectInfo.name, moduleType: projectInfo.type, lastTag }
     );
 
     // Build the git revision range
@@ -190,7 +192,8 @@ export async function getCommitsInRange(
   const cwd = options.cwd || process.cwd();
 
   logger.debug(
-    `🔍 Getting commits in range '${range}' with path filter '${pathFilter}' and excluding paths: ${excludePaths.join(", ")}`,
+    "Getting commits in range",
+    { range, pathFilter, excludePaths }
   );
 
   try {
@@ -223,7 +226,7 @@ export async function getCommitsInRange(
       }
     }
 
-    logger.debug(`🐙 Executing git command: git ${args.join(" ")}`);
+    logger.debug("Executing git command", { command: `git ${args.join(" ")}` });
 
     // Execute git log command
     // Silent mode prevents output pollution in GitHub Actions
@@ -234,7 +237,7 @@ export async function getCommitsInRange(
   } catch (error) {
     // Non-throwing error handling: log warning and return empty array
     // This allows the system to continue even if git operations fail
-    logger.warning(`Warning: Failed to get git commits: ${error}`);
+    logger.warning("Failed to get git commits", { error });
     return [];
   }
 }
@@ -252,7 +255,7 @@ function parseGitLog(output: string): Commit[] {
     return [];
   }
 
-  logger.debug(`Raw git log output:\n${output}`);
+  logger.debug("Raw git log output", { output });
 
   const commits: Commit[] = [];
 
@@ -269,7 +272,7 @@ function parseGitLog(output: string): Commit[] {
       throw new Error("Parsed commit is missing hash");
     }
 
-    logger.debug(`Parsed commit ${parsed.hash}: ${JSON.stringify(parsed)}`);
+    logger.debug("Parsed commit", { hash: parsed.hash, commit: parsed });
 
     commits.push(parsed);
   }
@@ -299,7 +302,8 @@ export async function getLastTagForModule(
   const cwd = options.cwd || process.cwd();
 
   logger.debug(
-    `🔍 Finding last tag for module '${projectInfo.name}' of type '${projectInfo.type}'...`,
+    "Finding last tag for module",
+    { moduleName: projectInfo.name, moduleType: projectInfo.type }
   );
 
   try {
@@ -313,7 +317,8 @@ export async function getLastTagForModule(
       // --sort=-version:refname: Sort by version in descending order (newest first)
 
       logger.debug(
-        `🐙 Executing git command: git tag -l ${moduleTagPattern} --sort=-version:refname`,
+        "Executing git command",
+        { command: `git tag -l ${moduleTagPattern} --sort=-version:refname` }
       );
 
       const { stdout } = await execa(
@@ -339,7 +344,8 @@ export async function getLastTagForModule(
       // --abbrev=0: Don't show commit hash suffix
 
       logger.debug(
-        `🐙 Executing git command: git describe --tags --abbrev=0 HEAD`,
+        "Executing git command",
+        { command: "git describe --tags --abbrev=0 HEAD" }
       );
 
       const { stdout: fallbackOutput } = await execa(
@@ -379,7 +385,8 @@ export async function getAllTags(options: GitOptions = {}): Promise<GitTag[]> {
     // %(objectname): Full commit SHA that the tag points to
 
     logger.debug(
-      `🐙 Executing git command: git tag -l --format=%(refname:short) %(objectname)`,
+      "Executing git command",
+      { command: "git tag -l --format=%(refname:short) %(objectname)" }
     );
 
     const { stdout } = await execa(

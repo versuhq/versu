@@ -31,27 +31,25 @@ export class VersionApplier {
     processedModuleChanges: ProcessedModuleChange[],
   ): Promise<ModuleChangeResult[]> {
     if (processedModuleChanges.length === 0) {
-      logger.info("✨ No version changes to apply");
+      logger.info("All versions up to date");
       return [];
     }
 
-    logger.info("🔍 Filtering modules with declared versions...");
+    logger.info("Filtering modules with declared versions");
 
     const modulesWithDeclaredVersions = processedModuleChanges.filter(
       (change) => change.module.declaredVersion,
     );
 
     if (modulesWithDeclaredVersions.length === 0) {
-      logger.info("✨ No modules with declared versions to update");
+      logger.info("All modules already have declared versions");
       return [];
     }
 
     this.logPlannedChanges(modulesWithDeclaredVersions);
 
     if (this.options.dryRun) {
-      logger.info(
-        "🏃‍♂️ Dry run mode - version changes will not be written to files",
-      );
+      logger.info("Dry run enabled, skipping version file updates");
     } else {
       await this.stageVersions(modulesWithDeclaredVersions);
       await this.commitVersions();
@@ -81,13 +79,15 @@ export class VersionApplier {
     processedModuleChanges: ProcessedModuleChange[],
   ): void {
     logger.info(
-      `📈 Planning to update ${processedModuleChanges.length} modules:`,
+      "Planning version updates",
+      { moduleCount: processedModuleChanges.length }
     );
     for (const change of processedModuleChanges) {
       const from = formatSemVer(change.fromVersion);
       const to = change.toVersion;
-      logger.info(
-        `  ${change.module.id}: ${from} → ${to} (${change.bumpType}, ${change.reason})`,
+      logger.debug(
+        "Version update planned",
+        { moduleId: change.module.id, from, to, bumpType: change.bumpType, reason: change.reason }
       );
     }
   }
@@ -95,18 +95,18 @@ export class VersionApplier {
   private async stageVersions(
     processedModuleChanges: ProcessedModuleChange[],
   ): Promise<void> {
-    logger.info("✍️ Staging new versions...");
     for (const change of processedModuleChanges) {
       // Use toVersion directly (now includes all transformations like Gradle snapshots)
       this.versionManager.updateVersion(change.module.id, change.toVersion);
-      logger.info(`  Staged ${change.module.id} to ${change.toVersion}`);
+      logger.debug("Version staged", { moduleId: change.module.id, version: change.toVersion });
     }
+    logger.info("Staged new versions", { count: processedModuleChanges.length });
   }
 
   private async commitVersions(): Promise<void> {
-    logger.info("💾 Committing version updates to files...");
+    logger.info("Committing version updates to files");
     const pendingUpdatesCount = this.versionManager.getPendingUpdatesCount();
     await this.versionManager.commit();
-    logger.info(`✅ Committed ${pendingUpdatesCount} version updates`);
+    logger.info("Version updates committed", { updateCount: pendingUpdatesCount });
   }
 }

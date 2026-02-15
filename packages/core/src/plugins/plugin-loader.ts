@@ -41,14 +41,24 @@ export class PluginLoader {
    */
   private async getGlobalNodeModulesPath(): Promise<string> {
     try {
+      logger.debug("Determining global node_modules path");
+      
       // Ask npm where the global root is
       const { stdout } = await execa("npm", ["root", "-g"], {
         encoding: "utf8",
       });
       const root = stdout.trim();
-      return root;
+
+      logger.debug("npm global root found", { root });
+
+      if (root && (await exists(root))) {
+        logger.debug("Global node_modules path resolved", { path: root });
+        return root;
+      }
+
+      throw new Error(`Global node_modules path does not exist: ${root}`);
     } catch (e) {
-      logger.error("Could not determine global path");
+      logger.error("Could not determine global node_modules path", { error: e });
       return "";
     }
   }
@@ -58,15 +68,16 @@ export class PluginLoader {
    * @param pluginNames List of package names (e.g. ['my-plugin-alpha', '@scope/my-plugin-beta'])
    */
   public async loadSelectedPlugins(pluginNames: string[]) {
-    logger.info(`🔍 Loading plugins...`);
+    logger.info("Loading plugins", { count: pluginNames.length });
+    
     const globalRoot = await this.getGlobalNodeModulesPath();
 
     if (!globalRoot || !(await exists(globalRoot))) {
-      logger.error(`❌ Global node_modules not found at: ${globalRoot}`);
+      logger.error("Global node_modules not found", { path: globalRoot });
       return;
     }
 
-    logger.info(`Plugins to load: ${pluginNames.join(", ")}`);
+    logger.info("Plugins to load", { plugins: pluginNames });
     for (const pluginName of pluginNames) {
       // Construct the absolute path to the specific package
       const pluginPath = path.join(globalRoot, pluginName);
@@ -75,9 +86,9 @@ export class PluginLoader {
         await this.loadSinglePlugin(pluginPath);
       } else {
         logger.warning(
-          `⚠️  Plugin not found: ${pluginName} (looked in ${globalRoot})`,
+          "Plugin not found",
+          { plugin: pluginName, searchPath: globalRoot, suggestion: `Run 'npm install -g ${pluginName}' to install` }
         );
-        logger.warning(`   Run 'npm install -g ${pluginName}' to fix this.`);
       }
     }
   }
@@ -102,19 +113,21 @@ export class PluginLoader {
 
       if (isAlreadyLoaded) {
         logger.warning(
-          `⚠️  Plugin with ID '${plugin.id}' is already loaded. Skipping duplicate from ${absolutePath}.`,
+          "Plugin already loaded, skipping duplicate",
+          { pluginId: plugin.id, path: absolutePath }
         );
         return;
       }
 
       this.pluginsMap.set(plugin.id, plugin);
-      logger.info(`✅ Loaded: ${plugin.name}`);
+      logger.info("Plugin loaded", { name: plugin.name, id: plugin.id, version: plugin.version });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       logger.error(
-        `❌ Failed to load plugin at ${absolutePath} ${errorMessage}`,
+        "Failed to load plugin",
         {
-          error: err,
+          path: absolutePath,
+          error: errorMessage,
         },
       );
     }

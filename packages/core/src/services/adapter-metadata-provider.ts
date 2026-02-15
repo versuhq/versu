@@ -71,7 +71,7 @@ export class AdapterMetadataProvider {
       );
     }
 
-    logger.info(`📝 Using explicitly provided adapter: ${this.adapterId}`);
+    logger.info("Using explicitly provided adapter", { adapter: this.adapterId });
 
     return identifier;
   }
@@ -96,7 +96,7 @@ export class AdapterMetadataProvider {
       );
     }
 
-    logger.info(`🔍 Auto-detected adapter: ${identifier.metadata.id}`);
+    logger.info("Auto-detected adapter", { adapter: identifier.metadata.id });
 
     return identifier;
   }
