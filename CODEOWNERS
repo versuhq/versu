@@ -1,0 +1,6 @@
+# File required to implement default reviewers
+# Reference:
+# - https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners
+# - https://help.github.com/en/github/administering-a-repository/enabling-required-reviews-for-pull-requests
+# Members of this team will added as default reviewers to all PRs
+*      @tvcsantos
