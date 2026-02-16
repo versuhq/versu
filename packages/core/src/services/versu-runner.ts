@@ -29,17 +29,17 @@ import { Commit } from "conventional-commits-parser";
 
 export type RunnerOptions = {
   readonly repoRoot: string;
-  readonly adapter?: string;
-  readonly dryRun: boolean;
-  readonly pushTags: boolean;
   readonly prereleaseMode: boolean;
   readonly prereleaseId: string;
   readonly bumpUnchanged: boolean;
   readonly addBuildMetadata: boolean;
   readonly timestampVersions: boolean;
   readonly appendSnapshot: boolean;
-  readonly pushChanges: boolean;
+  readonly createTags: boolean;
   readonly generateChangelog: boolean;
+  readonly pushChanges: boolean;
+  readonly dryRun: boolean;
+  readonly adapter?: string;
 };
 
 export type RunnerResult = {
@@ -260,12 +260,14 @@ export class VersuRunner {
   private async generateChangelogs(
     changedModules: ModuleChangeResult[],
     moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
+    multiModule: boolean,
   ): Promise<string[]> {
     this.changelogGenerator = new ChangelogGenerator({
       generateChangelog: this.options.generateChangelog,
       repoRoot: this.options.repoRoot,
       dryRun: this.options.dryRun,
       config: this.config.changelog,
+      multiModule,
     });
 
     // Generate changelogs
@@ -283,7 +285,7 @@ export class VersuRunner {
     // Initialize git operations service
     const gitOperationsOptions: GitOperationsOptions = {
       pushChanges: this.options.pushChanges,
-      pushTags: this.options.pushTags,
+      createTags: this.options.createTags,
       repoRoot: this.options.repoRoot,
       dryRun: this.options.dryRun,
       isTemporaryVersion:
@@ -352,6 +354,7 @@ export class VersuRunner {
     const changelogPaths = await this.generateChangelogs(
       changedModules,
       moduleCommits,
+      discoveredModules.length > 1,
     );
 
     logger.endGroup();

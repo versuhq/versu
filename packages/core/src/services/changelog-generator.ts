@@ -16,6 +16,7 @@ export type ChangelogGeneratorOptions = {
   repoRoot: string;
   dryRun: boolean;
   config: ChangelogConfig;
+  multiModule: boolean;
 };
 
 export class ChangelogGenerator {
@@ -37,6 +38,12 @@ export class ChangelogGenerator {
       return [];
     }
 
+    if (this.options.multiModule && moduleResults.length == 1) {
+      throw new Error(
+        "Multi-module changelog generation enabled but only one module found",
+      );
+    }
+
     logger.info("Generating changelogs");
 
     // Generate individual module changelogs
@@ -49,18 +56,24 @@ export class ChangelogGenerator {
       this.options.config?.module,
     );
 
-    // Generate root changelog
-    const rootChangelogPath = await generateRootChangelog(
-      moduleResults,
-      async (moduleId) =>
-        moduleCommits.get(moduleId) || { commits: [], lastTag: null },
-      this.options.repoRoot,
-      this.options.dryRun,
-      this.options.config?.root,
-    );
+    if (this.options.multiModule) {
+      logger.info(
+        "Multi-module changelog generation enabled, generating root changelog",
+      );
 
-    if (rootChangelogPath) {
-      changelogPaths.push(rootChangelogPath);
+      // Generate root changelog
+      const rootChangelogPath = await generateRootChangelog(
+        moduleResults,
+        async (moduleId) =>
+          moduleCommits.get(moduleId) || { commits: [], lastTag: null },
+        this.options.repoRoot,
+        this.options.dryRun,
+        this.options.config?.root,
+      );
+
+      if (rootChangelogPath) {
+        changelogPaths.push(rootChangelogPath);
+      }
     }
 
     logger.info("Changelog generation completed", {

@@ -19,7 +19,7 @@ export async function run(): Promise<void> {
     // Get inputs
     const dryRun = parseBooleanInput(core.getInput('dry-run'));
     const adapter = core.getInput('adapter') || undefined;
-    const pushTags = parseBooleanInput(core.getInput('push-tags'));
+    const createTags = parseBooleanInput(core.getInput('create-tags'));
     const prereleaseMode = parseBooleanInput(core.getInput('prerelease-mode'));
     const prereleaseId = core.getInput('prerelease-id') || 'alpha';
     const bumpUnchanged = parseBooleanInput(core.getInput('bump-unchanged'));
@@ -32,17 +32,17 @@ export async function run(): Promise<void> {
     // Create runner options
     const options: RunnerOptions = {
       repoRoot,
-      adapter,
-      dryRun,
-      pushTags,
       prereleaseMode,
       prereleaseId,
       bumpUnchanged,
       addBuildMetadata,
       timestampVersions,
       appendSnapshot,
-      pushChanges,
+      createTags,
       generateChangelog,
+      pushChanges,
+      dryRun,
+      adapter,
     };
     // Run VERSU engine
     const runner = new VersuRunner(options);

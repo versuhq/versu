@@ -10,8 +10,8 @@ import {
 } from "../git/index.js";
 
 export type GitOperationsOptions = {
+  createTags: boolean;
   pushChanges: boolean;
-  pushTags: boolean;
   repoRoot: string;
   dryRun: boolean;
   isTemporaryVersion: boolean;
@@ -72,6 +72,11 @@ export class GitOperations {
   ): Promise<string[]> {
     const createdTags: string[] = [];
 
+    if (!this.options.createTags) {
+      logger.info("Tag creation disabled, skipping tag creation and push");
+      return createdTags;
+    }
+
     if (this.options.isTemporaryVersion) {
       logger.info("Temporary version detected, skipping tag creation and push");
       return createdTags;
@@ -79,7 +84,6 @@ export class GitOperations {
 
     const disabledBy = [
       this.options.dryRun && "dry-run",
-      !this.options.pushTags && "push-tags",
       !this.options.pushChanges && "push-changes",
     ]
       .filter(Boolean)

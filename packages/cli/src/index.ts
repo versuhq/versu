@@ -22,20 +22,6 @@ export default class Version extends Command {
 
   static override flags = {
     version: Flags.version({char: 'v'}),
-    "dry-run": Flags.boolean({
-      description: "Run without writing or pushing changes",
-      default: false,
-    }),
-    adapter: Flags.string({
-      description:
-        "Language adapter (e.g., gradle). Auto-detected if not provided",
-      required: false,
-    }),
-    "push-tags": Flags.boolean({
-      description: "Push tags to origin",
-      default: true,
-      allowNo: true, 
-    }),
     "prerelease-mode": Flags.boolean({
       description: "Generate pre-release versions instead of final versions",
       default: false,
@@ -63,15 +49,29 @@ export default class Version extends Command {
         "Add -SNAPSHOT suffix to all versions if supported by adapter",
       default: false,
     }),
-    "push-changes": Flags.boolean({
-      description: "Commit and push version changes and changelogs to remote",
+    "create-tags": Flags.boolean({
+      description: "Create git tags for new versions",
       default: true,
-      allowNo: true,
+      allowNo: true, 
     }),
     "generate-changelog": Flags.boolean({
       description: "Generate or update changelog files for changed modules",
       default: true,
       allowNo: true,
+    }),
+    "push-changes": Flags.boolean({
+      description: "Commit and push version changes and changelogs to remote",
+      default: true,
+      allowNo: true,
+    }),
+    "dry-run": Flags.boolean({
+      description: "Run without writing or pushing changes",
+      default: false,
+    }),
+    adapter: Flags.string({
+      description:
+        "Language adapter (e.g., gradle). Auto-detected if not provided",
+      required: false,
     }),
   };
 
@@ -83,17 +83,17 @@ export default class Version extends Command {
     try {
       const options: RunnerOptions = {
         repoRoot: args.repositoryRoot,
-        adapter: flags.adapter,
-        dryRun: flags["dry-run"],
-        pushTags: flags["push-tags"],
         prereleaseMode: flags["prerelease-mode"],
         prereleaseId: flags["prerelease-id"],
         bumpUnchanged: flags["bump-unchanged"],
         addBuildMetadata: flags["add-build-metadata"],
         timestampVersions: flags["timestamp-versions"],
         appendSnapshot: flags["append-snapshot"],
+        createTags: flags["create-tags"],
+        generateChangelog: flags["generate-changelog"],
         pushChanges: flags["push-changes"],
-        generateChangelog: flags["generate-changelog"]
+        adapter: flags.adapter,
+        dryRun: flags["dry-run"],
       };
 
       const runner = new VersuRunner(options);

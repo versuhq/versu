@@ -122,9 +122,10 @@ export async function generateChangelogsForModules(
     );
 
     if (dryRun) {
-      logger.debug("Dry run enabled, skipping writing changelog to file", {
+      logger.info("Dry run enabled, skipping writing changelog to file", {
         moduleId: moduleResult.id,
       });
+      logger.debug("Generated changelog content", { changelogContent });
     } else {
       await updateChangelogFile(
         changelogContent,
@@ -211,6 +212,7 @@ export async function generateRootChangelog(
     logger.info("Dry run enabled, skipping writing root changelog to file", {
       moduleId: moduleResult.id,
     });
+    logger.debug("Generated root changelog content", { changelogContent });
   } else {
     await updateChangelogFile(
       changelogContent,

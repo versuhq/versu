@@ -22,7 +22,7 @@ export class ConfigurationValidator<T> {
         .join(", ");
       throw new Error(`Configuration validation failed: ${errors}`);
     }
-    return result.data;
+    return config as T;
   }
 }
 

@@ -28,46 +28,15 @@
           },
           "description": "List of module ids that are affected when this module changes",
           "uniqueItems": true
+        },
+        "type": {
+          "enum": ["root", "module"],
+          "description": "Type of the module (e.g., 'root', 'module')"
         }
       },
-      "required": ["name", "path", "version", "affectedModules"],
-      "additionalProperties": false
+      "required": ["name", "path", "affectedModules", "type"],
+      "additionalProperties": true
     }
   },
-  "additionalProperties": false,
-  "examples": [
-    {
-      ":": {
-        "name": "io.mb:mbio-starter",
-        "path": ".",
-        "version": "1.0.0",
-        "affectedModules": [":base", ":spring", ":spring:core", ":spring:servlet"]
-      },
-      ":base": {
-        "name": "io.mb:base",
-        "path": "base",
-        "version": "1.0.0",
-        "affectedModules": []
-      },
-      ":spring": {
-        "name": "io.mb:spring",
-        "path": "spring",
-        "version": "1.0.0",
-        "affectedModules": [":spring:core", ":spring:servlet"]
-      },
-      ":spring:core": {
-        "name": "io.mb:spring-core",
-        "path": "spring/core",
-        "version": "1.0.0",
-        "affectedModules": []
-      },
-      ":spring:servlet": {
-        "name": "io.mb:spring-servlet",
-        "path": "spring/servlet",
-        "version": "1.0.0",
-        "affectedModules": []
-      }
-    }
-  ]
+  "additionalProperties": false
 }
-
