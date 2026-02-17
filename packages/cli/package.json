@@ -65,9 +65,11 @@
     "dirname": "versu",
     "topicSeparator": " ",
     "plugins": [],
-    "commands": {
-      "strategy": "single",
-      "target": "./dist/index.js"
+    "commands": "./dist/commands",
+    "topics": {
+      "plugin": {
+        "description": "Manage VERSU plugins"
+      }
     }
   }
 }

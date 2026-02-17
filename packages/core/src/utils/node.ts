@@ -46,3 +46,25 @@ export async function installPackage(
     throw error;
   }
 }
+
+export async function uninstallPackage(
+  packageName: string,
+  global: boolean,
+): Promise<void> {
+  logger.info("Uninstalling package", { packageName, global });
+
+  const args = ["uninstall", packageName];
+  if (global) {
+    args.push("-g");
+  }
+
+  try {
+    await execa("npm", args, {
+      stdio: "inherit",
+    });
+    logger.info("Package uninstalled successfully", { packageName, global });
+  } catch (error) {
+    logger.error("Failed to uninstall package", { packageName, global, error });
+    throw error;
+  }
+}
