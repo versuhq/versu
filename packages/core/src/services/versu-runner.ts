@@ -80,12 +80,6 @@ export class VersuRunner {
     this.configurationLoader = new ConfigurationLoader(
       ConfigurationValidatorFactory.create<Config>(configSchema),
     );
-
-    this.pluginLoader = new PluginLoader(
-      ConfigurationValidatorFactory.create<PluginContract>(
-        pluginContractSchema,
-      ),
-    );
   }
 
   private logStartupInfo(): void {
@@ -156,6 +150,12 @@ export class VersuRunner {
   }
 
   private async loadPluginsAndResolveAdapter(): Promise<void> {
+    this.pluginLoader = new PluginLoader(
+      ConfigurationValidatorFactory.create<PluginContract>(
+        pluginContractSchema,
+      ),
+    );
+
     await this.pluginLoader.load(this.config.plugins);
     const plugins = this.pluginLoader.plugins;
 
@@ -267,8 +267,8 @@ export class VersuRunner {
       generateChangelog: this.options.generateChangelog,
       repoRoot: this.options.repoRoot,
       dryRun: this.options.dryRun,
-      config: this.config.changelog,
       multiModule,
+      config: this.config.changelog,
     });
 
     // Generate changelogs

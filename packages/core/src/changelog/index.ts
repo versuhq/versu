@@ -11,7 +11,7 @@ import { Commit } from "conventional-commits-parser";
 import { exists } from "../utils/file.js";
 import { getCurrentRepoUrl, GitOptions, parseRepoUrl } from "../git/index.js";
 import { isReleaseVersion } from "../semver/index.js";
-import { ModuleChangelogConfig } from "../services/changelog-generator.js";
+import { ModuleChangelogConfig } from "../config/index.js";
 
 /** Update or create a changelog file for a module. */
 export async function updateChangelogFile(
@@ -67,7 +67,7 @@ export async function generateChangelogsForModules(
     throw new Error(`Missing required changelog configuration`);
   }
 
-  const prependPlaceholder = config?.context.prependPlaceholder;
+  const prependPlaceholder = config?.context?.prependPlaceholder;
 
   if (!prependPlaceholder) {
     throw new Error("Missing required context property 'prependPlaceholder'");
@@ -162,7 +162,7 @@ export async function generateRootChangelog(
 
   logger.info("Loading root changelog configuration");
 
-  const prependPlaceholder = config?.context.prependPlaceholder;
+  const prependPlaceholder = config?.context?.prependPlaceholder;
 
   if (!prependPlaceholder) {
     throw new Error("Missing required context property 'prependPlaceholder'");

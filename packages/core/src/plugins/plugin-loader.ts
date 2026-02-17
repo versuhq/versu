@@ -1,10 +1,11 @@
 import * as path from "path";
-import { execa } from "execa";
 import { exists } from "../utils/file.js";
 import { logger } from "../utils/logger.js";
 import type { AdapterIdentifier } from "../services/adapter-identifier.js";
 import type { ModuleSystemFactory } from "../services/module-system-factory.js";
 import { ConfigurationValidator } from "../services/configuration-validator.js";
+import { getNodeModulesPath } from "../utils/node.js";
+import { getPluginPath } from "../utils/plugins.js";
 
 export type PluginContract = {
   id: string;
@@ -21,12 +22,14 @@ export type AdapterPluginContract = {
   moduleSystemFactory: (repoRoot: string) => ModuleSystemFactory;
 };
 
-export type PluginLoaderOptions = {
-  plugins: string[];
-};
-
 export class PluginLoader {
   private readonly pluginsMap: Map<string, PluginContract> = new Map();
+
+  private localNodeModulesPath?: string;
+  private localNodeModulesPathInitialized = false;
+
+  private globalNodeModulesPath?: string;
+  private globalNodeModulesPathInitialized = false;
 
   constructor(
     private readonly pluginValidator: ConfigurationValidator<PluginContract>,
@@ -36,33 +39,14 @@ export class PluginLoader {
     return Array.from(this.pluginsMap.values());
   }
 
-  /**
-   * 1. Find the global node_modules path
-   * This is safer than guessing strings because it varies by OS (Windows vs Mac)
-   */
-  private async getGlobalNodeModulesPath(): Promise<string> {
-    try {
-      logger.debug("Determining global node_modules path");
-
-      // Ask npm where the global root is
-      const { stdout } = await execa("npm", ["root", "-g"], {
-        encoding: "utf8",
-      });
-      const root = stdout.trim();
-
-      logger.debug("npm global root found", { root });
-
-      if (root && (await exists(root))) {
-        logger.debug("Global node_modules path resolved", { path: root });
-        return root;
-      }
-
-      throw new Error(`Global node_modules path does not exist: ${root}`);
-    } catch (e) {
-      logger.error("Could not determine global node_modules path", {
-        error: e,
-      });
-      return "";
+  private async initializeNodeModulesPaths() {
+    if (!this.localNodeModulesPathInitialized) {
+      this.localNodeModulesPath = await getNodeModulesPath(false);
+      this.localNodeModulesPathInitialized = true;
+    }
+    if (!this.globalNodeModulesPathInitialized) {
+      this.globalNodeModulesPath = await getNodeModulesPath(true);
+      this.globalNodeModulesPathInitialized = true;
     }
   }
 
@@ -75,25 +59,23 @@ export class PluginLoader {
 
     logger.debug("Plugin loading configuration", { pluginNames });
 
-    const globalRoot = await this.getGlobalNodeModulesPath();
+    await this.initializeNodeModulesPaths();
 
-    if (!globalRoot || !(await exists(globalRoot))) {
-      logger.error("Global node_modules not found", { path: globalRoot });
-      return;
+    const candidateRoots = [
+      this.localNodeModulesPath,
+      this.globalNodeModulesPath,
+    ].filter((root): root is string => !!root);
+
+    if (candidateRoots.length === 0) {
+      throw new Error("No node_modules paths available to search for plugins");
     }
 
     for (const pluginName of pluginNames) {
-      // Construct the absolute path to the specific package
-      const pluginPath = path.join(globalRoot, pluginName);
-
-      if (await exists(pluginPath)) {
-        await this.loadSinglePlugin(pluginPath);
+      const pluginPath = await getPluginPath(candidateRoots, pluginName);
+      if (pluginPath) {
+        await this.loadPluginFromPath(pluginPath);
       } else {
-        logger.warning("Plugin not found", {
-          plugin: pluginName,
-          searchPath: globalRoot,
-          suggestion: `Run 'npm install -g ${pluginName}' to install`,
-        });
+        logger.error("Plugin could not be found", { pluginName });
       }
     }
   }
@@ -101,13 +83,12 @@ export class PluginLoader {
   /**
    * 3. Dynamically require the plugin
    */
-  private async loadSinglePlugin(absolutePath: string) {
+  private async loadPluginFromPath(absolutePath: string): Promise<void> {
     try {
       logger.info("Attempting to load plugin");
       logger.debug("Loading plugin", { path: absolutePath });
 
       // Dynamic require using the absolute path
-      // Note: If using ESM (import), use await import(absolutePath)
       // For directory imports, we need to resolve to the main entry point
       const pluginEntryPoint = path.join(absolutePath, "dist/index.js");
       const importPath = (await exists(pluginEntryPoint))

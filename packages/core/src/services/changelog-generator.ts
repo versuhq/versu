@@ -5,18 +5,14 @@ import {
 } from "../changelog/index.js";
 import { ModuleChangeResult } from "./version-applier.js";
 import { Commit } from "conventional-commits-parser";
-import zod from "zod";
-import { changelogSchema, configSchema } from "../config/index.js";
-
-export type ModuleChangelogConfig = zod.infer<typeof changelogSchema>;
-export type ChangelogConfig = zod.infer<typeof configSchema>["changelog"];
+import { ChangelogConfig } from "../config/index.js";
 
 export type ChangelogGeneratorOptions = {
   generateChangelog: boolean;
   repoRoot: string;
   dryRun: boolean;
-  config: ChangelogConfig;
   multiModule: boolean;
+  config?: ChangelogConfig;
 };
 
 export class ChangelogGenerator {
