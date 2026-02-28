@@ -1,9 +1,9 @@
 import * as semver from "semver";
 import { SemVer } from "semver";
-import { PrereleaseBumpType, StableBumpType, Version } from "./types";
+import { PrereleaseBumpType, StableBumpType, Version } from "./types.js";
 import { Commit } from "conventional-commits-parser";
-import { VersuConfigWithDefaults } from "../config/types";
-import { getBumpTypeForCommit } from "../config";
+import { VersuConfigWithDefaults } from "../config/types.js";
+import { getBumpTypeForCommit } from "../config/index.js";
 
 /**
  * Parses a semantic version string into a Version object.

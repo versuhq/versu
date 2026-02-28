@@ -1,4 +1,4 @@
-import z from "zod";
+import { z } from "zod";
 
 /**
  * Always use .loose() to allow for additional properties in plugin contracts,

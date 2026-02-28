@@ -1,5 +1,5 @@
-import { AdapterIdentifier } from "../services/adapter-identifier";
-import { ModuleSystemFactory } from "../services/module-system-factory";
+import { AdapterIdentifier } from "../services/adapter-identifier.js";
+import { ModuleSystemFactory } from "../services/module-system-factory.js";
 
 export type PluginContract = {
   id: string;

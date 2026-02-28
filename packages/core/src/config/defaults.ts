@@ -1,4 +1,4 @@
-import { VersuConfigWithDefaults } from "./types";
+import { VersuConfigWithDefaults } from "./types.js";
 
 /**
  * Default configuration following Conventional Commits specification.

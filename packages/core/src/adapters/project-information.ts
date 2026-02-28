@@ -1,4 +1,4 @@
-import { Version } from "../semver/types";
+import { Version } from "../semver/types.js";
 
 /**
  * Represents a module within a project, containing metadata, version, and dependency information.
