@@ -5,24 +5,26 @@
  */
 
 import { logger } from "../utils/logger.js";
-import { Config, getDependencyBumpType } from "../config/index.js";
+import { getDependencyBumpType } from "../config/index.js";
 import { ModuleRegistry } from "./module-registry.js";
-import { calculateBumpFromCommits } from "../utils/commits.js";
 import {
   bumpSemVer,
-  bumpToPrerelease,
   formatSemVer,
   addBuildMetadata,
   generateTimestampPrereleaseId,
   maxBumpType,
-  BumpType,
-  Version,
+  calculateBumpFromCommits,
 } from "../semver/index.js";
-import { getCurrentCommitShortSha } from "../git/index.js";
 import { AdapterMetadata } from "./adapter-identifier.js";
 import { applySnapshotSuffix } from "../utils/versioning.js";
 import { Module } from "../adapters/project-information.js";
 import { Commit } from "conventional-commits-parser";
+import type { VersuConfigWithDefaults } from "../config/types.js";
+import type {
+  PrereleaseBumpType,
+  StableBumpType,
+  Version,
+} from "../semver/types.js";
 
 /**
  * Configuration options for the version bumper service.
@@ -45,7 +47,7 @@ export type VersionBumperOptions = {
   /** Absolute path to the repository root directory. */
   repoRoot: string;
   /** Project configuration including dependency bump rules. */
-  config: Config;
+  config: VersuConfigWithDefaults;
 };
 
 /**
@@ -61,11 +63,13 @@ type ProcessingModuleChange = {
   /** Calculated new version string (initially empty, populated in final phase). */
   toVersion: string;
   /** Type of version bump to apply (can be upgraded during cascade processing). */
-  bumpType: BumpType;
+  bumpType: StableBumpType | PrereleaseBumpType | "none";
   /** Why this module's version is changing ('unchanged' indicates no processing needed). */
   reason: ChangeReason | "unchanged";
   /** Whether this module requires a version update. */
   needsProcessing: boolean;
+  /** Last commit. */
+  lastCommit?: Commit;
 };
 
 /**
@@ -80,7 +84,7 @@ export type ProcessedModuleChange = {
   /** New calculated version string (e.g., '1.1.0', '1.1.0-alpha.1', '1.1.0-SNAPSHOT'). */
   readonly toVersion: string;
   /** Final bump type applied ('major', 'minor', 'patch', or 'none'). */
-  readonly bumpType: BumpType;
+  readonly bumpType: StableBumpType | PrereleaseBumpType | "none";
   /** Reason for version change. */
   readonly reason: ChangeReason;
 };
@@ -136,13 +140,6 @@ export class VersionBumper {
       });
     }
 
-    // Get current commit short SHA if build metadata is enabled
-    let shortSha: string | undefined;
-    if (this.options.addBuildMetadata) {
-      shortSha = await getCurrentCommitShortSha({ cwd: this.options.repoRoot });
-      logger.info("Build metadata will include short SHA", { shortSha });
-    }
-
     // Step 1: Calculate initial bump types for all modules
     const processingModuleChanges = this.calculateInitialBumps(moduleCommits);
 
@@ -157,7 +154,6 @@ export class VersionBumper {
     return this.applyVersionCalculations(
       cascadedChanges,
       effectivePrereleaseId,
-      shortSha,
     );
   }
 
@@ -193,7 +189,11 @@ export class VersionBumper {
 
       // Determine bump type from commits only
       // Uses Conventional Commits spec to analyze commit types
-      const bumpType = calculateBumpFromCommits(commits, this.options.config);
+      const bumpType = calculateBumpFromCommits(
+        commits,
+        this.options.config,
+        this.options.prereleaseMode,
+      );
 
       // Determine processing requirements and reason
       let reason: ChangeReason | "unchanged" = "unchanged";
@@ -221,6 +221,7 @@ export class VersionBumper {
         bumpType: bumpType,
         reason: reason,
         needsProcessing: needsProcessing,
+        lastCommit: commits[0],
       });
     }
 
@@ -313,6 +314,7 @@ export class VersionBumper {
         const requiredBump = getDependencyBumpType(
           currentChange.bumpType,
           this.options.config,
+          this.options.prereleaseMode,
         );
 
         if (requiredBump === "none") {
@@ -385,7 +387,6 @@ export class VersionBumper {
   private applyVersionCalculations(
     processingModuleChanges: ProcessingModuleChange[],
     effectivePrereleaseId: string,
-    shortSha?: string,
   ): ProcessedModuleChange[] {
     const processedModuleChanges: ProcessedModuleChange[] = [];
 
@@ -395,29 +396,23 @@ export class VersionBumper {
       // Only apply version changes if module needs processing
       if (change.needsProcessing) {
         // Apply version bumps based on module state
-        if (change.bumpType !== "none" && this.options.prereleaseMode) {
-          // Scenario 1: Commits with changes in prerelease mode
-          // Bump semantic version AND add prerelease identifier
-          newVersion = bumpToPrerelease(
-            change.fromVersion,
-            change.bumpType,
-            effectivePrereleaseId,
-          );
-        } else if (change.bumpType !== "none" && !this.options.prereleaseMode) {
-          // Scenario 2: Commits with changes in normal mode
-          // Standard semantic version bump (major.minor.patch)
+        if (change.bumpType !== "none") {
           logger.debug("Bumping module version", {
             moduleId: change.module.id,
             from: change.fromVersion.version,
             bumpType: change.bumpType,
           });
-          newVersion = bumpSemVer(change.fromVersion, change.bumpType);
+          newVersion = bumpSemVer(
+            change.fromVersion,
+            change.bumpType,
+            effectivePrereleaseId,
+          );
         } else if (change.reason === "prerelease-unchanged") {
           // Scenario 3: No changes but force prerelease bump (bumpUnchanged enabled)
           // Keep semantic version, just add prerelease identifier
-          newVersion = bumpToPrerelease(
+          newVersion = bumpSemVer(
             change.fromVersion,
-            "none",
+            "prerelease",
             effectivePrereleaseId,
           );
         }
@@ -425,8 +420,9 @@ export class VersionBumper {
 
         // Add build metadata if enabled (applies to all scenarios)
         // Build metadata doesn't affect version precedence per semver spec
-        if (this.options.addBuildMetadata && shortSha) {
-          newVersion = addBuildMetadata(newVersion, shortSha);
+        if (this.options.addBuildMetadata && change.lastCommit?.sha) {
+          // TODO lastCommit sha should be short SHA
+          newVersion = addBuildMetadata(newVersion, change.lastCommit.sha);
         }
       }
 

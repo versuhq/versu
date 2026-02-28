@@ -1,21 +1,9 @@
 import * as semver from "semver";
 import { SemVer } from "semver";
-
-/**
- * Semantic version bump types: major, minor, patch, or none.
- * Represents different ways a version can be incremented per Semantic Versioning 2.0.0.
- */
-export type BumpType = "major" | "minor" | "patch" | "none";
-
-export type Version = {
-  major: number;
-  minor: number;
-  patch: number;
-  prerelease: ReadonlyArray<string | number>;
-  build: ReadonlyArray<string>;
-  raw: string; // Full version string with all metadata
-  version: string; // Core version string (major.minor.patch-prerelease)
-};
+import { PrereleaseBumpType, StableBumpType, Version } from "./types";
+import { Commit } from "conventional-commits-parser";
+import { VersuConfigWithDefaults } from "../config/types";
+import { getBumpTypeForCommit } from "../config";
 
 /**
  * Parses a semantic version string into a Version object.
@@ -72,12 +60,23 @@ export function compareSemVer(a: Version, b: Version): number {
  * @returns A new Version object with the incremented version
  * @throws {Error} If the version cannot be bumped with the specified type
  */
-export function bumpSemVer(version: Version, bumpType: BumpType): Version {
+export function bumpSemVer(
+  version: Version,
+  bumpType: StableBumpType | PrereleaseBumpType | "none",
+  prereleaseId?: string,
+): Version {
   if (bumpType === "none") {
     return version;
   }
 
-  const bumpedVersionString = semver.inc(version.raw, bumpType);
+  let bumpedVersionString: string | null = null;
+
+  if (prereleaseId) {
+    bumpedVersionString = semver.inc(version.raw, bumpType, prereleaseId);
+  } else {
+    bumpedVersionString = semver.inc(version.raw, bumpType);
+  }
+
   if (!bumpedVersionString) {
     throw new Error(
       `Failed to bump version ${version.version} with type ${bumpType}`,
@@ -88,39 +87,31 @@ export function bumpSemVer(version: Version, bumpType: BumpType): Version {
 }
 
 /**
- * Determines the bump type between two versions.
- * @param from - The starting version
- * @param to - The ending version
- * @returns The bump type that would transform 'from' into 'to'
- */
-export function getBumpType(from: Version, to: Version): BumpType {
-  if (to.major > from.major) {
-    return "major";
-  }
-
-  if (to.minor > from.minor) {
-    return "minor";
-  }
-
-  if (to.patch > from.patch) {
-    return "patch";
-  }
-
-  return "none";
-}
-
-/**
  * Determines the highest priority bump type from an array.
  * Priority: major > minor > patch > none.
  * @param bumpTypes - Array of bump types to evaluate
  * @returns The bump type with highest priority
  */
-export function maxBumpType(bumpTypes: BumpType[]): BumpType {
-  const priority = { none: 0, patch: 1, minor: 2, major: 3 };
+export function maxBumpType(
+  bumpTypes: (StableBumpType | PrereleaseBumpType | "none")[],
+): StableBumpType | PrereleaseBumpType | "none" {
+  const priority = {
+    none: 0,
+    prerelease: 1,
+    prepatch: 2,
+    preminor: 3,
+    premajor: 4,
+    patch: 5,
+    minor: 6,
+    major: 7,
+  };
 
-  return bumpTypes.reduce((max, current) => {
-    return priority[current] > priority[max] ? current : max;
-  }, "none" as BumpType);
+  return bumpTypes.reduce(
+    (max, current) => {
+      return priority[current] > priority[max] ? current : max;
+    },
+    "none" as StableBumpType | PrereleaseBumpType | "none",
+  );
 }
 
 /**
@@ -138,78 +129,6 @@ export function isValidVersionString(versionString: string): boolean {
  */
 export function createInitialVersion(): Version {
   return new SemVer("0.0.0");
-}
-
-/**
- * Bumps a version to a prerelease version.
- * @param version - The version to bump to prerelease
- * @param bumpType - The type of version bump to apply before adding prerelease identifier
- * @param prereleaseId - The prerelease identifier (e.g., 'alpha', 'beta', 'rc')
- * @returns A new Version object with the prerelease version
- * @throws {Error} If the bump operation fails
- */
-export function bumpToPrerelease(
-  version: Version,
-  bumpType: BumpType,
-  prereleaseId: string,
-): Version {
-  if (bumpType === "none") {
-    // If no changes, convert current version to prerelease
-    if (version.prerelease.length > 0) {
-      // Already a prerelease, increment the prerelease version
-      const bumpedVersionString = semver.inc(
-        version.raw,
-        "prerelease",
-        prereleaseId,
-      );
-      if (!bumpedVersionString) {
-        throw new Error(`Failed to bump prerelease version ${version.version}`);
-      }
-      return parseSemVer(bumpedVersionString);
-    } else {
-      // Convert to prerelease by bumping patch and adding prerelease identifier
-      const bumpedVersionString = semver.inc(
-        version.raw,
-        "prepatch",
-        prereleaseId,
-      );
-      if (!bumpedVersionString) {
-        throw new Error(
-          `Failed to create prerelease version from ${version.version}`,
-        );
-      }
-      return parseSemVer(bumpedVersionString);
-    }
-  }
-
-  // Bump to prerelease version based on bump type
-  let prereleaseType: semver.ReleaseType;
-  switch (bumpType) {
-    case "patch":
-      prereleaseType = "prepatch";
-      break;
-    case "minor":
-      prereleaseType = "preminor";
-      break;
-    case "major":
-      prereleaseType = "premajor";
-      break;
-    default:
-      throw new Error(`Invalid bump type for prerelease: ${bumpType}`);
-  }
-
-  const bumpedVersionString = semver.inc(
-    version.raw,
-    prereleaseType,
-    prereleaseId,
-  );
-  if (!bumpedVersionString) {
-    throw new Error(
-      `Failed to bump version ${version.version} to prerelease with type ${prereleaseType}`,
-    );
-  }
-
-  return parseSemVer(bumpedVersionString);
 }
 
 /**
@@ -267,4 +186,26 @@ export function isReleaseVersion(version: Version | string): boolean {
 
   // A release version has no prerelease identifiers
   return version.prerelease.length === 0;
+}
+
+/**
+ * Calculates the overall semantic version bump type from a collection of commits.
+ * Returns the highest bump type: major > minor > patch > none.
+ * @param commits - Array of commit information to analyze
+ * @param config - Configuration containing commit type mappings
+ * @returns The highest BumpType required across all commits
+ */
+export function calculateBumpFromCommits(
+  commits: Commit[],
+  config: VersuConfigWithDefaults,
+  prerelease: boolean,
+): StableBumpType | PrereleaseBumpType | "none" {
+  // Analyze each commit and determine its version impact
+  const bumpTypes = commits.map((commit) =>
+    getBumpTypeForCommit(commit, config, prerelease),
+  );
+
+  // Return the highest bump type required across all commits
+  // If no meaningful commits found, returns 'none'
+  return maxBumpType(bumpTypes);
 }

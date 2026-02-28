@@ -5,7 +5,7 @@ import {
 } from "../changelog/index.js";
 import { ModuleChangeResult } from "./version-applier.js";
 import { Commit } from "conventional-commits-parser";
-import { ChangelogConfig } from "../config/index.js";
+import { ChangelogConfig } from "../config/types.js";
 
 export type ChangelogGeneratorOptions = {
   generateChangelog: boolean;

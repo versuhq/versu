@@ -1,27 +1,11 @@
 import * as path from "path";
 import { exists } from "../utils/file.js";
 import { logger } from "../utils/logger.js";
-import type { AdapterIdentifier } from "../services/adapter-identifier.js";
-import type { ModuleSystemFactory } from "../services/module-system-factory.js";
-import { ConfigurationValidator } from "../services/configuration-validator.js";
+import type { ConfigurationValidator } from "../services/configuration-validator.js";
 import { getNodeModulesPath } from "../utils/node.js";
 import { getPluginPath } from "../utils/plugins.js";
 import fg from "fast-glob";
-
-export type PluginContract = {
-  id: string;
-  name: string;
-  description: string;
-  version: string;
-  author: string;
-  adapters: AdapterPluginContract[];
-};
-
-export type AdapterPluginContract = {
-  id: string;
-  adapterIdentifier: () => AdapterIdentifier;
-  moduleSystemFactory: (repoRoot: string) => ModuleSystemFactory;
-};
+import { PluginContract } from "./types.js";
 
 export class PluginLoader {
   private readonly pluginsMap: Map<string, PluginContract> = new Map();

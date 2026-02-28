@@ -1,24 +1,49 @@
 import { describe, it, expect } from "vitest";
 import { ConfigurationValidator } from "../src/services/configuration-validator.js";
-import { Config, configSchema } from "../src/config/index.js";
+import { VersuConfig } from "../src/config/types.js";
+import { configSchema } from "../src/config/schema.js";
 
 describe("ConfigurationValidator", () => {
-  const validator = new ConfigurationValidator<Config>(configSchema);
+  const validator = new ConfigurationValidator<VersuConfig>(configSchema);
 
   it("should validate a valid configuration", () => {
-    const config: Config = {
+    const config: VersuConfig = {
       plugins: [],
-      versionRules: {
-        defaultBump: "patch",
-        commitTypeBumps: {
-          feat: "minor",
-          fix: "patch",
-          docs: "ignore",
+      versioning: {
+        breakingChange: {
+          stable: "major",
+          prerelease: "premajor",
         },
-        dependencyBumps: {
-          major: "major",
-          minor: "minor",
-          patch: "patch",
+        unknownCommitType: {
+          stable: "patch",
+          prerelease: "prepatch",
+        },
+        commitTypes: {
+          feat: {
+            stable: "minor",
+            prerelease: "preminor",
+          },
+          fix: {
+            stable: "patch",
+            prerelease: "prepatch",
+          },
+          docs: {
+            stable: "none",
+            prerelease: "none",
+          },
+        },
+        cascadeRules: {
+          stable: {
+            major: "major",
+            minor: "minor",
+            patch: "patch",
+          },
+          prerelease: {
+            premajor: "premajor",
+            preminor: "preminor",
+            prepatch: "prepatch",
+            prerelease: "prerelease",
+          },
         },
       },
     };
@@ -28,16 +53,13 @@ describe("ConfigurationValidator", () => {
 
   it("should reject invalid defaultBump", () => {
     const config = {
-      versionRules: {
-        defaultBump: "invalid",
-        commitTypeBumps: {},
-        dependencyBumps: {
-          major: "major",
-          minor: "minor",
-          patch: "patch",
+      versioning: {
+        unknownCommitType: {
+          stable: "invalid",
+          prerelease: "invalid",
         },
       },
-    } as any;
+    } as unknown as VersuConfig;
 
     expect(() => validator.validate(config)).toThrow(
       /Configuration validation failed/,
@@ -46,18 +68,15 @@ describe("ConfigurationValidator", () => {
 
   it("should reject invalid commit type bump value", () => {
     const config = {
-      versionRules: {
-        defaultBump: "patch",
-        commitTypeBumps: {
-          feat: "invalid",
-        },
-        dependencyBumps: {
-          major: "major",
-          minor: "minor",
-          patch: "patch",
+      versioning: {
+        commitTypes: {
+          feat: {
+            stable: "invalid",
+            prerelease: "invalid",
+          },
         },
       },
-    } as any;
+    } as unknown as VersuConfig;
 
     expect(() => validator.validate(config)).toThrow(
       /Configuration validation failed/,
@@ -66,74 +85,17 @@ describe("ConfigurationValidator", () => {
 
   it("should reject invalid dependency rules", () => {
     const config = {
-      versionRules: {
-        defaultBump: "patch",
-        commitTypeBumps: {},
-        dependencyBumps: {
-          major: "invalid",
-          minor: "minor",
-          patch: "patch",
+      versioning: {
+        cascadeRules: {
+          stable: {
+            major: "invalid",
+          },
         },
       },
-    } as any;
+    } as unknown as VersuConfig;
 
     expect(() => validator.validate(config)).toThrow(
       /Configuration validation failed/,
     );
-  });
-
-  it("should accept ignore in commitTypes but not in dependencyRules", () => {
-    const validConfig: Config = {
-      plugins: [],
-      versionRules: {
-        defaultBump: "patch",
-        commitTypeBumps: {
-          docs: "ignore",
-          feat: "minor",
-        },
-        dependencyBumps: {
-          major: "major",
-          minor: "minor",
-          patch: "patch",
-        },
-      },
-    };
-
-    expect(() => validator.validate(validConfig)).not.toThrow();
-
-    const invalidConfig = {
-      versionRules: {
-        defaultBump: "patch",
-        commitTypeBumps: {},
-        dependencyBumps: {
-          major: "ignore",
-          minor: "minor",
-          patch: "patch",
-        },
-      },
-    } as any;
-
-    expect(() => validator.validate(invalidConfig)).toThrow(
-      /Configuration validation failed/,
-    );
-  });
-
-  it("should validate optional nodejs config", () => {
-    const config: Config = {
-      plugins: [],
-      versionRules: {
-        defaultBump: "patch",
-        commitTypeBumps: {
-          feat: "minor",
-        },
-        dependencyBumps: {
-          major: "major",
-          minor: "minor",
-          patch: "patch",
-        },
-      },
-    };
-
-    expect(() => validator.validate(config)).not.toThrow();
   });
 });

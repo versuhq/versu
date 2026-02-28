@@ -1,8 +1,9 @@
 import { logger } from "../utils/logger.js";
 import { VersionManager } from "./version-manager.js";
-import { BumpType, formatSemVer, isReleaseVersion } from "../semver/index.js";
+import { formatSemVer, isReleaseVersion } from "../semver/index.js";
 import { ProcessedModuleChange } from "./version-bumper.js";
 import { getModuleTagName } from "../git/index.js";
+import { PrereleaseBumpType, StableBumpType } from "../semver/types.js";
 
 export type VersionApplierOptions = {
   dryRun: boolean;
@@ -15,7 +16,7 @@ export type ModuleChangeResult = {
   readonly type: "module" | "root";
   readonly from: string;
   readonly to: string;
-  readonly bumpType: BumpType;
+  readonly bumpType: StableBumpType | PrereleaseBumpType | "none";
   readonly declaredVersion: boolean;
   readonly isRelease: boolean;
   readonly tagName?: string;

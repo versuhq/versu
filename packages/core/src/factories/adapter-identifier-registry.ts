@@ -1,5 +1,5 @@
+import { PluginContract } from "../plugins/types.js";
 import { AdapterIdentifierRegistry } from "../services/adapter-identifier-registry.js";
-import { PluginContract } from "../plugins/plugin-loader.js";
 
 /**
  * Creates and configures the global adapter identifier registry.

@@ -3,7 +3,6 @@ import { ModuleSystemFactory } from "./module-system-factory.js";
 import { MapModuleRegistry, type ModuleRegistry } from "./module-registry.js";
 import { VersionManager } from "./version-manager.js";
 import { createModuleSystemFactory } from "../factories/module-system-factory.js";
-import { type Config, configSchema } from "../config/index.js";
 import { isWorkingDirectoryClean } from "../git/index.js";
 import { ConfigurationLoader } from "./configuration-loader.js";
 import { CommitAnalyzer } from "./commit-analyzer.js";
@@ -23,9 +22,12 @@ import { Module } from "../adapters/project-information.js";
 import { ConfigurationValidatorFactory } from "./configuration-validator.js";
 import { banner } from "../utils/banner.js";
 import path from "path";
-import { PluginContract, PluginLoader } from "../plugins/plugin-loader.js";
-import { pluginContractSchema } from "../plugins/plugin-schema.js";
+import { PluginLoader } from "../plugins/plugin-loader.js";
+import { pluginContractSchema } from "../plugins/schema.js";
 import { Commit } from "conventional-commits-parser";
+import type { VersuConfigWithDefaults } from "../config/types.js";
+import { configSchemaWithDefaults } from "../config/schema.js";
+import { PluginContract } from "../plugins/types.js";
 
 export type RunnerOptions = {
   readonly repoRoot: string;
@@ -54,7 +56,7 @@ export class VersuRunner {
   private moduleSystemFactory!: ModuleSystemFactory; // Will be initialized in run()
   private moduleRegistry!: ModuleRegistry; // Will be initialized in run()
   private versionManager!: VersionManager; // Will be initialized in run()
-  private config!: Config; // Will be initialized in run()
+  private config!: VersuConfigWithDefaults; // Will be initialized in run()
   private adapter!: AdapterMetadata; // Will be initialized in run()
   private options: RunnerOptions;
 
@@ -78,7 +80,9 @@ export class VersuRunner {
 
     // Initialize services
     this.configurationLoader = new ConfigurationLoader(
-      ConfigurationValidatorFactory.create<Config>(configSchema),
+      ConfigurationValidatorFactory.create<VersuConfigWithDefaults>(
+        configSchemaWithDefaults,
+      ),
     );
   }
 

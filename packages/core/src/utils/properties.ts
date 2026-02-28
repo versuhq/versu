@@ -36,8 +36,8 @@ export async function parseProperties(
     }
 
     const [, key, value] = match;
-    const trimmedKey = key.trim();
-    const trimmedValue = value.trim();
+    const trimmedKey = key?.trim() || ""; // TODO impossible undefined
+    const trimmedValue = value?.trim() || ""; // TODO impossible undefined
 
     properties.set(trimmedKey, trimmedValue);
   }

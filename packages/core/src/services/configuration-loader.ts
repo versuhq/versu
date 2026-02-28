@@ -1,8 +1,9 @@
 import { logger } from "../utils/logger.js";
-import { Config, DEFAULT_CONFIG } from "../config/index.js";
 import { cosmiconfig, type PublicExplorer } from "cosmiconfig";
 import deepmerge from "deepmerge";
 import { ConfigurationValidator } from "./configuration-validator.js";
+import { VersuConfig, VersuConfigWithDefaults } from "../config/types.js";
+import { DEFAULT_CONFIG } from "../config/defaults.js";
 
 /**
  * Loads and merges VERSU configuration from various sources (.versu, versu.config.js, package.json).
@@ -16,7 +17,7 @@ export class ConfigurationLoader {
    * @param configurationValidator - Validator to ensure configuration integrity
    */
   constructor(
-    private readonly configurationValidator: ConfigurationValidator<Config>,
+    private readonly configurationValidator: ConfigurationValidator<VersuConfigWithDefaults>,
   ) {
     // Initialize cosmiconfig explorer once for reuse across multiple loads
     this.explorer = cosmiconfig("versu", { searchStrategy: "global" });
@@ -28,7 +29,7 @@ export class ConfigurationLoader {
    * @returns A promise that resolves to the fully merged and validated configuration
    * @throws {Error} If configuration loading or validation fails
    */
-  async load(repoRoot: string): Promise<Config> {
+  async load(repoRoot: string): Promise<VersuConfigWithDefaults> {
     try {
       logger.info("Searching configuration file");
 
@@ -37,7 +38,7 @@ export class ConfigurationLoader {
       // Search for config in standard locations
       const result = await this.explorer.search(repoRoot);
 
-      let config: Config;
+      let config: VersuConfigWithDefaults;
 
       if (result?.config) {
         // Configuration found - merge, validate, and use it
@@ -45,7 +46,7 @@ export class ConfigurationLoader {
           source: result.filepath,
         });
 
-        const userConfig = result.config;
+        const userConfig = result.config as VersuConfig;
         const validatedConfig = mergeWithDefaults(userConfig);
         config = this.configurationValidator.validate(validatedConfig);
       } else {
@@ -84,6 +85,6 @@ const defaultMergeOptions = {
  * @returns Merged configuration with user values overriding defaults
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mergeWithDefaults(userConfig: any): any {
+function mergeWithDefaults<T>(userConfig: Partial<T>): T {
   return deepmerge(DEFAULT_CONFIG, userConfig, defaultMergeOptions);
 }

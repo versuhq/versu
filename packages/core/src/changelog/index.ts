@@ -9,9 +9,10 @@ import {
 import { logger } from "../utils/logger.js";
 import { Commit } from "conventional-commits-parser";
 import { exists } from "../utils/file.js";
-import { getCurrentRepoUrl, GitOptions, parseRepoUrl } from "../git/index.js";
+import { getCurrentRepoUrl, parseRepoUrl } from "../git/index.js";
 import { isReleaseVersion } from "../semver/index.js";
-import { ModuleChangelogConfig } from "../config/index.js";
+import { ModuleChangelogConfig } from "../config/types.js";
+import { GitOptions } from "../git/types.js";
 
 /** Update or create a changelog file for a module. */
 export async function updateChangelogFile(
