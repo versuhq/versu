@@ -6,7 +6,7 @@
 
 # @versu/core - Core Library
 
-The core business logic powering VERSU. This package is completely framework-agnostic and can be integrated into any TypeScript/JavaScript project, CI/CD system, or custom tooling.
+The core business logic powering Versu. This package is completely framework-agnostic and can be integrated into any TypeScript/JavaScript project, CI/CD system, or custom tooling.
 
 ## Installation
 
@@ -75,7 +75,7 @@ interface RunnerResult {
 
 ## Configuration
 
-VERSU core uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration loading and [Zod](https://github.com/colinhacks/zod) for validation.
+Versu core uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for configuration loading and [Zod](https://github.com/colinhacks/zod) for validation.
 
 ### Supported Configuration Files
 
@@ -124,7 +124,7 @@ VERSU core uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for 
 - `context.prependPlaceholder` - Placeholder string in changelog files where new entries are inserted
 - `options` - Advanced changelog generation options (templates, grouping, sorting)
 
-VERSU uses [conventional-changelog-writer](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer) for changelog generation. You can pass any options supported by conventional-changelog-writer through the `options` field. For advanced customization with functions (like `transform`, `commitsGroupsSort`), use JavaScript configuration files (`.versurc.js` or `versu.config.js`).
+Versu uses [conventional-changelog-writer](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer) for changelog generation. You can pass any options supported by conventional-changelog-writer through the `options` field. For advanced customization with functions (like `transform`, `commitsGroupsSort`), use JavaScript configuration files (`.versurc.js` or `versu.config.js`).
 
 ## Adapters
 

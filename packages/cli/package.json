@@ -1,7 +1,7 @@
 {
   "name": "@versu/cli",
   "version": "0.6.18",
-  "description": "VERSU (CLI)",
+  "description": "Versu (CLI)",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -65,9 +65,11 @@
     "dirname": "versu",
     "topicSeparator": " ",
     "plugins": [],
-    "commands": {
-      "strategy": "single",
-      "target": "./dist/index.js"
+    "commands": "./dist/commands",
+    "topics": {
+      "plugin": {
+        "description": "Manage Versu plugins"
+      }
     }
   }
 }

@@ -8,9 +8,9 @@
 
 _Compose the epic of your code, one release at a time._
 
-**VERSU** is an intelligent versioning automation tool that eliminates manual version management in multi-module projects. By leveraging [Conventional Commits](https://conventionalcommits.org/), VERSU automatically analyzes your commit history, determines semantic version bumps, manages dependency cascades, and generates changelogs — all without developer intervention!
+**Versu** is an intelligent versioning automation tool that eliminates manual version management in multi-module projects. By leveraging [Conventional Commits](https://conventionalcommits.org/), Versu automatically analyzes your commit history, determines semantic version bumps, manages dependency cascades, and generates changelogs — all without developer intervention!
 
-Whether you're working on a monorepo with dozens of interdependent modules or a simple single-module project, VERSU adapts to your workflow. Use it as a library in your custom tools, as a CLI in your terminal, or as a GitHub Action in your CI/CD pipeline. With its extensible plugin architecture, VERSU supports any build system or language ecosystem.
+Whether you're working on a monorepo with dozens of interdependent modules or a simple single-module project, Versu adapts to your workflow. Use it as a library in your custom tools, as a CLI in your terminal, or as a GitHub Action in your CI/CD pipeline. With its extensible plugin architecture, Versu supports any build system or language ecosystem.
 
 ## 🔑 Key Features
 
@@ -26,7 +26,7 @@ Whether you're working on a monorepo with dozens of interdependent modules or a 
 
 <!-- markdownlint-enable MD033 -->
 
-## 🤔 Why VERSU?
+## 🤔 Why Versu?
 
 ### 🎯 The Problem
 
@@ -40,16 +40,16 @@ Managing versions in multi-module projects is painful:
 
 ### ✨ The Solution
 
-VERSU automates the entire versioning lifecycle:
+Versu automates the entire versioning lifecycle:
 
 - **Zero manual decisions** - Your commit messages dictate version bumps automatically
-- **Smart dependency tracking** - When a module changes, VERSU automatically identifies and versions all dependents
+- **Smart dependency tracking** - When a module changes, Versu automatically identifies and versions all dependents
 - **Team consistency** - Everyone follows the same Conventional Commits standard, ensuring uniform versioning
 - **Generated changelogs** - Beautiful, accurate changelogs generated per-module from commit history
 - **Pre-release support** - Seamlessly generate alpha, beta, rc, or custom pre-release versions for testing
 - **Ecosystem agnostic** - Works with Gradle, npm, Maven, or any ecosystem through custom plugins
 
-### 🚀 Who Should Use VERSU?
+### 🚀 Who Should Use Versu?
 
 - **Monorepo teams** managing multiple interdependent packages
 - **Library maintainers** who want automated, semantic versioning
@@ -59,7 +59,7 @@ VERSU automates the entire versioning lifecycle:
 
 ## 📦 Packages
 
-VERSU provides four packages for different use cases. For more details, see the individual package READMEs.
+Versu provides four packages for different use cases. For more details, see the individual package READMEs.
 
 ### [@versu/core](packages/core)
 
@@ -87,7 +87,7 @@ Gradle adapter plugin that provides support for detecting and updating versions 
 
 ## 📝 Commit Message Format
 
-VERSU uses [Conventional Commits](https://conventionalcommits.org/) to automatically determine version bumps:
+Versu uses [Conventional Commits](https://conventionalcommits.org/) to automatically determine version bumps:
 
 ```text
 <type>[optional scope]: <description>

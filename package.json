@@ -1,7 +1,7 @@
 {
   "name": "versu",
   "version": "0.6.18",
-  "description": "VERSU",
+  "description": "Versu",
   "private": true,
   "workspaces": [
     "packages/core",

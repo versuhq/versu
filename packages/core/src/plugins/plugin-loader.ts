@@ -1,20 +1,18 @@
 import * as path from "path";
 import { exists } from "../utils/file.js";
 import { logger } from "../utils/logger.js";
-import type { ConfigurationValidator } from "../services/configuration-validator.js";
-import { getNodeModulesPath } from "../utils/node.js";
+import {
+  ConfigurationValidatorFactory,
+  type ConfigurationValidator,
+} from "../services/configuration-validator.js";
+import { findPackagesInNodeModules, getCandidateRoots } from "../utils/node.js";
 import { getPluginPath } from "../utils/plugins.js";
-import fg from "fast-glob";
-import { PluginContract } from "./types.js";
+import { PluginContract, PluginLoader } from "./types.js";
+import { pluginContractSchema } from "./schema.js";
+import { PLUGIN_PATTERNS } from "./constants.js";
 
-export class PluginLoader {
+class DefaultPluginLoader implements PluginLoader {
   private readonly pluginsMap: Map<string, PluginContract> = new Map();
-
-  private localNodeModulesPath?: string;
-  private localNodeModulesPathInitialized = false;
-
-  private globalNodeModulesPath?: string;
-  private globalNodeModulesPathInitialized = false;
 
   constructor(
     private readonly pluginValidator: ConfigurationValidator<PluginContract>,
@@ -24,69 +22,16 @@ export class PluginLoader {
     return Array.from(this.pluginsMap.values());
   }
 
-  private async initializeNodeModulesPaths() {
-    if (!this.localNodeModulesPathInitialized) {
-      this.localNodeModulesPath = await getNodeModulesPath(false);
-      this.localNodeModulesPathInitialized = true;
-    }
-    if (!this.globalNodeModulesPathInitialized) {
-      this.globalNodeModulesPath = await getNodeModulesPath(true);
-      this.globalNodeModulesPathInitialized = true;
-    }
-  }
-
-  private async getCandidateRoots(): Promise<string[]> {
-    await this.initializeNodeModulesPaths();
-
-    const candidateRoots = [
-      this.localNodeModulesPath,
-      this.globalNodeModulesPath,
-    ].filter((root): root is string => !!root);
-
-    if (candidateRoots.length === 0) {
-      throw new Error("No node_modules paths available to search for plugins");
-    }
-
-    return candidateRoots;
-  }
-
-  private async findPluginsInNodeModules(
-    nodeModulesPath: string,
-  ): Promise<{ name: string; path: string }[]> {
-    logger.debug("Searching for plugins in node_modules", { nodeModulesPath });
-
-    const patterns = [
-      `${nodeModulesPath}/versu-plugin-*/package.json`,
-      `${nodeModulesPath}/@*/versu-plugin-*/package.json`,
-      `${nodeModulesPath}/@versu/plugin-*/package.json`,
-    ];
-    const entries = await fg(patterns, { absolute: true });
-    const plugins = entries
-      .map((entry) => {
-        const parts = entry.split(path.sep);
-        const packageIndex =
-          parts.findIndex((part) => part === "node_modules") + 1;
-        if (packageIndex > 0 && packageIndex < parts.length) {
-          return {
-            name: parts.slice(packageIndex, parts.length - 1).join(path.sep),
-            path: path.join(path.sep, ...parts.slice(0, parts.length - 1)),
-          };
-        }
-      })
-      .filter((plugin): plugin is { name: string; path: string } => !!plugin);
-    return plugins;
-  }
-
   private async detect(): Promise<void> {
     logger.info("Loading all plugins from node_modules");
 
-    const candidateRoots = await this.getCandidateRoots();
+    const candidateRoots = await getCandidateRoots();
 
     const loadedPluginIds = new Set<string>();
     const loadedPluginPaths = new Map<string, string>();
 
     for (const root of candidateRoots) {
-      const plugins = await this.findPluginsInNodeModules(root);
+      const plugins = await findPackagesInNodeModules(root, PLUGIN_PATTERNS);
       for (const plugin of plugins) {
         if (loadedPluginIds.has(plugin.name)) {
           logger.warning("Plugin already loaded, skipping duplicate", {
@@ -120,7 +65,7 @@ export class PluginLoader {
 
     logger.debug("Plugin loading configuration", { pluginNames });
 
-    const candidateRoots = await this.getCandidateRoots();
+    const candidateRoots = await getCandidateRoots();
 
     for (const pluginName of pluginNames) {
       const pluginPath = await getPluginPath(candidateRoots, pluginName);
@@ -177,3 +122,7 @@ export class PluginLoader {
     return true;
   }
 }
+
+export const pluginLoader = new DefaultPluginLoader(
+  ConfigurationValidatorFactory.create<PluginContract>(pluginContractSchema),
+);

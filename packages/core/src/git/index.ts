@@ -417,7 +417,7 @@ export function getModuleTagName(moduleName: string, version: string): string {
  * Parses a git tag name to extract module and version components.
  *
  * This internal utility function handles multiple tag naming conventions used in
- * VERSU and returns a structured object with extracted metadata. It supports:
+ * Versu and returns a structured object with extracted metadata. It supports:
  * - **Module tags**: `moduleName@version` (monorepo convention)
  * - **Version tags**: `v{version}` or `{version}` (single repo convention)
  * - **Custom tags**: Returns empty object for unrecognized formats

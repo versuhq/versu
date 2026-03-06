@@ -6,7 +6,7 @@
 
 # @versu/plugin-gradle - Gradle Adapter Plugin
 
-Gradle adapter plugin for VERSU. Provides first-class support for versioning Gradle projects (Groovy & Kotlin DSL) in monorepo environments with automatic dependency detection and cascading version updates.
+Gradle adapter plugin for Versu. Provides first-class support for versioning Gradle projects (Groovy & Kotlin DSL) in monorepo environments with automatic dependency detection and cascading version updates.
 
 ## Installation
 
@@ -155,11 +155,11 @@ The plugin automatically detects project dependencies using a custom Gradle init
 
 ### Example
 
-If `api` depends on `core`, and `core` gets a version bump, VERSU will automatically cascade the change to `api` based on your dependency rules configuration.
+If `api` depends on `core`, and `core` gets a version bump, Versu will automatically cascade the change to `api` based on your dependency rules configuration.
 
 ## Configuration
 
-The Gradle plugin respects all VERSU configuration options. See the [core package documentation](../core#configuration) for details.
+The Gradle plugin respects all Versu configuration options. See the [core package documentation](../core#configuration) for details.
 
 ### Gradle-Specific Options
 
@@ -184,7 +184,7 @@ The plugin automatically activates when any of these files are present in the re
 
 ## Plugin Architecture
 
-The plugin implements the VERSU plugin contract:
+The plugin implements the Versu plugin contract:
 
 ```typescript
 interface PluginContract {

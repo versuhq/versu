@@ -22,12 +22,10 @@ import { Module } from "../adapters/project-information.js";
 import { ConfigurationValidatorFactory } from "./configuration-validator.js";
 import { banner } from "../utils/banner.js";
 import path from "path";
-import { PluginLoader } from "../plugins/plugin-loader.js";
-import { pluginContractSchema } from "../plugins/schema.js";
+import { pluginLoader } from "../plugins/plugin-loader.js";
 import { Commit } from "conventional-commits-parser";
 import type { VersuConfigWithDefaults } from "../config/types.js";
 import { configSchemaWithDefaults } from "../config/schema.js";
-import { PluginContract } from "../plugins/types.js";
 
 export type RunnerOptions = {
   readonly repoRoot: string;
@@ -69,7 +67,6 @@ export class VersuRunner {
   private gitOperations!: GitOperations; // Will be initialized in run()
   private adapterIdentifierRegistry!: AdapterIdentifierRegistry;
   private adapterMetadataProvider!: AdapterMetadataProvider;
-  private pluginLoader!: PluginLoader; // Will be initialized in run()
   private configDirectory!: string; // Will be initialized in run()
 
   constructor(options: RunnerOptions) {
@@ -154,14 +151,8 @@ export class VersuRunner {
   }
 
   private async loadPluginsAndResolveAdapter(): Promise<void> {
-    this.pluginLoader = new PluginLoader(
-      ConfigurationValidatorFactory.create<PluginContract>(
-        pluginContractSchema,
-      ),
-    );
-
-    await this.pluginLoader.load(this.config.plugins);
-    const plugins = this.pluginLoader.plugins;
+    await pluginLoader.load(this.config.plugins);
+    const plugins = pluginLoader.plugins;
 
     this.adapterIdentifierRegistry = createAdapterIdentifierRegistry(plugins);
 

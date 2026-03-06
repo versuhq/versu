@@ -15,3 +15,20 @@ export type AdapterPluginContract = {
   adapterIdentifier: () => AdapterIdentifier;
   moduleSystemFactory: (repoRoot: string) => ModuleSystemFactory;
 };
+
+export type PluginInformation = {
+  readonly name: string;
+  readonly path: string;
+  readonly global: boolean;
+};
+
+export interface PluginLoader {
+  get plugins(): PluginContract[];
+  load(pluginNames: string[]): Promise<void>;
+}
+
+export interface PluginManager {
+  list(): Promise<PluginInformation[]>;
+  install(pluginName: string, global?: boolean): Promise<void>;
+  uninstall(pluginName: string, global?: boolean): Promise<void>;
+}

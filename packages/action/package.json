@@ -1,7 +1,7 @@
 {
   "name": "@versu/action",
   "version": "0.6.18",
-  "description": "VERSU (GitHub Action)",
+  "description": "Versu (GitHub Action)",
   "main": "dist/index.js",
   "private": true,
   "scripts": {

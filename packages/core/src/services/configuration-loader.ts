@@ -6,7 +6,7 @@ import { VersuConfig, VersuConfigWithDefaults } from "../config/types.js";
 import { DEFAULT_CONFIG } from "../config/defaults.js";
 
 /**
- * Loads and merges VERSU configuration from various sources (.versu, versu.config.js, package.json).
+ * Loads and merges Versu configuration from various sources (.versu, versu.config.js, package.json).
  * Uses cosmiconfig for auto-discovery and merges user config with defaults.
  */
 export class ConfigurationLoader {
@@ -24,7 +24,7 @@ export class ConfigurationLoader {
   }
 
   /**
-   * Loads and validates the VERSU configuration.
+   * Loads and validates the Versu configuration.
    * @param repoRoot - Absolute path to the repository root directory
    * @returns A promise that resolves to the fully merged and validated configuration
    * @throws {Error} If configuration loading or validation fails

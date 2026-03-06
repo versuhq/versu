@@ -1,7 +1,7 @@
 {
   "name": "@versu/core",
   "version": "0.6.18",
-  "description": "VERSU (Core Library)",
+  "description": "Versu (Core Library)",
   "type": "module",
   "main": "dist/index.js",
   "exports": {

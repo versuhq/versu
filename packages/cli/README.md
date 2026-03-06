@@ -6,7 +6,7 @@
 
 # @versu/cli - Command-Line Interface
 
-Command-line interface for VERSU. This CLI provides all the power of VERSU's semantic versioning engine through an easy-to-use command-line tool, perfect for local development and custom CI/CD systems.
+Command-line interface for Versu. This CLI provides all the power of Versu's semantic versioning engine through an easy-to-use command-line tool, perfect for local development and custom CI/CD systems.
 
 ## Installation
 
@@ -165,7 +165,7 @@ Then manually review, commit, and push.
 
 ## Configuration
 
-VERSU CLI uses the same configuration system as the core library. Configuration files are automatically detected in your repository root.
+Versu CLI uses the same configuration system as the core library. Configuration files are automatically detected in your repository root.
 
 ### Supported Configuration Files
 
@@ -218,7 +218,7 @@ For more configuration examples, see the [core package documentation](../core).
 
 **Advanced Changelog Configuration:**
 
-VERSU supports [conventional-changelog-writer](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer) options for customizing changelog generation. For advanced customization with functions (transforms, sorting, templates), use JavaScript configuration files:
+Versu supports [conventional-changelog-writer](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer) options for customizing changelog generation. For advanced customization with functions (transforms, sorting, templates), use JavaScript configuration files:
 
 ```javascript
 // versu.config.js
@@ -281,7 +281,7 @@ api.version=1.5.0
 
 ## Commit Message Format
 
-VERSU uses [Conventional Commits](https://conventionalcommits.org/) to determine version bumps:
+Versu uses [Conventional Commits](https://conventionalcommits.org/) to determine version bumps:
 
 ```text
 <type>[optional scope]: <description>
@@ -315,7 +315,7 @@ Breaking changes trigger **major** version bumps:
 ### GitHub Actions
 
 ```yaml
-- name: Install VERSU CLI
+- name: Install Versu CLI
   run: npm install -g @versu/cli
 
 - name: Install Adapter
@@ -394,7 +394,7 @@ If versions aren't bumping:
 1. Check commit messages follow Conventional Commits format
 2. Verify you have commits since the last version
 3. Check configuration if certain commit types are ignored
-4. Use `--dry-run` to see what VERSU detects
+4. Use `--dry-run` to see what Versu detects
 
 ### Adapter Not Detected
 

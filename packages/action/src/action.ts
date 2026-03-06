@@ -5,7 +5,7 @@ import { parseBooleanInput } from './utils/actions.js';
 import { VERSION, PACKAGE_NAME } from './version.js';
 
 /**
- * Main entry point for VERSU GitHub Action
+ * Main entry point for Versu GitHub Action
  */
 export async function run(): Promise<void> {
   try {
@@ -44,7 +44,7 @@ export async function run(): Promise<void> {
       dryRun,
       adapter,
     };
-    // Run VERSU engine
+    // Run Versu engine
     const runner = new VersuRunner(options);
     const result = await runner.run();
 
