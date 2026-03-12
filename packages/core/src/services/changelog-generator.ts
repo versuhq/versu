@@ -34,9 +34,9 @@ export class ChangelogGenerator {
       return [];
     }
 
-    if (this.options.multiModule && moduleResults.length == 1) {
+    if (moduleResults.length > 1 && !this.options.multiModule) {
       throw new Error(
-        "Multi-module changelog generation enabled but only one module found",
+        "Multi-module changelog generation disabled but multiple modules being processed",
       );
     }
 
