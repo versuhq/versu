@@ -6,7 +6,7 @@
 
 # @versu/action - GitHub Action
 
-GitHub Actions wrapper for VERSU. This action provides seamless integration with GitHub workflows for automatic semantic versioning across your monorepo projects.
+GitHub Actions wrapper for Versu. This action provides seamless integration with GitHub workflows for automatic semantic versioning across your monorepo projects.
 
 ## Usage
 
@@ -27,12 +27,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: VERSU Semantic Evolution
+      - name: Versu Semantic Evolution
         id: versioner
-        uses: tvcsantos/versu@v0
+        uses: versuhq/versu@v0
         with:
           dry-run: false
-          # adapter: gradle  # Optional - VERSU will auto-detect your project type
+          # adapter: gradle  # Optional - Versu will auto-detect your project type
       - name: Print results
         run: |
           echo "Bumped: ${{ steps.versioner.outputs.bumped }}"
@@ -41,18 +41,18 @@ jobs:
 
 ### Adapter Auto-Detection
 
-VERSU automatically detects your project type based when supporting adapters plugins are installed and configured. It analyzes the repository structure and files to determine which adapter to use for versioning. For example for Gradle projects, it looks for `build.gradle`, `build.gradle.kts`, `settings.gradle`, or `settings.gradle.kts` files.
+Versu automatically detects your project type based when supporting adapters plugins are installed and configured. It analyzes the repository structure and files to determine which adapter to use for versioning. For example for Gradle projects, it looks for `build.gradle`, `build.gradle.kts`, `settings.gradle`, or `settings.gradle.kts` files.
 
-If auto-detection fails, VERSU will throw an error asking you to explicitly specify the `adapter` input:
+If auto-detection fails, Versu will throw an error asking you to explicitly specify the `adapter` input:
 
 ```yaml
-- name: VERSU Semantic Evolution
-  uses: tvcsantos/versu@v0
+- name: Versu Semantic Evolution
+  uses: versuhq/versu@v0
   with:
     adapter: gradle  # Required if auto-detection fails
 ```
 
-If the specified adapter is not supported or not properly configured, VERSU will provide a clear error message indicating the issue.
+If the specified adapter is not supported or not properly configured, Versu will provide a clear error message indicating the issue.
 
 ### Pre-release Versions
 
@@ -76,7 +76,7 @@ jobs:
         run: npm install -g @versu/plugin-gradle
 
       - name: Create pre-release versions
-        uses: tvcsantos/versu@v0
+        uses: versuhq/versu@v0
         with:
           adapter: gradle
           prerelease-mode: true
@@ -107,7 +107,7 @@ jobs:
         run: npm install -g @versu/plugin-gradle
 
       - name: Create timestamp versions
-        uses: tvcsantos/versu@v0
+        uses: versuhq/versu@v0
         with:
           adapter: gradle
           prerelease-mode: true
@@ -144,7 +144,7 @@ jobs:
         run: npm install -g @versu/plugin-gradle
 
       - name: Create Gradle SNAPSHOT versions
-        uses: tvcsantos/versu@v0
+        uses: versuhq/versu@v0
         with:
           adapter: gradle
           append-snapshot: true
@@ -182,9 +182,9 @@ This applies `-SNAPSHOT` suffix to **all** module versions, generating versions 
 ### Using Outputs
 
 ```yaml
-- name: VERSU Semantic Evolution
+- name: Versu Semantic Evolution
   id: versioner
-  uses: tvcsantos/versu@v0
+  uses: versuhq/versu@v0
   
 - name: Check if bumped
   if: steps.versioner.outputs.bumped == 'true'
@@ -216,7 +216,7 @@ For workflows where you want to handle git operations manually:
 
 ```yaml
 - name: Version modules (no git operations)
-  uses: tvcsantos/versu@v0
+  uses: versuhq/versu@v0
   with:
     adapter: gradle
     push-changes: false    # Disable automatic commit/push
@@ -248,11 +248,11 @@ steps:
 
 ## Configuration
 
-VERSU uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for flexible configuration loading and [Zod](https://github.com/colinhacks/zod) for type-safe validation. Configuration files are automatically detected in your repository root.
+Versu uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for flexible configuration loading and [Zod](https://github.com/colinhacks/zod) for type-safe validation. Configuration files are automatically detected in your repository root.
 
 ### Supported Configuration Files
 
-VERSU will automatically search for configuration in the following order:
+Versu will automatically search for configuration in the following order:
 
 1. `package.json` (in a `"versu"` property)
 2. `.versurc` (JSON or YAML)
@@ -392,11 +392,11 @@ module.exports = {
 
 ### Configuration Validation
 
-All configuration files are validated using [Zod](https://github.com/colinhacks/zod) schemas to ensure correctness and consistency. If validation fails, VERSU will provide a detailed error message indicating which configuration fields are invalid.
+All configuration files are validated using [Zod](https://github.com/colinhacks/zod) schemas to ensure correctness and consistency. If validation fails, Versu will provide a detailed error message indicating which configuration fields are invalid.
 
 ### Advanced Changelog Configuration
 
-VERSU integrates with [conventional-changelog-writer](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer) for powerful changelog generation. All options from conventional-changelog-writer are supported through the `changelog.options` field. For advanced customization requiring functions (like custom transforms, sorting logic, or templates), use JavaScript configuration files in your repository.
+Versu integrates with [conventional-changelog-writer](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer) for powerful changelog generation. All options from conventional-changelog-writer are supported through the `changelog.options` field. For advanced customization requiring functions (like custom transforms, sorting logic, or templates), use JavaScript configuration files in your repository.
 
 ## Gradle Project Support
 
@@ -435,7 +435,7 @@ api.version=1.5.0
 
 ### Version Management
 
-VERSU manages all module versions through the **root** `gradle.properties` file:
+Versu manages all module versions through the **root** `gradle.properties` file:
 
 - **All module versions** must be declared in the root `gradle.properties` file
 - **Root module** version uses the `version` property
@@ -445,7 +445,7 @@ VERSU manages all module versions through the **root** `gradle.properties` file:
 
 ## Commit Message Format
 
-VERSU uses [Conventional Commits](https://conventionalcommits.org/) to determine version bumps:
+Versu uses [Conventional Commits](https://conventionalcommits.org/) to determine version bumps:
 
 ```text
 <type>[optional scope]: <description>
@@ -511,7 +511,7 @@ jobs:
       - name: Release version
         if: github.ref == 'refs/heads/main'
         id: release
-        uses: tvcsantos/versu@v0
+        uses: versuhq/versu@v0
         with:
           adapter: gradle
           push-changes: true
@@ -521,7 +521,7 @@ jobs:
       - name: Pre-release version
         if: github.ref == 'refs/heads/develop'
         id: prerelease
-        uses: tvcsantos/versu@v0
+        uses: versuhq/versu@v0
         with:
           adapter: gradle
           prerelease-mode: true
@@ -534,7 +534,7 @@ jobs:
       - name: CI version
         if: startsWith(github.ref, 'refs/heads/feature/')
         id: ci
-        uses: tvcsantos/versu@v0
+        uses: versuhq/versu@v0
         with:
           adapter: gradle
           prerelease-mode: true

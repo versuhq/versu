@@ -1,6 +1,6 @@
 # Pre-release Version Support
 
-VERSU supports generating pre-release versions for development and testing builds.
+Versu supports generating pre-release versions for development and testing builds.
 
 ## Options
 

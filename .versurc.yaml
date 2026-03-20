@@ -1,25 +1,52 @@
-# VERSU configuration in YAML format
-defaultBump: patch
+# Versu configuration in YAML format
+plugins:
+  - "@versu/plugin-gradle"
 
-commitTypes:
-  feat: minor
-  fix: patch
-  perf: patch
-  refactor: patch
-  docs: ignore
-  test: ignore
-  chore: ignore
-  style: ignore
-  ci: ignore
-  build: ignore
-  breaking: major
-
-dependencyRules:
-  onMajorOfDependency: minor
-  onMinorOfDependency: patch
-  onPatchOfDependency: none
-
-nodejs:
-  versionSource:
-    - package.json
-  updatePackageLock: true
+versioning:
+  breakingChange: 
+    stable: major
+    prerelease: premajor
+  unknownCommitType:
+    stable: patch
+    prerelease: prepatch
+  commitTypes:
+    feat:
+      stable: minor
+      prerelease: preminor
+    fix:
+      stable: patch
+      prerelease: prepatch
+    perf:
+      stable: patch
+      prerelease: prepatch
+    refactor:
+      stable: patch
+      prerelease: prepatch
+    docs:
+      stable: none
+      prerelease: none
+    test:
+      stable: none
+      prerelease: none
+    chore:
+      stable: none
+      prerelease: none
+    style:
+      stable: none
+      prerelease: none
+    ci:
+      stable: none
+      prerelease: none
+    build:
+      stable: none
+      prerelease: none
+  cascadeRules:
+    stable:
+      major: major
+      minor: minor
+      patch: patch
+    prerelease:
+      premajor: premajor
+      preminor: preminor
+      prepatch: prepatch
+      prerelease: prerelease

@@ -133,7 +133,7 @@ export class GitOperations {
     const moduleNames = moduleChangeResults.map((change) => change.name);
 
     return moduleNames.length === 1
-      ? `chore(release): ${moduleNames[0]} ${moduleChangeResults[0].to}`
+      ? `chore(release): ${moduleNames[0]} ${moduleChangeResults[0]!.to}`
       : `chore(release): update ${moduleNames.length} modules`;
   }
 }

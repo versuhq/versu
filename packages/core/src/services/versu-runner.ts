@@ -3,7 +3,6 @@ import { ModuleSystemFactory } from "./module-system-factory.js";
 import { MapModuleRegistry, type ModuleRegistry } from "./module-registry.js";
 import { VersionManager } from "./version-manager.js";
 import { createModuleSystemFactory } from "../factories/module-system-factory.js";
-import { type Config, configSchema } from "../config/index.js";
 import { isWorkingDirectoryClean } from "../git/index.js";
 import { ConfigurationLoader } from "./configuration-loader.js";
 import { CommitAnalyzer } from "./commit-analyzer.js";
@@ -23,9 +22,10 @@ import { Module } from "../adapters/project-information.js";
 import { ConfigurationValidatorFactory } from "./configuration-validator.js";
 import { banner } from "../utils/banner.js";
 import path from "path";
-import { PluginContract, PluginLoader } from "../plugins/plugin-loader.js";
-import { pluginContractSchema } from "../plugins/plugin-schema.js";
+import { pluginLoader } from "../plugins/plugin-loader.js";
 import { Commit } from "conventional-commits-parser";
+import type { VersuConfigWithDefaults } from "../config/types.js";
+import { configSchemaWithDefaults } from "../config/schema.js";
 
 export type RunnerOptions = {
   readonly repoRoot: string;
@@ -54,7 +54,7 @@ export class VersuRunner {
   private moduleSystemFactory!: ModuleSystemFactory; // Will be initialized in run()
   private moduleRegistry!: ModuleRegistry; // Will be initialized in run()
   private versionManager!: VersionManager; // Will be initialized in run()
-  private config!: Config; // Will be initialized in run()
+  private config!: VersuConfigWithDefaults; // Will be initialized in run()
   private adapter!: AdapterMetadata; // Will be initialized in run()
   private options: RunnerOptions;
 
@@ -67,7 +67,6 @@ export class VersuRunner {
   private gitOperations!: GitOperations; // Will be initialized in run()
   private adapterIdentifierRegistry!: AdapterIdentifierRegistry;
   private adapterMetadataProvider!: AdapterMetadataProvider;
-  private pluginLoader!: PluginLoader; // Will be initialized in run()
   private configDirectory!: string; // Will be initialized in run()
 
   constructor(options: RunnerOptions) {
@@ -78,12 +77,8 @@ export class VersuRunner {
 
     // Initialize services
     this.configurationLoader = new ConfigurationLoader(
-      ConfigurationValidatorFactory.create<Config>(configSchema),
-    );
-
-    this.pluginLoader = new PluginLoader(
-      ConfigurationValidatorFactory.create<PluginContract>(
-        pluginContractSchema,
+      ConfigurationValidatorFactory.create<VersuConfigWithDefaults>(
+        configSchemaWithDefaults,
       ),
     );
   }
@@ -156,8 +151,8 @@ export class VersuRunner {
   }
 
   private async loadPluginsAndResolveAdapter(): Promise<void> {
-    await this.pluginLoader.load(this.config.plugins);
-    const plugins = this.pluginLoader.plugins;
+    await pluginLoader.load(this.config.plugins);
+    const plugins = pluginLoader.plugins;
 
     this.adapterIdentifierRegistry = createAdapterIdentifierRegistry(plugins);
 
@@ -267,8 +262,8 @@ export class VersuRunner {
       generateChangelog: this.options.generateChangelog,
       repoRoot: this.options.repoRoot,
       dryRun: this.options.dryRun,
-      config: this.config.changelog,
       multiModule,
+      config: this.config.changelog,
     });
 
     // Generate changelogs

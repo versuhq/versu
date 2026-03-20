@@ -1,10 +1,12 @@
-// Core VERSU exports - business logic without GitHub Actions dependency
+// Core Versu exports - business logic without GitHub Actions dependency
 
 // Configuration
 export * from './config/index.js';
+export type { VersuConfig, VersuConfigWithDefaults } from './config/types.js';
 
 // Plugins
-export type { PluginContract, AdapterPluginContract } from './plugins/plugin-loader.js';
+export type { PluginContract, AdapterPluginContract } from './plugins/types.js';
+export { pluginManager } from './plugins/plugin-manager.js';
 
 // Services
 export { VersuRunner } from './services/versu-runner.js';

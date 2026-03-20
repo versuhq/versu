@@ -1,6 +1,7 @@
 import { ModuleRegistry } from "./module-registry.js";
 import { VersionUpdateStrategy } from "./version-update-strategy.js";
-import { formatSemVer, Version } from "../semver/index.js";
+import { formatSemVer } from "../semver/index.js";
+import type { Version } from "../semver/types.js";
 
 /**
  * Manages version updates for modules with staged commits and batch persistence.

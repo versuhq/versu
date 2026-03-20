@@ -1,7 +1,7 @@
 {
   "name": "@versu/cli",
-  "version": "0.6.13",
-  "description": "VERSU (CLI)",
+  "version": "0.7.1",
+  "description": "Versu (CLI)",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -26,20 +26,20 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tvcsantos/versu.git",
+    "url": "git+https://github.com/versuhq/versu.git",
     "directory": "packages/cli"
   },
   "bugs": {
-    "url": "https://github.com/tvcsantos/versu/issues"
+    "url": "https://github.com/versuhq/versu/issues"
   },
-  "homepage": "https://github.com/tvcsantos/versu#readme",
+  "homepage": "https://github.com/versuhq/versu#readme",
   "files": [
     "dist"
   ],
   "types": "dist/index.d.ts",
   "dependencies": {
     "@oclif/core": "^4.8.0",
-    "@versu/core": "^0.6.13",
+    "@versu/core": "^0.7.1",
     "chalk": "^5.6.2",
     "oclif": "^4.14.0",
     "ora": "^9.3.0"
@@ -65,9 +65,11 @@
     "dirname": "versu",
     "topicSeparator": " ",
     "plugins": [],
-    "commands": {
-      "strategy": "single",
-      "target": "./dist/index.js"
+    "commands": "./dist/commands",
+    "topics": {
+      "plugin": {
+        "description": "Manage Versu plugins"
+      }
     }
   }
 }

@@ -1,7 +1,7 @@
 import zod from "zod";
 
 /**
- * Validates VERSU configuration against Zod schema for type safety and correctness.
+ * Validates Versu configuration against Zod schema for type safety and correctness.
  * Ensures all configuration values conform to expected types and constraints,
  * providing detailed error messages for any validation failures.
  */

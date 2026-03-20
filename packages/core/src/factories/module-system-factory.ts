@@ -1,5 +1,5 @@
+import { AdapterPluginContract } from "../plugins/types.js";
 import { ModuleSystemFactory } from "../services/module-system-factory.js";
-import { AdapterPluginContract } from "../plugins/plugin-loader.js";
 
 /**
  * Creates the appropriate module system factory for a given adapter.

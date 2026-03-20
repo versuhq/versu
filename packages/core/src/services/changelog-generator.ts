@@ -5,18 +5,14 @@ import {
 } from "../changelog/index.js";
 import { ModuleChangeResult } from "./version-applier.js";
 import { Commit } from "conventional-commits-parser";
-import zod from "zod";
-import { changelogSchema, configSchema } from "../config/index.js";
-
-export type ModuleChangelogConfig = zod.infer<typeof changelogSchema>;
-export type ChangelogConfig = zod.infer<typeof configSchema>["changelog"];
+import { ChangelogConfig } from "../config/types.js";
 
 export type ChangelogGeneratorOptions = {
   generateChangelog: boolean;
   repoRoot: string;
   dryRun: boolean;
-  config: ChangelogConfig;
   multiModule: boolean;
+  config?: ChangelogConfig;
 };
 
 export class ChangelogGenerator {
@@ -38,9 +34,9 @@ export class ChangelogGenerator {
       return [];
     }
 
-    if (this.options.multiModule && moduleResults.length == 1) {
+    if (moduleResults.length > 1 && !this.options.multiModule) {
       throw new Error(
-        "Multi-module changelog generation enabled but only one module found",
+        "Multi-module changelog generation disabled but multiple modules being processed",
       );
     }
 
