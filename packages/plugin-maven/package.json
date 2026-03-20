@@ -1,6 +1,6 @@
 {
   "name": "@versu/plugin-maven",
-  "version": "0.6.13",
+  "version": "0.7.1",
   "description": "VERSU Maven Plugin",
   "type": "module",
   "main": "dist/index.js",
@@ -34,13 +34,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tvcsantos/versu.git",
+    "url": "git+https://github.com/versuhq/versu.git",
     "directory": "packages/plugin-maven"
   },
   "bugs": {
-    "url": "https://github.com/tvcsantos/versu/issues"
+    "url": "https://github.com/versuhq/versu/issues"
   },
-  "homepage": "https://github.com/tvcsantos/versu#readme",
+  "homepage": "https://github.com/versuhq/versu#readme",
   "files": [
     "dist"
   ],
@@ -50,14 +50,14 @@
     "xpath": "^0.0.34"
   },
   "peerDependencies": {
-    "@versu/core": "^0.6.13"
+    "@versu/core": "^0.7.1"
   },
   "devDependencies": {
     "@types/node": "^20.19.23",
     "@types/semver": "^7.7.1",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
-    "@versu/core": "^0.6.13",
+    "@versu/core": "^0.7.1",
     "@vitest/coverage-v8": "^1.1.0",
     "eslint": "^8.56.0",
     "prettier": "^3.1.1",
