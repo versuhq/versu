@@ -761,7 +761,7 @@ export function parseRepoUrl(repoUrl: string): {
   repo: string;
 } {
   // Handle SSH format: git@github.com:owner/repo.git
-  const sshMatch = repoUrl.match(/^git@([^:]+):(.+?)\/([^/]+?)(\.git)?$/);
+  const sshMatch = repoUrl.match(/^(?:\w|-)+@([^:]+):(.+?)\/([^/]+?)(\.git)?$/);
   if (sshMatch) {
     return {
       host: sshMatch[1]!,
