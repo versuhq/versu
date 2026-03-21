@@ -78,7 +78,6 @@ jobs:
       - name: Create pre-release versions
         uses: versuhq/versu@v0
         with:
-          adapter: gradle
           prerelease-mode: true
           prerelease-id: alpha
           bump-unchanged: true
@@ -109,7 +108,6 @@ jobs:
       - name: Create timestamp versions
         uses: versuhq/versu@v0
         with:
-          adapter: gradle
           prerelease-mode: true
           prerelease-id: alpha
           timestamp-versions: true
@@ -146,7 +144,6 @@ jobs:
       - name: Create Gradle SNAPSHOT versions
         uses: versuhq/versu@v0
         with:
-          adapter: gradle
           append-snapshot: true
 ```
 
@@ -400,7 +397,7 @@ Versu integrates with [conventional-changelog-writer](https://github.com/convent
 
 ## Gradle Project Support
 
-Gradle support is provided by the **[@versu/plugin-gradle](../plugin-gradle)** package.
+Gradle support is provided by the **[@versu/plugin-gradle][plugin-gradle]** package.
 
 The Gradle adapter supports:
 
@@ -513,7 +510,6 @@ jobs:
         id: release
         uses: versuhq/versu@v0
         with:
-          adapter: gradle
           push-changes: true
           push-tags: true
       
@@ -597,8 +593,10 @@ If auto-detection fails:
 
 - **[@versu/core](../core)** - Core library for custom integrations
 - **[@versu/cli](../cli)** - CLI tool for local development
-- **[@versu/plugin-gradle](../plugin-gradle)** - Gradle adapter plugin
+- **[@versu/plugin-gradle][plugin-gradle]** - Gradle adapter plugin
 
 ## License
 
 MIT License - see [LICENSE](../../LICENSE) for details.
+
+[plugin-gradle]: https://github.com/versuhq/plugin-gradle

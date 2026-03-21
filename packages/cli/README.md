@@ -246,7 +246,7 @@ module.exports = {
 
 ## Gradle Project Support
 
-Gradle support is provided by the **[@versu/plugin-gradle](../plugin-gradle)** package.
+Gradle support is provided by the **[@versu/plugin-gradle][plugin-gradle]** package.
 
 The CLI supports Gradle projects with:
 
@@ -324,7 +324,7 @@ Breaking changes trigger **major** version bumps:
     npm install -g @versu/plugin-gradle
 
 - name: Version modules
-  run: versu --adapter gradle
+  run: versu run
 ```
 
 ### GitLab CI
@@ -334,7 +334,7 @@ version:
   script:
     - npm install -g @versu/cli
     - npm install -g @versu/plugin-gradle
-    - versu --adapter gradle
+    - versu run
 ```
 
 ### Jenkins
@@ -344,7 +344,7 @@ stage('Version') {
   steps {
     sh 'npm install -g @versu/cli'
     sh 'npm install -g @versu/plugin-gradle'
-    sh 'versu --adapter gradle'
+    sh 'versu run'
   }
 }
 ```
@@ -436,8 +436,10 @@ npm publish --workspace packages/cli --access public
 
 - **[@versu/core](../core)** - Core library for custom integrations
 - **[@versu/action](../action)** - GitHub Actions integration
-- **[@versu/plugin-gradle](../plugin-gradle)** - Gradle adapter plugin
+- **[@versu/plugin-gradle][plugin-gradle]** - Gradle adapter plugin
 
 ## License
 
 MIT License - see [LICENSE](../../LICENSE) for details.
+
+[plugin-gradle]: https://github.com/versuhq/plugin-gradle

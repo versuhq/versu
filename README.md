@@ -79,12 +79,6 @@ GitHub Actions integration for automated versioning in workflow pipelines.
 
 **Use when:** You want automated versioning in GitHub workflows.
 
-### [@versu/plugin-gradle](packages/plugin-gradle)
-
-Gradle adapter plugin that provides support for detecting and updating versions in Gradle projects (Groovy & Kotlin DSL).
-
-**Use when:** Working with Gradle-based projects and need version management support.
-
 ## 📝 Commit Message Format
 
 Versu uses [Conventional Commits](https://conventionalcommits.org/) to automatically determine version bumps:
@@ -107,7 +101,7 @@ Versu uses [Conventional Commits](https://conventionalcommits.org/) to automatic
 
 ## 🔌 Extending
 
-To add support for new project types, see the [core package documentation](packages/core#creating-custom-adapters) for instructions on creating custom adapter plugins. Reference [@versu/plugin-gradle](packages/plugin-gradle) as an example implementation.
+To add support for new project types, see the [core package documentation](packages/core#creating-custom-adapters) for instructions on creating custom adapter plugins. Reference [@versu/plugin-gradle][plugin-gradle] as an example implementation.
 
 ## 🛠️ Development
 
@@ -136,9 +130,7 @@ packages/
 │       └── config/      # Configuration system
 ├── cli/                 # CLI tool (@versu/cli)
 │   └── src/
-├── action/              # GitHub Action (@versu/action)
-│   └── src/
-└── plugin-gradle/       # Gradle plugin (@versu/plugin-gradle)
+└── action/              # GitHub Action (@versu/action)
     └── src/
 ```
 
@@ -147,3 +139,5 @@ Each package has its own README with detailed documentation. The monorepo uses n
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) for details.
+
+[plugin-gradle]: https://github.com/versuhq/plugin-gradle

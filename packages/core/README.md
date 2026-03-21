@@ -130,7 +130,7 @@ Versu uses [conventional-changelog-writer](https://github.com/conventional-chang
 
 ### Gradle Adapter
 
-Gradle support is provided by the **[@versu/plugin-gradle](../plugin-gradle)** package.
+Gradle support is provided by the **[@versu/plugin-gradle][plugin-gradle]** package.
 
 **Features:**
 
@@ -242,7 +242,7 @@ const myPlugin: PluginContract = {
 export default myPlugin;
 ```
 
-See [@versu/plugin-gradle](../plugin-gradle) for a complete implementation example.
+See [@versu/plugin-gradle][plugin-gradle] for a complete implementation example.
 
 ## Development
 
@@ -279,7 +279,7 @@ npm publish --workspace packages/core --access public
 
 - **[@versu/cli](../cli)** - Command-line interface
 - **[@versu/action](../action)** - GitHub Actions integration
-- **[@versu/plugin-gradle](../plugin-gradle)** - Gradle adapter plugin
+- **[@versu/plugin-gradle][plugin-gradle]** - Gradle adapter plugin
 
 ## Requirements
 
@@ -289,3 +289,5 @@ npm publish --workspace packages/core --access public
 ## License
 
 MIT License - see [LICENSE](../../LICENSE) for details.
+
+[plugin-gradle]: https://github.com/versuhq/plugin-gradle
