@@ -13,6 +13,7 @@ export type ChangelogGeneratorOptions = {
   dryRun: boolean;
   multiModule: boolean;
   config?: ChangelogConfig;
+  provider?: string;
 };
 
 export class ChangelogGenerator {
@@ -50,6 +51,7 @@ export class ChangelogGenerator {
       this.options.repoRoot,
       this.options.dryRun,
       this.options.config?.module,
+      this.options.provider,
     );
 
     if (this.options.multiModule) {
@@ -65,6 +67,7 @@ export class ChangelogGenerator {
         this.options.repoRoot,
         this.options.dryRun,
         this.options.config?.root,
+        this.options.provider,
       );
 
       if (rootChangelogPath) {

@@ -3,7 +3,7 @@ import { ModuleSystemFactory } from "./module-system-factory.js";
 import { MapModuleRegistry, type ModuleRegistry } from "./module-registry.js";
 import { VersionManager } from "./version-manager.js";
 import { createModuleSystemFactory } from "../factories/module-system-factory.js";
-import { isWorkingDirectoryClean } from "../git/index.js";
+import { getProviderName, isWorkingDirectoryClean } from "../git/index.js";
 import { ConfigurationLoader } from "./configuration-loader.js";
 import { CommitAnalyzer } from "./commit-analyzer.js";
 import { VersionBumper, VersionBumperOptions } from "./version-bumper.js";
@@ -40,6 +40,7 @@ export type RunnerOptions = {
   readonly pushChanges: boolean;
   readonly dryRun: boolean;
   readonly adapter?: string;
+  provider?: string;
 };
 
 export type RunnerResult = {
@@ -103,6 +104,7 @@ export class VersuRunner {
       createTags: this.options.createTags,
       generateChangelog: this.options.generateChangelog,
       pushChanges: this.options.pushChanges,
+      provider: this.options.provider || "(auto-detect)",
     });
   }
 
@@ -146,6 +148,18 @@ export class VersuRunner {
   }
 
   private async loadConfiguration(): Promise<void> {
+    this.options.provider =
+      this.options.provider ||
+      (await getProviderName({ cwd: this.options.repoRoot }));
+
+    if (!this.options.provider) {
+      logger.warning(
+        "Could not detect provider, continuing without provider-specific features",
+      );
+    }
+
+    logger.info("Provider set to", { provider: this.options.provider });
+
     this.configDirectory = path.join(this.options.repoRoot, ".versu");
     this.config = await this.configurationLoader.load(this.configDirectory);
   }
@@ -264,6 +278,7 @@ export class VersuRunner {
       dryRun: this.options.dryRun,
       multiModule,
       config: this.config.changelog,
+      provider: this.options.provider,
     });
 
     // Generate changelogs

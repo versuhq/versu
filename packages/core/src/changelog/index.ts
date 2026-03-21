@@ -61,6 +61,7 @@ export async function generateChangelogsForModules(
   repoRoot: string,
   dryRun: boolean,
   config?: ModuleChangelogConfig,
+  provider?: string,
 ): Promise<string[]> {
   const changelogPaths: string[] = [];
 
@@ -118,6 +119,7 @@ export async function generateChangelogsForModules(
         ...contextRepository,
         ...config?.context,
         prepend,
+        provider,
       } as Context<Commit>,
       config?.options as Options<Commit>,
     );
@@ -149,6 +151,7 @@ export async function generateRootChangelog(
   repoRoot: string,
   dryRun: boolean,
   config?: ModuleChangelogConfig,
+  provider?: string,
 ): Promise<string | undefined> {
   const moduleResult = moduleResults.find((result) => result.type === "root");
 
@@ -205,6 +208,7 @@ export async function generateRootChangelog(
       ...contextRepository,
       ...config?.context,
       prepend,
+      provider,
     } as Context<Commit>,
     config?.options as Options<Commit>,
   );

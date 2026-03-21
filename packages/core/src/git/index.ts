@@ -885,3 +885,24 @@ export async function getRepoName(options: GitOptions = {}): Promise<string> {
   const { repo } = parseRepoUrl(repoUrl);
   return repo;
 }
+
+/**
+ * Determines the Git provider name based on the repository host.
+ * @param options - Configuration options for Git operations
+ * @returns A promise that resolves to the provider name ('github', 'gitlab', 'bitbucket') or undefined if the host is not recognized
+ * @example
+ * const provider = await getProviderName({ cwd: '/path/to/repo' });
+ * console.log(provider); // 'github'
+ */
+export async function getProviderName(
+  options: GitOptions = {},
+): Promise<string | undefined> {
+  const host = await getRepoHost(options);
+  if (host.includes("github.com")) {
+    return "github";
+  } else if (host.includes("gitlab.com")) {
+    return "gitlab";
+  } else if (host.includes("bitbucket.org")) {
+    return "bitbucket";
+  }
+}
