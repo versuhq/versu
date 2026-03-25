@@ -6,6 +6,8 @@ import { commitPartial } from "./templates/commit.js";
 import { headerPartial } from "./templates/header.js";
 import { footerPartial } from "./templates/footer.js";
 import { mainModuleTemplate } from "./templates/main-module.js";
+import { mainReleaseRootTemplate } from "./templates/main-release-root.js";
+import { mainReleaseModuleTemplate } from "./templates/main-release-module.js";
 
 const issueRegex = /\((\w+\s)?#([0-9]+)\)/;
 
@@ -197,6 +199,56 @@ export const DEFAULT_CONFIG: VersuConfigWithDefaults = {
 
         // HANDLEBARS TEMPLATES
         mainTemplate: mainModuleTemplate,
+        commitPartial,
+        headerPartial,
+        footerPartial,
+      },
+    },
+  },
+  release: {
+    root: {
+      // 1. CONTEXT: Global variables for the templates
+      context: {
+        prependPlaceholder,
+      },
+
+      // 2. OPTIONS: Logic and Templates
+      options: {
+        // How to group the commits (mapped in transform)
+        groupBy: "type",
+
+        // The order sections appear in the changelog
+        commitGroupsSort,
+
+        // Transform raw commit data into "Keep a Changelog" format
+        transform,
+
+        // HANDLEBARS TEMPLATES
+        mainTemplate: mainReleaseRootTemplate,
+        commitPartial,
+        headerPartial,
+        footerPartial,
+      },
+    },
+    module: {
+      // 1. CONTEXT: Global variables for the templates
+      context: {
+        prependPlaceholder,
+      },
+
+      // 2. OPTIONS: Logic and Templates
+      options: {
+        // How to group the commits (mapped in transform)
+        groupBy: "type",
+
+        // The order sections appear in the changelog
+        commitGroupsSort,
+
+        // Transform raw commit data into "Keep a Changelog" format
+        transform,
+
+        // HANDLEBARS TEMPLATES
+        mainTemplate: mainReleaseModuleTemplate,
         commitPartial,
         headerPartial,
         footerPartial,

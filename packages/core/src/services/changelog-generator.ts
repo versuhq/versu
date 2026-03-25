@@ -12,6 +12,7 @@ export type ChangelogGeneratorOptions = {
   repoRoot: string;
   dryRun: boolean;
   multiModule: boolean;
+  filename: string;
   config?: ChangelogConfig;
   provider?: string;
 };
@@ -50,6 +51,7 @@ export class ChangelogGenerator {
         moduleCommits.get(moduleId) || { commits: [], lastTag: null },
       this.options.repoRoot,
       this.options.dryRun,
+      this.options.filename,
       this.options.config?.module,
       this.options.provider,
     );
@@ -66,6 +68,7 @@ export class ChangelogGenerator {
           moduleCommits.get(moduleId) || { commits: [], lastTag: null },
         this.options.repoRoot,
         this.options.dryRun,
+        this.options.filename,
         this.options.config?.root,
         this.options.provider,
       );

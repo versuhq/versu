@@ -28,6 +28,8 @@ export async function run(): Promise<void> {
     const appendSnapshot = parseBooleanInput(core.getInput('append-snapshot'));
     const pushChanges = parseBooleanInput(core.getInput('push-changes'));
     const generateChangelog = parseBooleanInput(core.getInput('generate-changelog') || 'false');
+    const changelogFilename = core.getInput('changelog-filename') || 'CHANGELOG.md';
+    const releaseNotesFilename = core.getInput('release-notes-filename') || 'RELEASE.md';
 
     // Create runner options
     const options: RunnerOptions = {
@@ -43,6 +45,8 @@ export async function run(): Promise<void> {
       pushChanges,
       dryRun,
       adapter,
+      changelogFilename,
+      releaseNotesFilename,
     };
     // Run Versu engine
     const runner = new VersuRunner(options);
@@ -54,6 +58,7 @@ export async function run(): Promise<void> {
     core.setOutput('changed-modules', JSON.stringify(result.changedModules));
     core.setOutput('created-tags', result.createdTags.join(','));
     core.setOutput('changelog-paths', result.changelogPaths.join(','));
+    core.setOutput('release-notes-paths', result.releaseNotesPaths.join(','));
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     core.setFailed(`Action failed: ${errorMessage}`);

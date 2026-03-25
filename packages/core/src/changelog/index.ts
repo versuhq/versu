@@ -60,6 +60,7 @@ export async function generateChangelogsForModules(
   ) => Promise<{ commits: Commit[]; lastTag: string | null }>,
   repoRoot: string,
   dryRun: boolean,
+  filename: string,
   config?: ModuleChangelogConfig,
   provider?: string,
 ): Promise<string[]> {
@@ -95,7 +96,7 @@ export async function generateChangelogsForModules(
       continue;
     }
 
-    const changelogPath = join(repoRoot, moduleResult.path, "CHANGELOG.md");
+    const changelogPath = join(repoRoot, moduleResult.path, filename);
 
     let prepend = true;
     if (await exists(changelogPath)) {
@@ -150,6 +151,7 @@ export async function generateRootChangelog(
   ) => Promise<{ commits: Commit[]; lastTag: string | null }>,
   repoRoot: string,
   dryRun: boolean,
+  filename: string,
   config?: ModuleChangelogConfig,
   provider?: string,
 ): Promise<string | undefined> {
@@ -183,7 +185,7 @@ export async function generateRootChangelog(
     return;
   }
 
-  const changelogPath = join(repoRoot, moduleResult.path, "CHANGELOG.md");
+  const changelogPath = join(repoRoot, moduleResult.path, filename);
 
   let prepend = true;
   if (await exists(changelogPath)) {

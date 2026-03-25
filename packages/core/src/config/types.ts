@@ -23,14 +23,16 @@ export type VersuConfig = {
     };
   };
   readonly changelog?: ChangelogConfig;
+  readonly release?: ChangelogConfig;
 };
 
 export type VersuConfigWithDefaults = Omit<
   Required<VersuConfig>,
-  "changelog"
+  "changelog" | "release"
 > & {
   readonly versioning: Required<VersuConfig["versioning"]>;
   readonly changelog?: ChangelogConfig;
+  readonly release?: ChangelogConfig;
 };
 
 export type ModuleChangelogConfig = {

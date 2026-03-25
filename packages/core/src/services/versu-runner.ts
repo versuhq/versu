@@ -40,6 +40,8 @@ export type RunnerOptions = {
   readonly pushChanges: boolean;
   readonly dryRun: boolean;
   readonly adapter?: string;
+  readonly changelogFilename?: string;
+  readonly releaseNotesFilename?: string;
   provider?: string;
 };
 
@@ -49,6 +51,7 @@ export type RunnerResult = {
   readonly changedModules: Array<ModuleChangeResult>;
   readonly createdTags: string[];
   readonly changelogPaths: string[];
+  readonly releaseNotesPaths: string[];
 };
 
 export class VersuRunner {
@@ -105,6 +108,8 @@ export class VersuRunner {
       generateChangelog: this.options.generateChangelog,
       pushChanges: this.options.pushChanges,
       provider: this.options.provider || "(auto-detect)",
+      changelogFilename: this.options.changelogFilename || "CHANGELOG.md",
+      releaseNotesFilename: this.options.releaseNotesFilename || "RELEASE.md",
     });
   }
 
@@ -277,7 +282,32 @@ export class VersuRunner {
       repoRoot: this.options.repoRoot,
       dryRun: this.options.dryRun,
       multiModule,
+      filename: this.options.changelogFilename || "CHANGELOG.md",
       config: this.config.changelog,
+      provider: this.options.provider,
+    });
+
+    // Generate changelogs
+    const changelogPaths = await this.changelogGenerator.generateChangelogs(
+      changedModules,
+      moduleCommits,
+    );
+
+    return changelogPaths;
+  }
+
+  private async generateReleaseNotes(
+    changedModules: ModuleChangeResult[],
+    moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
+    multiModule: boolean,
+  ): Promise<string[]> {
+    this.changelogGenerator = new ChangelogGenerator({
+      generateChangelog: this.options.generateChangelog,
+      repoRoot: this.options.repoRoot,
+      dryRun: this.options.dryRun,
+      multiModule,
+      filename: this.options.releaseNotesFilename || "RELEASE.md",
+      config: this.config.release,
       provider: this.options.provider,
     });
 
@@ -349,13 +379,18 @@ export class VersuRunner {
       await this.calculatingBumpsAndApplyingChanges(moduleCommits);
 
     if (changedModules.length === 0) {
-      return {
+      const result = {
         bumped: false,
         discoveredModules,
         changedModules: [],
         createdTags: [],
         changelogPaths: [],
+        releaseNotesPaths: [],
       };
+
+      logger.debug("Execution result", { result });
+
+      return result;
     }
 
     logger.endGroup();
@@ -363,6 +398,16 @@ export class VersuRunner {
     logger.startGroup("Generating changelogs");
 
     const changelogPaths = await this.generateChangelogs(
+      changedModules,
+      moduleCommits,
+      discoveredModules.length > 1,
+    );
+
+    logger.endGroup();
+
+    logger.startGroup("Generating release notes");
+
+    const releaseNotesPaths = await this.generateReleaseNotes(
       changedModules,
       moduleCommits,
       discoveredModules.length > 1,
@@ -378,12 +423,17 @@ export class VersuRunner {
 
     logger.info("Semantic evolution completed successfully");
 
-    return {
+    const result = {
       bumped: true,
       discoveredModules,
       changedModules,
       createdTags,
       changelogPaths,
+      releaseNotesPaths,
     };
+
+    logger.debug("Execution result", { result });
+
+    return result;
   }
 }

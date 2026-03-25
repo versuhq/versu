@@ -73,6 +73,14 @@ export default class Run extends Command {
         "Language adapter (e.g., gradle). Auto-detected if not provided",
       required: false,
     }),
+    "changelog-filename": Flags.string({
+      description: "Filename for generated changelog (default: CHANGELOG.md)",
+      default: "CHANGELOG.md",
+    }),
+    "release-notes-filename": Flags.string({
+      description: "Filename for generated release notes (default: RELEASE.md)",
+      default: "RELEASE.md",
+    }),
   };
 
   async run(): Promise<void> {
@@ -94,6 +102,8 @@ export default class Run extends Command {
         pushChanges: flags["push-changes"],
         adapter: flags.adapter,
         dryRun: flags["dry-run"],
+        changelogFilename: flags["changelog-filename"],
+        releaseNotesFilename: flags["release-notes-filename"],
       };
 
       const runner = new VersuRunner(options);

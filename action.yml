@@ -49,6 +49,14 @@ inputs:
     description: 'Language adapter (e.g., gradle). Auto-detected if not provided'
     required: false
     default: ''
+  changelog-filename:
+    description: 'Filename for generated changelog (default: CHANGELOG.md)'
+    required: false
+    default: 'CHANGELOG.md'
+  release-notes-filename:
+    description: 'Filename for generated release notes (default: RELEASE.md)'
+    required: false
+    default: 'RELEASE.md'
 outputs:
   bumped:
     description: 'Whether any module was bumped'
@@ -58,6 +66,8 @@ outputs:
     description: 'List of created tags'
   changelog-paths:
     description: 'Generated changelog files'
+  release-notes-paths:
+    description: 'Generated release notes files'
 runs:
   using: 'node20'
   main: 'packages/action/dist/index.js'
