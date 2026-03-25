@@ -133,6 +133,12 @@ export class VersuRunner {
           paths: result.changelogPaths,
         });
       }
+
+      if (result.releaseNotesPaths.length > 0) {
+        logger.info("Release notes files generated", {
+          paths: result.releaseNotesPaths,
+        });
+      }
     } else {
       logger.info("All versions up to date");
     }

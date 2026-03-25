@@ -13,6 +13,13 @@ import { getCurrentRepoUrl, parseRepoUrl } from "../git/index.js";
 import { isReleaseVersion } from "../semver/index.js";
 import { ModuleChangelogConfig } from "../config/types.js";
 import { GitOptions } from "../git/types.js";
+import Handlebars from "handlebars";
+
+Handlebars.registerHelper("eq", (a, b) => a === b);
+Handlebars.registerHelper("ne", (a, b) => a !== b);
+Handlebars.registerHelper("and", (a, b) => a && b);
+Handlebars.registerHelper("or", (a, b) => a || b);
+Handlebars.registerHelper("not", (a) => !a);
 
 /** Update or create a changelog file for a module. */
 export async function updateChangelogFile(
@@ -61,6 +68,7 @@ export async function generateChangelogsForModules(
   repoRoot: string,
   dryRun: boolean,
   filename: string,
+  multiModule: boolean,
   config?: ModuleChangelogConfig,
   provider?: string,
 ): Promise<string[]> {
@@ -79,6 +87,13 @@ export async function generateChangelogsForModules(
   const contextRepository = await buildContextRepository({ cwd: repoRoot });
 
   for (const moduleResult of moduleResults) {
+    if (moduleResult.type === "root" && multiModule) {
+      logger.info(
+        "Skipping root module for individual changelog generation since multi-module changelog enabled",
+        { moduleId: moduleResult.id },
+      );
+      continue;
+    }
     if (!moduleResult.declaredVersion) {
       logger.debug(
         "Module has no declared version, skipping changelog generation",

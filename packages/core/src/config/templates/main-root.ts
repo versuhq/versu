@@ -28,5 +28,7 @@ export const mainRootTemplate = `{{~#if prepend}}{{> header}}
 {{> commit}}
 {{/each}}
 {{/each}}
-{{#if prepend}}{{> footer}}{{/if}}
+{{#if prepend}}
+
+{{> footer}}{{/if}}
 `;

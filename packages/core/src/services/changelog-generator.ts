@@ -52,6 +52,7 @@ export class ChangelogGenerator {
       this.options.repoRoot,
       this.options.dryRun,
       this.options.filename,
+      this.options.multiModule,
       this.options.config?.module,
       this.options.provider,
     );
