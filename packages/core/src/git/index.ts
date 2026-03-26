@@ -90,10 +90,14 @@ const GIT_LOG_FORMAT = [
   "%an", // author name
   "-authorEmail-", // delimiter for author email
   "%ae", // author email
+  "-authorShortDate-", // delimiter for author short date
+  "%as", // author short date (ISO 8601 format)
   "-committerName-", // delimiter for committer name
   "%cn", // committer name
   "-committerEmail-", // delimiter for committer email
   "%ce", // committer email
+  "-committerShortDate-", // delimiter for commit short date
+  "%cs", // commit short date (ISO 8601 format)
   GIT_LOG_SPLIT_DELIMITER, // delimiter for end of commit
 ];
 
