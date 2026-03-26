@@ -1,17 +1,4 @@
-export const mainReleaseModuleTemplate = `{{~#if version}}
-{{~#if linkCompare}}
-## [{{version}}]({{repoUrl}}/compare/{{previousTag}}...{{currentTag}}) - {{date}}
-{{~else}}
-## [{{version}}]({{repoUrl}}/releases/tag/{{version}}) - {{date}}
-{{~/if}}
-{{~else}}
-{{~#if previousTag}}
-## [Unreleased]({{repoUrl}}/compare/{{previousTag}}...HEAD) - {{date}}
-{{~else}}
-## Unreleased
-{{~/if}}
-{{~/if}}
-
+export const mainReleaseModuleTemplate = `## What's changed
 {{#each commitGroups}}
 
 ### {{title}}
@@ -20,5 +7,12 @@ export const mainReleaseModuleTemplate = `{{~#if version}}
 {{> commit}}
 {{/each}}
 {{/each}}
+
+**Full Changelog:** {{#if linkCompare~}}
+[\`{{previousTag}}...{{currentTag}}\`]({{repoUrl}}/compare/{{previousTag}}...{{currentTag}})
+{{else~}}
+[\`{{version}}\`]({{repoUrl}}/releases/tag/{{version}})
+{{/if}}
+
 {{> footer}}
 `;

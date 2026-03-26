@@ -1,16 +1,18 @@
-export const mainReleaseRootTemplate = `{{#if moduleResults}}
+export const mainReleaseRootTemplate = `## What's changed
+{{#if moduleResults}}
 
 ### 🚀 Module Releases
 
 {{#each moduleResults}}
-{{~#if declaredVersion~}}
-{{~#if isRelease~}}
+{{#if declaredVersion}}
+{{#if (ne type "root")}}
+{{#if isRelease}}
 - [{{name}}]({{path}}/CHANGELOG.md) - [{{to}}]({{@root.repoUrl}}/compare/{{name}}@{{from}}...{{name}}@{{to}})
-{{~else~}}
+{{else}}
 - [{{name}}]({{path}}/CHANGELOG.md) - Unreleased
-{{~/if}}
-
-{{/if~}}
+{{/if}}
+{{/if}}
+{{/if}}
 {{/each}}
 {{/if}}
 
@@ -23,5 +25,12 @@ export const mainReleaseRootTemplate = `{{#if moduleResults}}
 {{> commit}}
 {{/each}}
 {{/each}}
+
+**Full Changelog:** {{#if linkCompare~}}
+[\`{{previousTag}}...{{currentTag}}\`]({{repoUrl}}/compare/{{previousTag}}...{{currentTag}})
+{{else~}}
+[\`{{version}}\`]({{repoUrl}}/releases/tag/{{version}})
+{{/if}}
+
 {{> footer}}
 `;
