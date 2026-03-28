@@ -6,7 +6,7 @@ export const mainModuleTemplate = `{{~#if prepend}}{{> header}}
 {{~#if linkCompare}}
 ## [{{version}}]({{repoUrl}}/compare/{{previousTag}}...{{currentTag}}) - {{date}}
 {{~else}}
-## [{{version}}]({{repoUrl}}/releases/tag/{{version}}) - {{date}}
+## [{{version}}]({{repoUrl}}/releases/tag/{{currentTag}}) - {{date}}
 {{~/if}}
 {{~else}}
 {{~#if previousTag}}

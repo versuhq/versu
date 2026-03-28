@@ -27,9 +27,9 @@ export const mainReleaseRootTemplate = `## What's changed
 {{/each}}
 
 **Full Changelog:** {{#if linkCompare~}}
-[\`{{previousTag}}...{{currentTag}}\`]({{repoUrl}}/compare/{{previousTag}}...{{currentTag}})
+[\`{{previousTagVersion}}...{{version}}\`]({{repoUrl}}/compare/{{previousTag}}...{{currentTag}})
 {{else~}}
-[\`{{version}}\`]({{repoUrl}}/releases/tag/{{version}})
+[\`{{version}}\`]({{repoUrl}}/releases/tag/{{currentTag}})
 {{/if}}
 
 {{> footer}}

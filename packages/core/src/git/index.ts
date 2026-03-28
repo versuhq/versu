@@ -496,7 +496,10 @@ export function getModuleTagName(moduleName: string, version: string): string {
  *          - Empty object: Unrecognized format
  * @internal
  */
-function parseTagName(tagName: string): { module?: string; version?: string } {
+export function parseTagName(tagName: string): {
+  module?: string;
+  version?: string;
+} {
   // Try to match module-specific tag pattern: moduleName@version
   // Regex: ^(.+)@(.+)$
   //   ^(.+)  - Start of string, capture group 1 (module name, greedy)

@@ -9,7 +9,12 @@ import {
 import { logger } from "../utils/logger.js";
 import { Commit } from "conventional-commits-parser";
 import { exists } from "../utils/file.js";
-import { getCurrentRepoUrl, parseRepoUrl } from "../git/index.js";
+import {
+  getCurrentRepoUrl,
+  getModuleTagName,
+  parseRepoUrl,
+  parseTagName,
+} from "../git/index.js";
 import { isReleaseVersion } from "../semver/index.js";
 import { ModuleChangelogConfig } from "../config/types.js";
 import { GitOptions } from "../git/types.js";
@@ -210,7 +215,7 @@ export async function generateRootChangelog(
   const isRelease = isReleaseVersion(moduleResult.to);
   const version = isRelease ? moduleResult.to : undefined;
   const currentTag = isRelease
-    ? `${moduleResult.name}@${moduleResult.to}`
+    ? getModuleTagName(moduleResult.name, moduleResult.to)
     : undefined;
   const previousTag = lastTag || undefined;
 
@@ -220,6 +225,9 @@ export async function generateRootChangelog(
       moduleResults,
       version: version,
       previousTag: previousTag,
+      previousTagVersion: previousTag
+        ? parseTagName(previousTag).version
+        : undefined,
       currentTag: currentTag,
       linkCompare: previousTag && currentTag ? true : false,
       ...contextRepository,
