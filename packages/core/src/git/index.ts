@@ -961,7 +961,7 @@ export async function getRepoName(options: GitOptions = {}): Promise<string> {
  */
 export async function getProviderName(
   options: GitOptions = {},
-): Promise<string | undefined> {
+): Promise<WellKnownProvider | undefined> {
   const host = await getRepoHost(options);
   if (host.includes("github.com")) {
     return "github";
@@ -971,3 +971,5 @@ export async function getProviderName(
     return "bitbucket";
   }
 }
+
+export type WellKnownProvider = "github" | "gitlab" | "bitbucket";

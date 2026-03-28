@@ -55,6 +55,7 @@ export async function run(): Promise<void> {
       changelogFilename,
       releaseNotesFilename,
       fromRef,
+      provider: 'github',
     };
     
     // Run Versu engine

@@ -86,6 +86,10 @@ export default class Run extends Command {
         "Git reference to compare from (e.g., previous tag or commit SHA)",
       required: false,
     }),
+    provider: Flags.string({
+      description: "Version control provider (e.g., github, gitlab)",
+      required: false,
+    }),
   };
 
   async run(): Promise<void> {
@@ -110,6 +114,7 @@ export default class Run extends Command {
         changelogFilename: flags["changelog-filename"],
         releaseNotesFilename: flags["release-notes-filename"],
         fromRef: flags["from-ref"],
+        provider: flags["provider"],
       };
 
       const runner = new VersuRunner(options);
