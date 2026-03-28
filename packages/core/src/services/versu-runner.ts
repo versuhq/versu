@@ -111,6 +111,7 @@ export class VersuRunner {
       provider: this.options.provider || "(auto-detect)",
       changelogFilename: this.options.changelogFilename || "CHANGELOG.md",
       releaseNotesFilename: this.options.releaseNotesFilename || "RELEASE.md",
+      fromRef: this.options.fromRef || "(no cutoff)",
     });
   }
 
