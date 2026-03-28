@@ -81,6 +81,11 @@ export default class Run extends Command {
       description: "Filename for generated release notes (default: RELEASE.md)",
       default: "RELEASE.md",
     }),
+    "from-ref": Flags.string({
+      description:
+        "Git reference to compare from (e.g., previous tag or commit SHA)",
+      required: false,
+    }),
   };
 
   async run(): Promise<void> {
@@ -104,6 +109,7 @@ export default class Run extends Command {
         dryRun: flags["dry-run"],
         changelogFilename: flags["changelog-filename"],
         releaseNotesFilename: flags["release-notes-filename"],
+        fromRef: flags["from-ref"],
       };
 
       const runner = new VersuRunner(options);

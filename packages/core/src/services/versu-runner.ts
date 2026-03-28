@@ -42,6 +42,7 @@ export type RunnerOptions = {
   readonly adapter?: string;
   readonly changelogFilename?: string;
   readonly releaseNotesFilename?: string;
+  readonly fromRef?: string;
   provider?: string;
 };
 
@@ -220,7 +221,9 @@ export class VersuRunner {
       this.options.repoRoot,
     );
 
-    return await this.commitAnalyzer.analyzeCommitsSinceLastRelease();
+    return await this.commitAnalyzer.analyzeCommitsSinceLastRelease(
+      this.options.fromRef,
+    );
   }
 
   private async calculatingBumpsAndApplyingChanges(

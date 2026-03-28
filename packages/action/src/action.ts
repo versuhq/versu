@@ -3,6 +3,7 @@ import { VersuRunner, RunnerOptions, initLogger, logger } from '@versu/core';
 import { ActionsLogger } from './logger.js';
 import { parseBooleanInput } from './utils/actions.js';
 import { VERSION, PACKAGE_NAME } from './version.js';
+import { githubContext } from './github/github-context.js';
 
 /**
  * Main entry point for Versu GitHub Action
@@ -31,6 +32,12 @@ export async function run(): Promise<void> {
     const changelogFilename = core.getInput('changelog-filename') || 'CHANGELOG.md';
     const releaseNotesFilename = core.getInput('release-notes-filename') || 'RELEASE.md';
 
+    let fromRef: string | undefined;
+    if (githubContext.isPullRequest()) {
+      const {baseSha} = githubContext.getPullRequestInformation();
+      fromRef = baseSha;
+    }
+
     // Create runner options
     const options: RunnerOptions = {
       repoRoot,
@@ -47,7 +54,9 @@ export async function run(): Promise<void> {
       adapter,
       changelogFilename,
       releaseNotesFilename,
+      fromRef,
     };
+    
     // Run Versu engine
     const runner = new VersuRunner(options);
     const result = await runner.run();
