@@ -8,6 +8,8 @@
 
 The core business logic powering Versu. This package is completely framework-agnostic and can be integrated into any TypeScript/JavaScript project, CI/CD system, or custom tooling.
 
+For comprehensive documentation, examples, and configuration options, please refer to the our website <https://versuhq.github.io/>.
+
 ## Installation
 
 ```bash
