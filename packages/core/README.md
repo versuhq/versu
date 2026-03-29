@@ -153,12 +153,12 @@ To add support for new project types, create a plugin package that implements th
 ```typescript
 import {
   AdapterIdentifier,
+  type AdapterMetadata,
   ModuleDetector,
+  type ProjectInformation,
   VersionUpdateStrategy,
+  type ModuleRegistry,
   ModuleSystemFactory,
-  AdapterMetadata,
-  RawProjectInformation,
-  ProcessedModuleChange,
 } from "@versu/core";
 
 // 1. Adapter identifier for auto-detection
