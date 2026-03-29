@@ -8,6 +8,8 @@
 
 Command-line interface for Versu. This CLI provides all the power of Versu's semantic versioning engine through an easy-to-use command-line tool, perfect for local development and custom CI/CD systems.
 
+For comprehensive documentation, examples, and configuration options, please refer to the our website <https://versuhq.github.io/>.
+
 ## Installation
 
 ### Global Installation
@@ -25,7 +27,7 @@ npm install --save-dev @versu/cli
 ### Using npx (no installation)
 
 ```bash
-px @versu/cli
+npx @versu/cli run
 ```
 
 ## Usage
@@ -35,7 +37,7 @@ px @versu/cli
 Navigate to your project root and run:
 
 ```bash
-versu
+versu run
 ```
 
 This will:
@@ -53,13 +55,13 @@ This will:
 Preview what would happen without making changes:
 
 ```bash
-versu --dry-run
+versu run --dry-run
 ```
 
 ### Specify Project Root
 
 ```bash
-versu /path/to/project
+versu run /path/to/project
 ```
 
 ### Specify Adapter
@@ -67,39 +69,38 @@ versu /path/to/project
 If auto-detection fails or you want to be explicit:
 
 ```bash
-versu --adapter gradle
+versu run --adapter gradle
 ```
 
 ## Command Reference
 
-### `versu [REPOSITORYROOT]`
+### `versu run <repositoryRoot> [options]`
 
 Calculate and apply semantic version changes.
 
 **Arguments:**
 
-- `REPOSITORYROOT` - Path to the repository root (default: `.`)
+- `<repositoryRoot>` - Path to the repository root (default: `.`)
 
 **Flags:**
 
 | Flag | Description | Default |
 | ------ | ------------- | --------- |
-| `--dry-run` | Run without writing or pushing changes | `false` |
-| `--adapter <value>` | Language adapter (e.g., gradle). Auto-detected if not provided | - |
-| `--push-tags` | Push tags to origin | `true` |
-| `--no-push-tags` | Don't push tags to origin | - |
 | `--prerelease-mode` | Generate pre-release versions instead of final versions | `false` |
 | `--prerelease-id <value>` | Pre-release identifier (e.g., alpha, beta, rc) | `alpha` |
 | `--bump-unchanged` | In prerelease mode, bump modules even when no changes are detected | `false` |
 | `--add-build-metadata` | Add build metadata with short SHA to all versions | `false` |
 | `--timestamp-versions` | Use timestamp-based prerelease identifiers (requires prerelease-mode) | `false` |
 | `--append-snapshot` | Add -SNAPSHOT suffix to all versions if supported by adapter | `false` |
-| `--push-changes` | Commit and push version changes and changelogs to remote | `true` |
-| `--no-push-changes` | Don't commit and push changes | - |
+| `--create-tags` | Create git tags for new versions | `true` |
 | `--generate-changelog` | Generate or update changelog files for changed modules | `true` |
-| `--no-generate-changelog` | Don't generate changelogs | - |
-
-> 📖 **Detailed Pre-release Documentation**: See [@versu/core PRERELEASE.md](../core/PRERELEASE.md) for comprehensive examples and use cases.
+| `--push-changes` | Commit and push version changes and changelogs to remote | `true` |
+| `--dry-run` | Run without writing or pushing changes | `false` |
+| `--adapter <value>` | Language adapter (e.g., gradle). Auto-detected if not provided | - |
+| `--changelog-filename <value>` | Filename for generated changelog | `CHANGELOG.md` |
+| `--release-notes-filename <value>` | Filename for generated release notes | `RELEASE.md` |
+| `--from-ref <value>` | Git ref to compare from (e.g., previous tag or commit SHA) | - |
+| `--provider <value>` | Version control provider (e.g., github, gitlab) | - |
 
 ## Examples
 
@@ -108,7 +109,7 @@ Calculate and apply semantic version changes.
 Apply semantic versions based on commits:
 
 ```bash
-versu
+versu run
 ```
 
 ### Pre-release Versions
@@ -116,7 +117,7 @@ versu
 Generate beta pre-release versions:
 
 ```bash
-versu --prerelease-mode --prerelease-id beta
+versu run --prerelease-mode --prerelease-id beta
 ```
 
 ### Timestamp Versions
@@ -124,7 +125,7 @@ versu --prerelease-mode --prerelease-id beta
 Generate timestamp-based pre-release versions for CI builds:
 
 ```bash
-versu --prerelease-mode --prerelease-id alpha --timestamp-versions --add-build-metadata
+versu run --prerelease-mode --prerelease-id alpha --timestamp-versions --add-build-metadata
 ```
 
 This generates versions like: `1.2.3-alpha.20251208.1530+abc1234`
@@ -134,7 +135,7 @@ This generates versions like: `1.2.3-alpha.20251208.1530+abc1234`
 Generate Gradle SNAPSHOT versions:
 
 ```bash
-versu --append-snapshot
+versu run --append-snapshot
 ```
 
 ### Development Workflow
@@ -142,7 +143,7 @@ versu --append-snapshot
 Bump all modules (even unchanged) for development:
 
 ```bash
-versu --prerelease-mode --bump-unchanged
+versu run --prerelease-mode --bump-unchanged
 ```
 
 ### Local Testing
@@ -150,7 +151,7 @@ versu --prerelease-mode --bump-unchanged
 Test without committing or pushing:
 
 ```bash
-versu --dry-run --no-push-changes --no-push-tags
+versu run --dry-run --no-push-changes --no-push-tags
 ```
 
 ### Manual Git Operations
@@ -158,7 +159,7 @@ versu --dry-run --no-push-changes --no-push-tags
 Calculate versions without automatic git operations:
 
 ```bash
-versu --no-push-changes --no-push-tags
+versu run --no-push-changes --no-push-tags
 ```
 
 Then manually review, commit, and push.
@@ -169,12 +170,29 @@ Versu CLI uses the same configuration system as the core library. Configuration 
 
 ### Supported Configuration Files
 
-1. `package.json` (in a `"versu"` property)
-2. `.versurc` (JSON or YAML)
+Versu will automatically search for configuration in the following order:
+
+1. `package.json` (under the `versu` key)
+2. `.versurc`
 3. `.versurc.json`
-4. `.versurc.yaml` / `.versurc.yml`
-5. `.versurc.js` (JavaScript)
-6. `versu.config.js` (JavaScript)
+4. `.versurc.yaml`
+5. `.versurc.yml`
+6. `.versurc.js`
+7. `.versurc.ts`
+8. `.versurc.mjs`
+9. `.versurc.cjs`
+10. `.config/versurc`
+11. `.config/versurc.json`
+12. `.config/versurc.yaml`
+13. `.config/versurc.yml`
+14. `.config/versurc.js`
+15. `.config/versurc.ts`
+16. `.config/versurc.mjs`
+17. `.config/versurc.cjs`
+18. `versu.config.js`
+19. `versu.config.ts`
+20. `versu.config.mjs`
+21. `versu.config.cjs`
 
 ### Configuration Example
 
@@ -182,32 +200,47 @@ Versu CLI uses the same configuration system as the core library. Configuration 
 
 ```json
 {
-  "versionRules": {
-    "defaultBump": "patch",
-    "commitTypeBumps": {
-      "feat": "minor",
-      "fix": "patch",
-      "perf": "patch",
-      "refactor": "patch",
-      "docs": "ignore",
-      "test": "ignore",
-      "chore": "ignore"
+  "versioning": {
+    "breakingChange": {
+      "stable": "major",
+      "prerelease": "premajor"
     },
-    "dependencyBumps": {
-      "major": "major",
-      "minor": "minor",
-      "patch": "patch"
+    "unknownCommitType": {
+      "stable": "patch",
+      "prerelease": "prepatch"
+    },
+    "commitTypes": {
+      "feat": {
+        "stable": "minor",
+        "prerelease": "preminor"
+      },
+      "fix": {
+        "stable": "patch",
+        "prerelease": "prepatch"
+      }
+    },
+    "cascadeRules": {
+      "stable": {
+        "major": "major",
+        "minor": "minor",
+        "patch": "patch"
+      },
+      "prerelease": {
+        "major": "premajor",
+        "minor": "preminor",
+        "patch": "prepatch"
+      }
     }
   },
   "changelog": {
     "root": {
       "context": {
-        "prependPlaceholder": "<!-- CHANGELOG -->"
+        "prependPlaceholder": "<!-- Next Version Placeholder -->"
       }
     },
     "module": {
       "context": {
-        "prependPlaceholder": "<!-- CHANGELOG -->"
+        "prependPlaceholder": "<!-- Next Version Placeholder -->"
       }
     }
   }
@@ -223,7 +256,7 @@ Versu supports [conventional-changelog-writer](https://github.com/conventional-c
 ```javascript
 // versu.config.js
 module.exports = {
-  versionRules: {
+  versioning: {
     // ... version rules
   },
   changelog: {
@@ -236,7 +269,8 @@ module.exports = {
         },
         transform: (commit, context) => {
           // Custom commit transformation
-          return commit;
+          const commitPatch = {};
+          return commitPatch;
         }
       }
     }
@@ -246,38 +280,7 @@ module.exports = {
 
 ## Gradle Project Support
 
-Gradle support is provided by the **[@versu/plugin-gradle][plugin-gradle]** package.
-
-The CLI supports Gradle projects with:
-
-- **Multi-module projects** via `settings.gradle(.kts)`
-- **Version management** through root `gradle.properties` file
-- **Dependency detection** via custom Gradle init script
-- **Both DSLs**: Groovy and Kotlin
-
-### Example Project Structure
-
-```text
-myproject/
-├── settings.gradle.kts
-├── build.gradle.kts
-├── gradle.properties      # All module versions defined here
-├── core/
-│   └── build.gradle.kts
-└── api/
-    └── build.gradle.kts
-```
-
-### Example `gradle.properties`
-
-```properties
-# Root module version
-version=1.0.0
-
-# Submodule versions
-core.version=2.1.0
-api.version=1.5.0
-```
+Gradle support is provided by the **[@versu/plugin-gradle][plugin-gradle]** package. For more details please refer to the [plugin documentation][plugin-gradle].
 
 ## Commit Message Format
 
@@ -316,12 +319,12 @@ Breaking changes trigger **major** version bumps:
 
 ```yaml
 - name: Install Versu CLI
-  run: npm install -g @versu/cli
+  run: npm i -g @versu/cli
 
 - name: Install Adapter
   run: |
     # install required adapters
-    npm install -g @versu/plugin-gradle
+    npm i -g @versu/plugin-gradle
 
 - name: Version modules
   run: versu run
@@ -332,8 +335,8 @@ Breaking changes trigger **major** version bumps:
 ```yaml
 version:
   script:
-    - npm install -g @versu/cli
-    - npm install -g @versu/plugin-gradle
+    - npm i -g @versu/cli
+    - npm i -g @versu/plugin-gradle
     - versu run
 ```
 
@@ -342,8 +345,8 @@ version:
 ```groovy
 stage('Version') {
   steps {
-    sh 'npm install -g @versu/cli'
-    sh 'npm install -g @versu/plugin-gradle'
+    sh 'npm i -g @versu/cli'
+    sh 'npm i -g @versu/plugin-gradle'
     sh 'versu run'
   }
 }
@@ -356,8 +359,8 @@ Add to your `package.json`:
 ```json
 {
   "scripts": {
-    "version": "versu --dry-run",
-    "version:release": "versu"
+    "version": "versu run --dry-run",
+    "version:release": "versu run"
   }
 }
 ```
@@ -423,7 +426,7 @@ npm run build
 
 ```bash
 # After building
-node dist/index.js --dry-run
+bin/dev.js --dry-run
 ```
 
 ### Publishing

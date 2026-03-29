@@ -17,16 +17,14 @@ npm install @versu/core
 ## Quick Start
 
 ```typescript
-import { VersuRunner } from '@versu/core';
+import { VersuRunner, type RunnerOptions } from '@versu/core';
 
-const runner = new VersuRunner({
+const options: RunnerOptions = {
   repoRoot: '/path/to/repository',
-  adapter: 'gradle', // Optional - auto-detected if not specified
-  dryRun: false,
-  pushTags: true,
-  pushChanges: true,
-  generateChangelog: true
-});
+  // ...other options as needed
+};
+
+const runner = new VersuRunner(options);
 
 const result = await runner.run();
 
@@ -35,42 +33,45 @@ console.log(`Changed modules:`, result.changedModules);
 console.log(`Created tags:`, result.createdTags);
 ```
 
-For detailed pre-release configuration and examples, see [PRERELEASE.md](./PRERELEASE.md).
-
 ## VersuRunner API
 
 ### Options
 
 ```typescript
-interface RunnerOptions {
-  repoRoot: string;                    // Path to repository root
-  adapter?: string;                    // Language adapter (auto-detected if not specified)
-  dryRun?: boolean;                    // Preview changes without writing (default: false)
-  pushTags?: boolean;                  // Push version tags (default: true)
-  prereleaseMode?: boolean;            // Generate pre-release versions (default: false)
-  prereleaseId?: string;               // Pre-release identifier: alpha, beta, rc, etc. (default: 'alpha')
-  bumpUnchanged?: boolean;             // Bump modules with no changes in prerelease mode (default: false)
-  addBuildMetadata?: boolean;          // Add build metadata with short SHA (default: false)
-  timestampVersions?: boolean;         // Use timestamp-based prerelease IDs (default: false)
-  appendSnapshot?: boolean;            // Add -SNAPSHOT suffix (Gradle only) (default: false)
-  pushChanges?: boolean;               // Commit and push version changes (default: true)
-  generateChangelog?: boolean;         // Generate changelogs (default: true)
-}
+type RunnerOptions = {
+  // Required
+  repoRoot: string;              // Absolute path to repository root
+  prereleaseMode: boolean;       // Generate pre-release versions
+  prereleaseId: string;          // Pre-release identifier, e.g. 'alpha', 'beta', 'rc'
+  bumpUnchanged: boolean;        // Bump modules with no changes (prerelease mode only)
+  addBuildMetadata: boolean;     // Append short SHA as build metadata (+sha)
+  timestampVersions: boolean;    // Use timestamp-based pre-release identifiers
+  appendSnapshot: boolean;       // Append -SNAPSHOT suffix (Gradle only)
+  createTags: boolean;           // Create git tags for bumped modules
+  generateChangelog: boolean;    // Generate CHANGELOG.md files
+  pushChanges: boolean;          // Commit and push version changes to remote
+  dryRun: boolean;               // Preview changes without writing anything
+
+  // Optional
+  adapter?: string;              // Language adapter ID (auto-detected if omitted)
+  changelogFilename?: string;    // Changelog filename (default: 'CHANGELOG.md')
+  releaseNotesFilename?: string; // Release notes filename (default: 'RELEASE.md')
+  fromRef?: string;              // Git ref to use as the lower boundary for commit analysis
+  provider?: string;             // CI provider name (auto-detected if omitted)
+};
 ```
 
 ### Result
 
 ```typescript
-interface RunnerResult {
+type RunnerResult = {
   bumped: boolean;                     // Whether any version was updated
-  changedModules: Array<{
-    name: string;                      // Module name
-    from: string;                      // Previous version
-    to: string;                        // New version
-  }>;
-  createdTags: string[];              // Git tags that were created
-  changelogPaths: string[];           // Generated changelog file paths
-}
+  discoveredModules: Array<Module>;    // All modules found in the repository
+  changedModules: Array<ModuleChangeResult>; // Modules whose version changed
+  createdTags: string[];               // Git tags that were created
+  changelogPaths: string[];            // Generated changelog file paths
+  releaseNotesPaths: string[];         // Generated release notes file paths
+};
 ```
 
 ## Configuration
@@ -79,76 +80,95 @@ Versu core uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for 
 
 ### Supported Configuration Files
 
-1. `package.json` (in a `"versu"` property)
-2. `.versurc.json`
-3. `.versurc.yaml` / `.versurc.yml`
-4. `.versurc.js` or `versu.config.js` (JavaScript)
+Versu will automatically search for configuration in the following order:
+
+1. `package.json` (under the `versu` key)
+2. `.versurc`
+3. `.versurc.json`
+4. `.versurc.yaml`
+5. `.versurc.yml`
+6. `.versurc.js`
+7. `.versurc.ts`
+8. `.versurc.mjs`
+9. `.versurc.cjs`
+10. `.config/versurc`
+11. `.config/versurc.json`
+12. `.config/versurc.yaml`
+13. `.config/versurc.yml`
+14. `.config/versurc.js`
+15. `.config/versurc.ts`
+16. `.config/versurc.mjs`
+17. `.config/versurc.cjs`
+18. `versu.config.js`
+19. `versu.config.ts`
+20. `versu.config.mjs`
+21. `versu.config.cjs`
 
 ### Configuration Example
 
 ```json
 {
-  "versionRules": {
-    "defaultBump": "patch",
-    "commitTypeBumps": {
-      "feat": "minor",
-      "fix": "patch",
-      "perf": "patch",
-      "docs": "ignore"
+  "versioning": {
+    "breakingChange": {
+      "stable": "major",
+      "prerelease": "premajor"
     },
-    "dependencyBumps": {
-      "major": "major",
-      "minor": "minor",
-      "patch": "patch"
+    "unknownCommitType": {
+      "stable": "patch",
+      "prerelease": "prepatch"
+    },
+    "commitTypes": {
+      "feat": {
+        "stable": "minor",
+        "prerelease": "preminor"
+      },
+      "fix": {
+        "stable": "patch",
+        "prerelease": "prepatch"
+      }
+    },
+    "cascadeRules": {
+      "stable": {
+        "major": "major",
+        "minor": "minor",
+        "patch": "patch"
+      },
+      "prerelease": {
+        "major": "premajor",
+        "minor": "preminor",
+        "patch": "prepatch"
+      }
     }
   },
   "changelog": {
     "root": {
       "context": {
-        "prependPlaceholder": "<!-- CHANGELOG -->"
+        "prependPlaceholder": "<!-- Next Version Placeholder -->"
       }
     },
     "module": {
       "context": {
-        "prependPlaceholder": "<!-- CHANGELOG -->"
+        "prependPlaceholder": "<!-- Next Version Placeholder -->"
       }
     }
   }
 }
 ```
 
-**Changelog Configuration:**
+**Changelog & Release Notes Configuration:**
 
 - `changelog.root` - Configuration for root-level CHANGELOG.md generation
 - `changelog.module` - Configuration for per-module CHANGELOG.md generation
-- `context.prependPlaceholder` - Placeholder string in changelog files where new entries are inserted
-- `options` - Advanced changelog generation options (templates, grouping, sorting)
+- `changelog.context.prependPlaceholder` - Placeholder string in changelog files where new entries are inserted
+- `changelog.context.options` - Advanced changelog generation options (templates, grouping, sorting)
 
-Versu uses [conventional-changelog-writer](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer) for changelog generation. You can pass any options supported by conventional-changelog-writer through the `options` field. For advanced customization with functions (like `transform`, `commitsGroupsSort`), use JavaScript configuration files (`.versurc.js` or `versu.config.js`).
+Release notes follows the same pattern under `release` key.
+
+Versu uses [conventional-changelog-writer](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-writer) for changelog and release notes generation. You can pass any options supported by conventional-changelog-writer through the `options` field. For advanced customization with functions (like `transform`, `commitsGroupsSort`), use JavaScript configuration files (`.versurc.js` or `versu.config.js`).
 
 ## Adapters
 
-### Gradle Adapter
-
-Gradle support is provided by the **[@versu/plugin-gradle][plugin-gradle]** package.
-
-**Features:**
-
-- Multi-module project detection
-- Version management through root `gradle.properties`
-- Dependency detection
-- Both Groovy and Kotlin DSL support
-
-**Version Format:**
-
-```properties
-# Root module
-version=1.0.0
-
-# Submodules
-core.version=2.1.0
-api.version=1.5.0
-```
+Versu supports multiple language ecosystems through adapters. The core package includes a plugin system for adding new adapter support. In order to support additional ecosystems, you need to implement the required interfaces and register them as plugins.
 
 ### Creating Custom Adapters
 
@@ -180,15 +200,34 @@ class MyAdapterIdentifier implements AdapterIdentifier {
 
 // 2. Module detector for discovering project structure
 class MyModuleDetector implements ModuleDetector {
-  async detectModules(projectRoot: string): Promise<RawProjectInformation> {
+  constructor(
+    readonly repoRoot: string,
+    readonly outputFile: string
+  ) {}
+
+  async detect(): Promise<ProjectInformation> {
     // Discover and return modules and dependencies
     return {
+      moduleIds: ['root', 'module-a'],
       modules: [
-        { name: 'root', path: projectRoot, version: '1.0.0' },
-        { name: 'module-a', path: join(projectRoot, 'module-a'), version: '2.0.0' }
-      ],
-      dependencies: [
-        { from: 'module-a', to: 'root' }
+        { 
+          id: 'root', 
+          name: 'root', 
+          path: this.repoRoot, 
+          type: 'root', 
+          affectedModules: new Set(['module-a']), 
+          version: '1.0.0', 
+          declaredVersion: false 
+        },
+        { 
+          id: 'module-a', 
+          name: 'module-a', 
+          path: join(this.repoRoot, 'module-a'), 
+          type: 'module', 
+          affectedModules: new Set([]), 
+          version: '2.0.0', 
+          declaredVersion: true
+        }
       ]
     };
   }
@@ -196,12 +235,13 @@ class MyModuleDetector implements ModuleDetector {
 
 // 3. Version update strategy for applying changes
 class MyVersionUpdateStrategy implements VersionUpdateStrategy {
-  async applyVersionUpdates(
-    changes: ProcessedModuleChange[],
-    projectRoot: string
+  constructor(private readonly moduleRegistry: ModuleRegistry) {}
+  
+  async writeVersionUpdates(
+    moduleVersions: Map<string, string>,
   ): Promise<void> {
     // Apply version changes to build files
-    for (const change of changes) {
+    for (const [moduleId, newVersion] of moduleVersions) {
       // Update version in your project's format
     }
   }
@@ -209,12 +249,14 @@ class MyVersionUpdateStrategy implements VersionUpdateStrategy {
 
 // 4. Module system factory to tie it all together
 class MyModuleSystemFactory implements ModuleSystemFactory {
-  createDetector(): ModuleDetector {
-    return new MyModuleDetector();
+  constructor(private readonly repoRoot: string) {}
+
+  createDetector(outputFile: string): ModuleDetector {
+    return new MyModuleDetector(this.repoRoot, outputFile);
   }
   
-  createVersionUpdateStrategy(): VersionUpdateStrategy {
-    return new MyVersionUpdateStrategy();
+  createVersionUpdateStrategy(moduleRegistry: ModuleRegistry): VersionUpdateStrategy {
+    return new MyVersionUpdateStrategy(moduleRegistry);
   }
 }
 ```
