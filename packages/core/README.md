@@ -17,10 +17,10 @@ npm install @versu/core
 ## Quick Start
 
 ```typescript
-import { VersuRunner, type RunnerOptions } from '@versu/core';
+import { VersuRunner, type RunnerOptions } from "@versu/core";
 
 const options: RunnerOptions = {
-  repoRoot: '/path/to/repository',
+  repoRoot: "/path/to/repository",
   // ...other options as needed
 };
 
@@ -40,24 +40,24 @@ console.log(`Created tags:`, result.createdTags);
 ```typescript
 type RunnerOptions = {
   // Required
-  repoRoot: string;              // Absolute path to repository root
-  prereleaseMode: boolean;       // Generate pre-release versions
-  prereleaseId: string;          // Pre-release identifier, e.g. 'alpha', 'beta', 'rc'
-  bumpUnchanged: boolean;        // Bump modules with no changes (prerelease mode only)
-  addBuildMetadata: boolean;     // Append short SHA as build metadata (+sha)
-  timestampVersions: boolean;    // Use timestamp-based pre-release identifiers
-  appendSnapshot: boolean;       // Append -SNAPSHOT suffix (Gradle only)
-  createTags: boolean;           // Create git tags for bumped modules
-  generateChangelog: boolean;    // Generate CHANGELOG.md files
-  pushChanges: boolean;          // Commit and push version changes to remote
-  dryRun: boolean;               // Preview changes without writing anything
+  repoRoot: string; // Absolute path to repository root
+  prereleaseMode: boolean; // Generate pre-release versions
+  prereleaseId: string; // Pre-release identifier, e.g. 'alpha', 'beta', 'rc'
+  bumpUnchanged: boolean; // Bump modules with no changes (prerelease mode only)
+  addBuildMetadata: boolean; // Append short SHA as build metadata (+sha)
+  timestampVersions: boolean; // Use timestamp-based pre-release identifiers
+  appendSnapshot: boolean; // Append -SNAPSHOT suffix (Gradle only)
+  createTags: boolean; // Create git tags for bumped modules
+  generateChangelog: boolean; // Generate CHANGELOG.md files
+  pushChanges: boolean; // Commit and push version changes to remote
+  dryRun: boolean; // Preview changes without writing anything
 
   // Optional
-  adapter?: string;              // Language adapter ID (auto-detected if omitted)
-  changelogFilename?: string;    // Changelog filename (default: 'CHANGELOG.md')
+  adapter?: string; // Language adapter ID (auto-detected if omitted)
+  changelogFilename?: string; // Changelog filename (default: 'CHANGELOG.md')
   releaseNotesFilename?: string; // Release notes filename (default: 'RELEASE.md')
-  fromRef?: string;              // Git ref to use as the lower boundary for commit analysis
-  provider?: string;             // CI provider name (auto-detected if omitted)
+  fromRef?: string; // Git ref to use as the lower boundary for commit analysis
+  provider?: string; // CI provider name (auto-detected if omitted)
 };
 ```
 
@@ -65,12 +65,12 @@ type RunnerOptions = {
 
 ```typescript
 type RunnerResult = {
-  bumped: boolean;                     // Whether any version was updated
-  discoveredModules: Array<Module>;    // All modules found in the repository
+  bumped: boolean; // Whether any version was updated
+  discoveredModules: Array<Module>; // All modules found in the repository
   changedModules: Array<ModuleChangeResult>; // Modules whose version changed
-  createdTags: string[];               // Git tags that were created
-  changelogPaths: string[];            // Generated changelog file paths
-  releaseNotesPaths: string[];         // Generated release notes file paths
+  createdTags: string[]; // Git tags that were created
+  changelogPaths: string[]; // Generated changelog file paths
+  releaseNotesPaths: string[]; // Generated release notes file paths
 };
 ```
 
@@ -175,26 +175,26 @@ Versu supports multiple language ecosystems through adapters. The core package i
 To add support for new project types, create a plugin package that implements the adapter interfaces:
 
 ```typescript
-import { 
+import {
   AdapterIdentifier,
   ModuleDetector,
   VersionUpdateStrategy,
   ModuleSystemFactory,
   AdapterMetadata,
   RawProjectInformation,
-  ProcessedModuleChange
-} from '@versu/core';
+  ProcessedModuleChange,
+} from "@versu/core";
 
 // 1. Adapter identifier for auto-detection
 class MyAdapterIdentifier implements AdapterIdentifier {
   readonly metadata: AdapterMetadata = {
-    id: 'my-adapter',
-    capabilities: { supportsSnapshots: false }
+    id: "my-adapter",
+    capabilities: { supportsSnapshots: false },
   };
 
   async accept(projectRoot: string): Promise<boolean> {
     // Check for adapter-specific files
-    return await fileExists(path.join(projectRoot, 'my-build-file'));
+    return await fileExists(path.join(projectRoot, "my-build-file"));
   }
 }
 
@@ -202,33 +202,33 @@ class MyAdapterIdentifier implements AdapterIdentifier {
 class MyModuleDetector implements ModuleDetector {
   constructor(
     readonly repoRoot: string,
-    readonly outputFile: string
+    readonly outputFile: string,
   ) {}
 
   async detect(): Promise<ProjectInformation> {
     // Discover and return modules and dependencies
     return {
-      moduleIds: ['root', 'module-a'],
+      moduleIds: ["root", "module-a"],
       modules: [
-        { 
-          id: 'root', 
-          name: 'root', 
-          path: this.repoRoot, 
-          type: 'root', 
-          affectedModules: new Set(['module-a']), 
-          version: '1.0.0', 
-          declaredVersion: false 
+        {
+          id: "root",
+          name: "root",
+          path: this.repoRoot,
+          type: "root",
+          affectedModules: new Set(["module-a"]),
+          version: "1.0.0",
+          declaredVersion: false,
         },
-        { 
-          id: 'module-a', 
-          name: 'module-a', 
-          path: join(this.repoRoot, 'module-a'), 
-          type: 'module', 
-          affectedModules: new Set([]), 
-          version: '2.0.0', 
-          declaredVersion: true
-        }
-      ]
+        {
+          id: "module-a",
+          name: "module-a",
+          path: join(this.repoRoot, "module-a"),
+          type: "module",
+          affectedModules: new Set([]),
+          version: "2.0.0",
+          declaredVersion: true,
+        },
+      ],
     };
   }
 }
@@ -236,7 +236,7 @@ class MyModuleDetector implements ModuleDetector {
 // 3. Version update strategy for applying changes
 class MyVersionUpdateStrategy implements VersionUpdateStrategy {
   constructor(private readonly moduleRegistry: ModuleRegistry) {}
-  
+
   async writeVersionUpdates(
     moduleVersions: Map<string, string>,
   ): Promise<void> {
@@ -254,8 +254,10 @@ class MyModuleSystemFactory implements ModuleSystemFactory {
   createDetector(outputFile: string): ModuleDetector {
     return new MyModuleDetector(this.repoRoot, outputFile);
   }
-  
-  createVersionUpdateStrategy(moduleRegistry: ModuleRegistry): VersionUpdateStrategy {
+
+  createVersionUpdateStrategy(
+    moduleRegistry: ModuleRegistry,
+  ): VersionUpdateStrategy {
     return new MyVersionUpdateStrategy(moduleRegistry);
   }
 }
@@ -264,19 +266,20 @@ class MyModuleSystemFactory implements ModuleSystemFactory {
 Then create a plugin:
 
 ```typescript
-import type { PluginContract } from '@versu/core';
+import type { PluginContract } from "@versu/core";
 
 const myPlugin: PluginContract = {
-  id: 'my-adapter',
-  name: 'My Adapter',
-  description: 'Support for my build system',
-  version: '1.0.0',
-  author: 'Your Name',
+  id: "my-adapter",
+  name: "My Adapter",
+  description: "Support for my build system",
+  version: "1.0.0",
+  author: "Your Name",
   adapters: [
     {
-      id: 'my-adapter',
+      id: "my-adapter",
       adapterIdentifier: () => new MyAdapterIdentifier(),
-      moduleSystemFactory: (repoRoot: string) => new MyModuleSystemFactory(repoRoot),
+      moduleSystemFactory: (repoRoot: string) =>
+        new MyModuleSystemFactory(repoRoot),
     },
   ],
 };
