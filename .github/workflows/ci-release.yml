@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"   # e.g. v1.0.0, v0.3.2
+      - "v*.*.*"
 
 jobs:
   release:
@@ -38,7 +38,6 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # Option A: publish all workspaces in one go (npm 8+)
       - name: Publish workspaces
         run: |
           npm publish --workspaces --access public
