@@ -271,31 +271,7 @@ steps:
 
 Versu uses [cosmiconfig](https://github.com/davidtheclark/cosmiconfig) for flexible configuration loading and [Zod](https://github.com/colinhacks/zod) for type-safe validation. Configuration files are automatically detected in your repository root.
 
-### Supported Configuration Files
-
-Versu will automatically search for configuration in the following order:
-
-1. `package.json` (under the `versu` key)
-2. `.versurc`
-3. `.versurc.json`
-4. `.versurc.yaml`
-5. `.versurc.yml`
-6. `.versurc.js`
-7. `.versurc.ts`
-8. `.versurc.mjs`
-9. `.versurc.cjs`
-10. `.config/versurc`
-11. `.config/versurc.json`
-12. `.config/versurc.yaml`
-13. `.config/versurc.yml`
-14. `.config/versurc.js`
-15. `.config/versurc.ts`
-16. `.config/versurc.mjs`
-17. `.config/versurc.cjs`
-18. `versu.config.js`
-19. `versu.config.ts`
-20. `versu.config.mjs`
-21. `versu.config.cjs`
+You can provide configuration in any of the supported config files (e.g., `.versurc`, `versu.config.js`, etc.) or via `package.json` under the `versu` key. For the full list please refer to [cosmiconfig search places documentation](https://github.com/cosmiconfig/cosmiconfig?tab=readme-ov-file#searchplaces).
 
 ### Configuration Options
 
