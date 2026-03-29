@@ -82,7 +82,7 @@ jobs:
   prerelease-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # This is required to analyze commit history for version bumps
           fetch-depth: 0
@@ -115,7 +115,7 @@ jobs:
   ci-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # This is required to analyze commit history for version bumps
           fetch-depth: 0
@@ -154,7 +154,7 @@ jobs:
   gradle-snapshot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # This is required to analyze commit history for version bumps
           fetch-depth: 0
@@ -682,7 +682,7 @@ If you get permission errors when pushing:
 2. Use a token with write permissions:
 
    ```yaml
-   - uses: actions/checkout@v4
+   - uses: actions/checkout@v6
      with:
        token: ${{ secrets.PAT_TOKEN }}  # Personal access token
    ```

@@ -5,8 +5,6 @@ on:
     tags:
       - "v*.*.*"   # e.g. v1.0.0, v0.3.2
 
-  workflow_dispatch: {}  # optional manual trigger
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -16,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           registry-url: "https://registry.npmjs.org"
