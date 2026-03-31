@@ -59,6 +59,11 @@ export default class Run extends Command {
       default: true,
       allowNo: true,
     }),
+    "generate-release-notes": Flags.boolean({
+      description: "Generate release notes summarizing all changes",
+      default: true,
+      allowNo: true,
+    }),
     "push-changes": Flags.boolean({
       description: "Commit and push version changes and changelogs to remote",
       default: true,
@@ -81,6 +86,15 @@ export default class Run extends Command {
       description: "Filename for generated release notes (default: RELEASE.md)",
       default: "RELEASE.md",
     }),
+    "from-ref": Flags.string({
+      description:
+        "Git reference to compare from (e.g., previous tag or commit SHA)",
+      required: false,
+    }),
+    provider: Flags.string({
+      description: "Version control provider (e.g., github, gitlab)",
+      required: false,
+    }),
   };
 
   async run(): Promise<void> {
@@ -99,11 +113,14 @@ export default class Run extends Command {
         appendSnapshot: flags["append-snapshot"],
         createTags: flags["create-tags"],
         generateChangelog: flags["generate-changelog"],
+        generateReleaseNotes: flags["generate-release-notes"],
         pushChanges: flags["push-changes"],
         adapter: flags.adapter,
         dryRun: flags["dry-run"],
         changelogFilename: flags["changelog-filename"],
         releaseNotesFilename: flags["release-notes-filename"],
+        fromRef: flags["from-ref"],
+        provider: flags["provider"],
       };
 
       const runner = new VersuRunner(options);

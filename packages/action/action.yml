@@ -34,6 +34,10 @@ inputs:
     description: 'Generate or update changelog files for changed modules'
     required: false
     default: 'true'
+  generate-release-notes:
+    description: 'Generate release notes summarizing all changes'
+    required: false
+    default: 'true'
   push-changes:
     description: 'Commit and push version changes and changelogs to remote'
     required: false

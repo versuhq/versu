@@ -3,9 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"   # e.g. v1.0.0, v0.3.2
-
-  workflow_dispatch: {}  # optional manual trigger
+      - "v*.*.*"
 
 jobs:
   release:
@@ -16,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
           registry-url: "https://registry.npmjs.org"
@@ -40,7 +38,6 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # Option A: publish all workspaces in one go (npm 8+)
       - name: Publish workspaces
         run: |
           npm publish --workspaces --access public

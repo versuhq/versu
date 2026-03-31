@@ -6,7 +6,7 @@
 
 import { type Commit, CommitParser } from "conventional-commits-parser";
 import { logger } from "../utils/logger.js";
-import { execa } from "execa";
+import { execa, ExecaError } from "execa";
 import { type Module } from "../index.js";
 import type { GitOptions, GitTag } from "./types.js";
 
@@ -24,12 +24,14 @@ const commitParser = new CommitParser({
  * @param projectInfo - Module information including path and type
  * @param options - Git operation options
  * @param excludePaths - Paths to exclude using git pathspec syntax
+ * @param fromRef - Optional Git reference to start analysis from (i.e. the cutoff point for commits to include)
  * @returns Promise resolving to array of parsed commits (oldest to newest)
  */
 export async function getCommitsSinceLastTag(
   projectInfo: Module,
   options: GitOptions = {},
   excludePaths: string[] = [],
+  fromRef?: string,
 ): Promise<{ commits: Commit[]; lastTag: string | null }> {
   // Resolve the working directory, defaulting to current process directory
   const cwd = options.cwd || process.cwd();
@@ -43,7 +45,7 @@ export async function getCommitsSinceLastTag(
     // Find the most recent tag for this module
     // For root modules, this finds general tags (v1.0.0)
     // For submodules, this finds module-specific tags (module@1.0.0)
-    const lastTag = await getLastTagForModule(projectInfo, { cwd });
+    const lastTag = await getLastTagForModule(projectInfo, fromRef, { cwd });
 
     logger.debug("Last tag for module found", {
       moduleName: projectInfo.name,
@@ -53,8 +55,12 @@ export async function getCommitsSinceLastTag(
 
     // Build the git revision range
     // If tag exists: 'tag..HEAD' means commits after tag up to HEAD
-    // If no tag: empty string means all commits in history
-    const range = lastTag ? `${lastTag}..HEAD` : "";
+    // If no tag: empty string means all commits in history (or from fromRef if provided)
+    const range = lastTag
+      ? `${lastTag}..HEAD`
+      : fromRef
+        ? `${fromRef}..HEAD`
+        : "";
     const commits = await getCommitsInRange(
       range,
       projectInfo.path,
@@ -66,7 +72,7 @@ export async function getCommitsSinceLastTag(
     // If tag lookup fails for any reason, fall back to all commits
     // This ensures we always have commit history for version determination
     const commits = await getCommitsInRange(
-      "",
+      fromRef ? `${fromRef}..HEAD` : "",
       projectInfo.path,
       { cwd },
       excludePaths,
@@ -213,14 +219,56 @@ export function isBreakingCommit(commit: Commit): boolean {
 }
 
 /**
+ * Checks whether one commit is strictly before another in git history.
+ * Returns true when `commitA` is an ancestor of `commitB` (and not the same commit).
+ * @param commitA - Candidate older commit hash
+ * @param commitB - Candidate newer commit hash
+ * @param options - Git operation options
+ * @returns Promise resolving to true if commitA is before commitB, otherwise false
+ * @throws {Error} If git command fails for reasons other than "not an ancestor"
+ */
+export async function isCommitBefore(
+  commitA: string,
+  commitB: string,
+  options: GitOptions = {},
+): Promise<boolean> {
+  const cwd = options.cwd || process.cwd();
+
+  if (!commitA.trim() || !commitB.trim()) {
+    throw new Error("Both commit hashes are required");
+  }
+
+  if (commitA === commitB) {
+    return false;
+  }
+
+  try {
+    await execa("git", ["merge-base", "--is-ancestor", commitA, commitB], {
+      cwd,
+    });
+    return true;
+  } catch (error) {
+    if (error instanceof ExecaError && error.exitCode === 1) {
+      return false;
+    }
+
+    throw new Error(
+      `Failed to compare commits "${commitA}" and "${commitB}": ${error}`,
+    );
+  }
+}
+
+/**
  * Finds the most recent git tag for a specific module with fallback to general tags.
  * Searches module-specific tags first (moduleName@*), then falls back to general tags.
  * @param projectInfo - Module information for tag pattern construction
  * @param options - Git operation options
+ * @param fromRef - Optional Git reference to start analysis from (i.e. the cutoff point for commits to include)
  * @returns Most recent tag name or null if no tags exist
  */
 export async function getLastTagForModule(
   projectInfo: Module,
+  fromRef?: string,
   options: GitOptions = {},
 ): Promise<string | null> {
   // Resolve working directory, defaulting to current directory
@@ -255,7 +303,18 @@ export async function getLastTagForModule(
 
       // If we found module-specific tags, return the first (most recent)
       if (stdout.trim()) {
-        return stdout.trim().split("\n")[0] || null;
+        const tags = stdout.trim().split("\n").filter(Boolean);
+
+        if (!fromRef) return tags[0] || null;
+
+        for (const tag of tags) {
+          const isBefore = await isCommitBefore(fromRef, tag, { cwd });
+          if (isBefore) {
+            return tag;
+          }
+        }
+
+        return null;
       }
     }
 
@@ -267,13 +326,15 @@ export async function getLastTagForModule(
       // --tags: Consider all tags (not just annotated)
       // --abbrev=0: Don't show commit hash suffix
 
+      const range = fromRef ? `${fromRef}..HEAD` : "HEAD";
+
       logger.debug("Executing git command", {
-        command: "git describe --tags --abbrev=0 HEAD",
+        command: `git describe --tags --abbrev=0 ${range}`,
       });
 
       const { stdout: fallbackOutput } = await execa(
         "git",
-        ["describe", "--tags", "--abbrev=0", "HEAD"],
+        ["describe", "--tags", "--abbrev=0", range],
         {
           cwd,
         },
@@ -435,7 +496,10 @@ export function getModuleTagName(moduleName: string, version: string): string {
  *          - Empty object: Unrecognized format
  * @internal
  */
-function parseTagName(tagName: string): { module?: string; version?: string } {
+export function parseTagName(tagName: string): {
+  module?: string;
+  version?: string;
+} {
   // Try to match module-specific tag pattern: moduleName@version
   // Regex: ^(.+)@(.+)$
   //   ^(.+)  - Start of string, capture group 1 (module name, greedy)
@@ -900,7 +964,7 @@ export async function getRepoName(options: GitOptions = {}): Promise<string> {
  */
 export async function getProviderName(
   options: GitOptions = {},
-): Promise<string | undefined> {
+): Promise<WellKnownProvider | undefined> {
   const host = await getRepoHost(options);
   if (host.includes("github.com")) {
     return "github";
@@ -910,3 +974,5 @@ export async function getProviderName(
     return "bitbucket";
   }
 }
+
+export type WellKnownProvider = "github" | "gitlab" | "bitbucket";

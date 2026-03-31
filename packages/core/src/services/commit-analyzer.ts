@@ -25,13 +25,15 @@ export class CommitAnalyzer {
   /**
    * Analyzes commits since the last release for all modules.
    *
+   * @param fromRef - Optional Git reference to start analysis from
+   * (i.e. the cutoff point for commits to include)
    * @returns Map of module ID to array of {@link Commit} objects
    * @throws {Error} If git operations fail
    */
-  async analyzeCommitsSinceLastRelease(): Promise<
-    Map<string, { commits: Commit[]; lastTag: string | null }>
-  > {
-    logger.info("Analyzing commits since last release");
+  async analyzeCommitsSinceLastRelease(
+    fromRef?: string,
+  ): Promise<Map<string, { commits: Commit[]; lastTag: string | null }>> {
+    logger.info("Analyzing commits since last release", { fromRef });
 
     const moduleCommits = new Map<
       string,
@@ -52,6 +54,7 @@ export class CommitAnalyzer {
         projectInfo,
         { cwd: this.repoRoot },
         childModulePaths,
+        fromRef,
       );
 
       // Store commits for this module

@@ -1,51 +1,49 @@
 import { logger } from "../utils/logger.js";
 import {
-  generateChangelogsForModules,
-  generateRootChangelog,
+  renderChangesForModules,
+  renderRootChanges,
 } from "../changelog/index.js";
 import { ModuleChangeResult } from "./version-applier.js";
 import { Commit } from "conventional-commits-parser";
-import { ChangelogConfig } from "../config/types.js";
+import { ReleaseChangesConfig } from "../config/types.js";
 
-export type ChangelogGeneratorOptions = {
-  generateChangelog: boolean;
+export type ChangesRendererOptions = {
+  render: boolean;
   repoRoot: string;
   dryRun: boolean;
   multiModule: boolean;
   filename: string;
-  config?: ChangelogConfig;
+  config?: ReleaseChangesConfig;
   provider?: string;
 };
 
-export class ChangelogGenerator {
-  constructor(private readonly options: ChangelogGeneratorOptions) {}
+export class ChangesRenderer {
+  constructor(private readonly options: ChangesRendererOptions) {}
 
-  async generateChangelogs(
+  async render(
     moduleResults: ModuleChangeResult[],
     moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
   ): Promise<string[]> {
-    if (!this.options.generateChangelog) {
-      logger.info("Changelog generation disabled, skipping");
+    if (!this.options.render) {
+      logger.info("Rendering disabled, skipping");
       return [];
     }
 
     if (moduleResults.length === 0) {
-      logger.info(
-        "No modules with declared versions, skipping changelog generation",
-      );
+      logger.info("No modules with declared versions, skipping rendering");
       return [];
     }
 
     if (moduleResults.length > 1 && !this.options.multiModule) {
       throw new Error(
-        "Multi-module changelog generation disabled but multiple modules being processed",
+        "Multi-module rendering disabled but multiple modules being processed",
       );
     }
 
-    logger.info("Generating changelogs");
+    logger.info("Rendering changes");
 
-    // Generate individual module changelogs
-    const changelogPaths = await generateChangelogsForModules(
+    // Generate individual module changes
+    const renderedPaths = await renderChangesForModules(
       moduleResults,
       async (moduleId) =>
         moduleCommits.get(moduleId) || { commits: [], lastTag: null },
@@ -59,11 +57,11 @@ export class ChangelogGenerator {
 
     if (this.options.multiModule) {
       logger.info(
-        "Multi-module changelog generation enabled, generating root changelog",
+        "Multi-module changes generation enabled, generating root changes",
       );
 
-      // Generate root changelog
-      const rootChangelogPath = await generateRootChangelog(
+      // Generate root changes
+      const rootChangesPath = await renderRootChanges(
         moduleResults,
         async (moduleId) =>
           moduleCommits.get(moduleId) || { commits: [], lastTag: null },
@@ -74,14 +72,14 @@ export class ChangelogGenerator {
         this.options.provider,
       );
 
-      if (rootChangelogPath) {
-        changelogPaths.push(rootChangelogPath);
+      if (rootChangesPath) {
+        renderedPaths.push(rootChangesPath);
       }
     }
 
-    logger.info("Changelog generation completed", {
-      fileCount: changelogPaths.length,
+    logger.info("Changes generation completed", {
+      fileCount: renderedPaths.length,
     });
-    return changelogPaths;
+    return renderedPaths;
   }
 }

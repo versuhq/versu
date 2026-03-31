@@ -12,7 +12,7 @@ import {
   VersionApplierOptions,
   ModuleChangeResult,
 } from "./version-applier.js";
-import { ChangelogGenerator } from "./changelog-generator.js";
+import { ChangesRenderer } from "./changes-renderer.js";
 import { GitOperations, GitOperationsOptions } from "./git-operations.js";
 import { AdapterMetadata } from "./adapter-identifier.js";
 import { AdapterMetadataProvider } from "./adapter-metadata-provider.js";
@@ -37,11 +37,13 @@ export type RunnerOptions = {
   readonly appendSnapshot: boolean;
   readonly createTags: boolean;
   readonly generateChangelog: boolean;
+  readonly generateReleaseNotes: boolean;
   readonly pushChanges: boolean;
   readonly dryRun: boolean;
   readonly adapter?: string;
   readonly changelogFilename?: string;
   readonly releaseNotesFilename?: string;
+  readonly fromRef?: string;
   provider?: string;
 };
 
@@ -67,7 +69,7 @@ export class VersuRunner {
   private commitAnalyzer!: CommitAnalyzer;
   private versionBumper!: VersionBumper; // Will be initialized in run()
   private versionApplier!: VersionApplier; // Will be initialized in run()
-  private changelogGenerator!: ChangelogGenerator; // Will be initialized in run()
+  private changelogGenerator!: ChangesRenderer; // Will be initialized in run()
   private gitOperations!: GitOperations; // Will be initialized in run()
   private adapterIdentifierRegistry!: AdapterIdentifierRegistry;
   private adapterMetadataProvider!: AdapterMetadataProvider;
@@ -110,6 +112,7 @@ export class VersuRunner {
       provider: this.options.provider || "(auto-detect)",
       changelogFilename: this.options.changelogFilename || "CHANGELOG.md",
       releaseNotesFilename: this.options.releaseNotesFilename || "RELEASE.md",
+      fromRef: this.options.fromRef || "(no cutoff)",
     });
   }
 
@@ -220,7 +223,9 @@ export class VersuRunner {
       this.options.repoRoot,
     );
 
-    return await this.commitAnalyzer.analyzeCommitsSinceLastRelease();
+    return await this.commitAnalyzer.analyzeCommitsSinceLastRelease(
+      this.options.fromRef,
+    );
   }
 
   private async calculatingBumpsAndApplyingChanges(
@@ -283,8 +288,8 @@ export class VersuRunner {
     moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
     multiModule: boolean,
   ): Promise<string[]> {
-    this.changelogGenerator = new ChangelogGenerator({
-      generateChangelog: this.options.generateChangelog,
+    this.changelogGenerator = new ChangesRenderer({
+      render: this.options.generateChangelog,
       repoRoot: this.options.repoRoot,
       dryRun: this.options.dryRun,
       multiModule,
@@ -294,7 +299,7 @@ export class VersuRunner {
     });
 
     // Generate changelogs
-    const changelogPaths = await this.changelogGenerator.generateChangelogs(
+    const changelogPaths = await this.changelogGenerator.render(
       changedModules,
       moduleCommits,
     );
@@ -307,8 +312,8 @@ export class VersuRunner {
     moduleCommits: Map<string, { commits: Commit[]; lastTag: string | null }>,
     multiModule: boolean,
   ): Promise<string[]> {
-    this.changelogGenerator = new ChangelogGenerator({
-      generateChangelog: this.options.generateChangelog,
+    this.changelogGenerator = new ChangesRenderer({
+      render: this.options.generateReleaseNotes,
       repoRoot: this.options.repoRoot,
       dryRun: this.options.dryRun,
       multiModule,
@@ -318,7 +323,7 @@ export class VersuRunner {
     });
 
     // Generate changelogs
-    const changelogPaths = await this.changelogGenerator.generateChangelogs(
+    const changelogPaths = await this.changelogGenerator.render(
       changedModules,
       moduleCommits,
     );

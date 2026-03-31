@@ -9,9 +9,14 @@ import {
 import { logger } from "../utils/logger.js";
 import { Commit } from "conventional-commits-parser";
 import { exists } from "../utils/file.js";
-import { getCurrentRepoUrl, parseRepoUrl } from "../git/index.js";
+import {
+  getCurrentRepoUrl,
+  getModuleTagName,
+  parseRepoUrl,
+  parseTagName,
+} from "../git/index.js";
 import { isReleaseVersion } from "../semver/index.js";
-import { ModuleChangelogConfig } from "../config/types.js";
+import { ModuleReleaseChangesConfig } from "../config/types.js";
 import { GitOptions } from "../git/types.js";
 import Handlebars from "handlebars";
 
@@ -21,22 +26,22 @@ Handlebars.registerHelper("and", (a, b) => a && b);
 Handlebars.registerHelper("or", (a, b) => a || b);
 Handlebars.registerHelper("not", (a) => !a);
 
-/** Update or create a changelog file for a module. */
-export async function updateChangelogFile(
-  changelogContent: string,
-  changelogPath: string,
+/** Update or create changes file for a module. */
+async function updateRenderFile(
+  content: string,
+  filePath: string,
   prependPlaceholder: string,
 ): Promise<void> {
-  let fileContent = changelogContent;
-  if (await exists(changelogPath)) {
-    logger.info("Updating existing changelog", { path: changelogPath });
-    // Try to read existing changelog
-    const existingContent = await fs.readFile(changelogPath, "utf8");
-    const newContent = `${prependPlaceholder}\n\n${changelogContent.trimEnd()}`;
+  let fileContent = content;
+  if (await exists(filePath)) {
+    logger.info("Updating existing changes", { path: filePath });
+    // Try to read existing changes
+    const existingContent = await fs.readFile(filePath, "utf8");
+    const newContent = `${prependPlaceholder}\n\n${content.trimEnd()}`;
 
     fileContent = existingContent.replace(prependPlaceholder, newContent);
   }
-  await fs.writeFile(changelogPath, fileContent, "utf8");
+  await fs.writeFile(filePath, fileContent, "utf8");
 }
 
 type ContextRepository = {
@@ -59,8 +64,8 @@ async function buildContextRepository(
   };
 }
 
-/** Generate changelog for multiple modules. */
-export async function generateChangelogsForModules(
+/** Generate changes for multiple modules. */
+export async function renderChangesForModules(
   moduleResults: ModuleChangeResult[],
   getCommitsForModule: (
     moduleId: string,
@@ -69,19 +74,21 @@ export async function generateChangelogsForModules(
   dryRun: boolean,
   filename: string,
   multiModule: boolean,
-  config?: ModuleChangelogConfig,
+  config?: ModuleReleaseChangesConfig,
   provider?: string,
 ): Promise<string[]> {
-  const changelogPaths: string[] = [];
+  const renderedPaths: string[] = [];
 
   if (!config) {
-    throw new Error(`Missing required changelog configuration`);
+    throw new Error(`Missing required changes rendering configuration`);
   }
 
   const prependPlaceholder = config?.context?.prependPlaceholder;
 
   if (!prependPlaceholder) {
-    throw new Error("Missing required context property 'prependPlaceholder'");
+    throw new Error(
+      "Missing required changes rendering context property 'prependPlaceholder'",
+    );
   }
 
   const contextRepository = await buildContextRepository({ cwd: repoRoot });
@@ -89,14 +96,14 @@ export async function generateChangelogsForModules(
   for (const moduleResult of moduleResults) {
     if (moduleResult.type === "root" && multiModule) {
       logger.info(
-        "Skipping root module for individual changelog generation since multi-module changelog enabled",
+        "Skipping root module for individual changes generation since multi-module changes enabled",
         { moduleId: moduleResult.id },
       );
       continue;
     }
     if (!moduleResult.declaredVersion) {
       logger.debug(
-        "Module has no declared version, skipping changelog generation",
+        "Module has no declared version, skipping changes generation",
         { moduleId: moduleResult.id },
       );
       continue;
@@ -105,16 +112,16 @@ export async function generateChangelogsForModules(
     const { commits, lastTag } = await getCommitsForModule(moduleResult.id);
 
     if (commits.length === 0) {
-      logger.info("No commits found, skipping changelog", {
+      logger.info("No commits found, skipping rendering changes", {
         moduleId: moduleResult.id,
       });
       continue;
     }
 
-    const changelogPath = join(repoRoot, moduleResult.path, filename);
+    const renderedPath = join(repoRoot, moduleResult.path, filename);
 
     let prepend = true;
-    if (await exists(changelogPath)) {
+    if (await exists(renderedPath)) {
       prepend = false;
     }
 
@@ -125,7 +132,7 @@ export async function generateChangelogsForModules(
       : undefined;
     const previousTag = lastTag || undefined;
 
-    const changelogContent = await writeChangelogString(
+    const changesContent = await writeChangelogString(
       commits,
       {
         version: version,
@@ -141,25 +148,21 @@ export async function generateChangelogsForModules(
     );
 
     if (dryRun) {
-      logger.info("Dry run enabled, skipping writing changelog to file", {
+      logger.info("Dry run enabled, skipping writing changes to file", {
         moduleId: moduleResult.id,
       });
-      logger.debug("Generated changelog content", { changelogContent });
+      logger.debug("Generated changes content", { changesContent });
     } else {
-      await updateChangelogFile(
-        changelogContent,
-        changelogPath,
-        prependPlaceholder,
-      );
+      await updateRenderFile(changesContent, renderedPath, prependPlaceholder);
     }
 
-    changelogPaths.push(changelogPath);
+    renderedPaths.push(renderedPath);
   }
 
-  return changelogPaths;
+  return renderedPaths;
 }
 
-export async function generateRootChangelog(
+export async function renderRootChanges(
   moduleResults: ModuleChangeResult[],
   getCommitsForModule: (
     moduleId: string,
@@ -167,26 +170,28 @@ export async function generateRootChangelog(
   repoRoot: string,
   dryRun: boolean,
   filename: string,
-  config?: ModuleChangelogConfig,
+  config?: ModuleReleaseChangesConfig,
   provider?: string,
 ): Promise<string | undefined> {
   const moduleResult = moduleResults.find((result) => result.type === "root");
 
   if (!moduleResult) {
-    logger.info("No root module found, skipping root changelog generation");
+    logger.info("No root module found, skipping root changes generation");
     return;
   }
 
   if (!config) {
-    throw new Error(`Missing required changelog configuration`);
+    throw new Error(`Missing required changes rendering configuration`);
   }
 
-  logger.info("Loading root changelog configuration");
+  logger.info("Loading root changes configuration");
 
   const prependPlaceholder = config?.context?.prependPlaceholder;
 
   if (!prependPlaceholder) {
-    throw new Error("Missing required context property 'prependPlaceholder'");
+    throw new Error(
+      "Missing required changes rendering context property 'prependPlaceholder'",
+    );
   }
 
   const contextRepository = await buildContextRepository({ cwd: repoRoot });
@@ -194,32 +199,35 @@ export async function generateRootChangelog(
   const { commits, lastTag } = await getCommitsForModule(moduleResult.id);
 
   if (commits.length === 0) {
-    logger.info("No commits found, skipping root changelog", {
+    logger.info("No commits found, skipping root changes", {
       moduleId: moduleResult.id,
     });
     return;
   }
 
-  const changelogPath = join(repoRoot, moduleResult.path, filename);
+  const renderedPath = join(repoRoot, moduleResult.path, filename);
 
   let prepend = true;
-  if (await exists(changelogPath)) {
+  if (await exists(renderedPath)) {
     prepend = false;
   }
 
   const isRelease = isReleaseVersion(moduleResult.to);
   const version = isRelease ? moduleResult.to : undefined;
   const currentTag = isRelease
-    ? `${moduleResult.name}@${moduleResult.to}`
+    ? getModuleTagName(moduleResult.name, moduleResult.to)
     : undefined;
   const previousTag = lastTag || undefined;
 
-  const changelogContent = await writeChangelogString(
+  const changesContent = await writeChangelogString(
     commits,
     {
       moduleResults,
       version: version,
       previousTag: previousTag,
+      previousTagVersion: previousTag
+        ? parseTagName(previousTag).version
+        : undefined,
       currentTag: currentTag,
       linkCompare: previousTag && currentTag ? true : false,
       ...contextRepository,
@@ -231,17 +239,13 @@ export async function generateRootChangelog(
   );
 
   if (dryRun) {
-    logger.info("Dry run enabled, skipping writing root changelog to file", {
+    logger.info("Dry run enabled, skipping writing root changes to file", {
       moduleId: moduleResult.id,
     });
-    logger.debug("Generated root changelog content", { changelogContent });
+    logger.debug("Generated root changes content", { changesContent });
   } else {
-    await updateChangelogFile(
-      changelogContent,
-      changelogPath,
-      prependPlaceholder,
-    );
+    await updateRenderFile(changesContent, renderedPath, prependPlaceholder);
   }
 
-  return changelogPath;
+  return renderedPath;
 }
