@@ -295,12 +295,12 @@ Breaking changes trigger **major** version bumps:
 
 ```yaml
 - name: Install Versu CLI
-  run: npm i -g @versu/cli
+  run: npm install -g @versu/cli
 
 - name: Install Adapter
   run: |
     # install required adapters
-    npm i -g @versu/plugin-gradle
+    npm install -g @versu/plugin-gradle
 
 - name: Version modules
   run: versu run
@@ -311,8 +311,8 @@ Breaking changes trigger **major** version bumps:
 ```yaml
 version:
   script:
-    - npm i -g @versu/cli
-    - npm i -g @versu/plugin-gradle
+    - npm install -g @versu/cli
+    - npm install -g @versu/plugin-gradle
     - versu run
 ```
 
@@ -321,8 +321,8 @@ version:
 ```groovy
 stage('Version') {
   steps {
-    sh 'npm i -g @versu/cli'
-    sh 'npm i -g @versu/plugin-gradle'
+    sh 'npm install -g @versu/cli'
+    sh 'npm install -g @versu/plugin-gradle'
     sh 'versu run'
   }
 }

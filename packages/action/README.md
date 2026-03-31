@@ -34,7 +34,7 @@ jobs:
       # Example using the Gradle adapter
       # Make sure to install the appropriate adapter for your project type
       - name: Install gradle adapter
-        run: npm i -g @versu/plugin-gradle
+        run: npm install -g @versu/plugin-gradle
 
       - name: Versu Semantic Evolution
         id: versu
@@ -90,7 +90,7 @@ jobs:
       # Example using the Gradle adapter
       # Make sure to install the appropriate adapter for your project type
       - name: Install gradle adapter
-        run: npm i -g @versu/plugin-gradle
+        run: npm install -g @versu/plugin-gradle
 
       - name: Create pre-release versions
         uses: versuhq/versu@v0
@@ -123,7 +123,7 @@ jobs:
       # Example using the Gradle adapter
       # Make sure to install the appropriate adapter for your project type
       - name: Install gradle adapter
-        run: npm i -g @versu/plugin-gradle
+        run: npm install -g @versu/plugin-gradle
 
       - name: Create timestamp versions
         uses: versuhq/versu@v0
@@ -161,7 +161,7 @@ jobs:
 
       # Install the Gradle adapter plugin
       - name: Install gradle adapter
-        run: npm i -g @versu/plugin-gradle
+        run: npm install -g @versu/plugin-gradle
 
       - name: Create Gradle SNAPSHOT versions
         uses: versuhq/versu@v0

@@ -51,6 +51,7 @@ type RunnerOptions = {
   appendSnapshot: boolean; // Append -SNAPSHOT suffix (Gradle only)
   createTags: boolean; // Create git tags for bumped modules
   generateChangelog: boolean; // Generate CHANGELOG.md files
+  generateReleaseNotes: boolean; // Generate release notes files (e.g. RELEASE.md)
   pushChanges: boolean; // Commit and push version changes to remote
   dryRun: boolean; // Preview changes without writing anything
 
