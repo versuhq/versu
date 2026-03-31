@@ -27,7 +27,7 @@ Handlebars.registerHelper("or", (a, b) => a || b);
 Handlebars.registerHelper("not", (a) => !a);
 
 /** Update or create changes file for a module. */
-export async function updateRenderFile(
+async function updateRenderFile(
   content: string,
   filePath: string,
   prependPlaceholder: string,
