@@ -155,13 +155,14 @@ To add support for new project types, create a plugin package that implements th
 
 ```typescript
 import {
-  AdapterIdentifier,
+  type AdapterIdentifier,
   type AdapterMetadata,
-  ModuleDetector,
+  type ModuleDetector,
   type ProjectInformation,
-  VersionUpdateStrategy,
+  type VersionUpdateStrategy,
   type ModuleRegistry,
-  ModuleSystemFactory,
+  type ModuleSystemFactory,
+  exists,
 } from "@versu/core";
 
 // 1. Adapter identifier for auto-detection
@@ -173,7 +174,7 @@ class MyAdapterIdentifier implements AdapterIdentifier {
 
   async accept(projectRoot: string): Promise<boolean> {
     // Check for adapter-specific files
-    return await fileExists(path.join(projectRoot, "my-build-file"));
+    return await exists(path.join(projectRoot, "my-build-file"));
   }
 }
 
