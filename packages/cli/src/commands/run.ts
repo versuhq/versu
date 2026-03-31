@@ -59,6 +59,11 @@ export default class Run extends Command {
       default: true,
       allowNo: true,
     }),
+    "generate-release-notes": Flags.boolean({
+      description: "Generate release notes summarizing all changes",
+      default: true,
+      allowNo: true,
+    }),
     "push-changes": Flags.boolean({
       description: "Commit and push version changes and changelogs to remote",
       default: true,
@@ -108,6 +113,7 @@ export default class Run extends Command {
         appendSnapshot: flags["append-snapshot"],
         createTags: flags["create-tags"],
         generateChangelog: flags["generate-changelog"],
+        generateReleaseNotes: flags["generate-release-notes"],
         pushChanges: flags["push-changes"],
         adapter: flags.adapter,
         dryRun: flags["dry-run"],

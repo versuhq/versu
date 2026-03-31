@@ -17,7 +17,7 @@ export { VersionBumper } from './services/version-bumper.js';
 export type { VersionBumperOptions } from './services/version-bumper.js';
 export { VersionApplier } from './services/version-applier.js';
 export type { VersionApplierOptions, ModuleChangeResult } from './services/version-applier.js';
-export { ChangelogGenerator } from './services/changelog-generator.js';
+export { ChangesRenderer } from './services/changes-renderer.js';
 export { GitOperations } from './services/git-operations.js';
 export type { GitOperationsOptions } from './services/git-operations.js';
 export { CommitAnalyzer } from './services/commit-analyzer.js';

@@ -29,6 +29,7 @@ export async function run(): Promise<void> {
     const appendSnapshot = parseBooleanInput(core.getInput('append-snapshot'));
     const pushChanges = parseBooleanInput(core.getInput('push-changes'));
     const generateChangelog = parseBooleanInput(core.getInput('generate-changelog') || 'false');
+    const generateReleaseNotes = parseBooleanInput(core.getInput('generate-release-notes') || 'false');
     const changelogFilename = core.getInput('changelog-filename') || 'CHANGELOG.md';
     const releaseNotesFilename = core.getInput('release-notes-filename') || 'RELEASE.md';
 
@@ -49,6 +50,7 @@ export async function run(): Promise<void> {
       appendSnapshot,
       createTags,
       generateChangelog,
+      generateReleaseNotes,
       pushChanges,
       dryRun,
       adapter,
