@@ -35,3 +35,21 @@ export function getFriendlyPath(from: string, to: string): string {
 
   return isOutside ? absoluteTo : relative;
 }
+
+/**
+ * Checks if a path is a child subdirectory of a parent path.
+ *
+ * @param childPath - Path to test
+ * @param parentPath - Potential parent path
+ * @returns `true` if childPath is a subdirectory of parentPath
+ */
+export function isChildPath(childPath: string, parentPath: string): boolean {
+  // Special handling for root path - it's the parent of all non-root paths
+  if (parentPath === ".") {
+    return childPath !== ".";
+  }
+
+  // Check if child path starts with parent path followed by a path separator
+  // This ensures 'core/api' is a child of 'core', but 'core2' is not
+  return childPath.startsWith(parentPath + "/");
+}

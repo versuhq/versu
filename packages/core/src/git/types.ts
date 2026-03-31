@@ -1,5 +1,3 @@
-import type { Commit } from "conventional-commits-parser";
-
 /**
  * Represents a parsed git tag with extracted module and version metadata.
  * Supports module tags (moduleName@version) and general tags (v{version}).
@@ -32,48 +30,4 @@ export type GitOptions = {
    * Defaults to `process.cwd()` if not specified.
    */
   readonly cwd?: string;
-};
-
-/**
- * Represents a parsed git commit following the Conventional Commits specification.
- * Extracts type, scope, breaking changes, and descriptive content for version bumping.
- */
-export type CommitInfo = {
-  /** The full SHA-1 commit hash (40 hexadecimal characters) */
-  readonly hash: string;
-  /**
-   * The commit type indicating the nature of the change.
-   * Common values: 'feat', 'fix', 'docs', 'chore', 'refactor', 'test', 'unknown'.
-   * Used to determine version bump strategy.
-   */
-  readonly type: string;
-  /**
-   * Optional scope providing additional context about what was changed.
-   * Examples: 'api', 'core', 'ui', 'auth'.
-   * Not used for version bumping but useful for changelog organization.
-   */
-  readonly scope?: string;
-  /**
-   * The commit subject line without type and scope prefix.
-   * Should be a concise description of the change.
-   */
-  readonly subject: string;
-  /**
-   * The full commit body text, if present.
-   * May contain detailed explanations, breaking change descriptions, and footer metadata.
-   */
-  readonly body?: string;
-  /**
-   * Whether this commit introduces breaking changes.
-   * Detected from 'BREAKING CHANGE:' footer or '!' suffix in commit message.
-   * When true, always triggers a major version bump.
-   */
-  readonly breaking: boolean;
-  /**
-   * Optional module name if the commit is specific to a module in a monorepo.
-   * Not currently extracted by the parser but reserved for future use.
-   */
-  readonly module?: string;
-
-  readonly parsed?: Commit;
 };

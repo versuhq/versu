@@ -163,7 +163,7 @@ export async function getCommitsInRange(
     // Silent mode prevents output pollution in GitHub Actions
     const { stdout } = await execa("git", args, { cwd });
 
-    // Parse the formatted output into CommitInfo objects
+    // Parse the formatted output into Commit objects
     return parseGitLog(stdout);
   } catch (error) {
     // Non-throwing error handling: log warning and return empty array
@@ -466,7 +466,7 @@ export async function pushTags(options: GitOptions = {}): Promise<void> {
  * @returns A glob pattern string matching all tags for the module
  * @internal
  */
-function getModuleTagPattern(moduleName: string): string {
+export function getModuleTagPattern(moduleName: string): string {
   // Create glob pattern for module-specific tags
   // Format: moduleName@* where * matches any version
   return `${moduleName}@*`;

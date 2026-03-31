@@ -104,10 +104,10 @@ const optionsSchema = z.object({
 });
 
 /**
- * Zod schema for Changelog configuration.
- * Validates the structure of changelog options and context.
+ * Zod schema for Changes configuration.
+ * Validates the structure of changes options and context.
  */
-export const changelogSchema = z.object({
+export const moduleChangesSchema = z.object({
   context: contextSchema.optional(),
   options: optionsSchema.optional(),
 });
@@ -158,8 +158,14 @@ export const configSchema = z.object({
     .optional(),
   changelog: z
     .object({
-      root: changelogSchema.optional(),
-      module: changelogSchema.optional(),
+      root: moduleChangesSchema.optional(),
+      module: moduleChangesSchema.optional(),
+    })
+    .optional(),
+  release: z
+    .object({
+      root: moduleChangesSchema.optional(),
+      module: moduleChangesSchema.optional(),
     })
     .optional(),
 });
@@ -183,8 +189,14 @@ export const configSchemaWithDefaults = z.object({
   }),
   changelog: z
     .object({
-      root: changelogSchema.optional(),
-      module: changelogSchema.optional(),
+      root: moduleChangesSchema.optional(),
+      module: moduleChangesSchema.optional(),
+    })
+    .optional(),
+  release: z
+    .object({
+      root: moduleChangesSchema.optional(),
+      module: moduleChangesSchema.optional(),
     })
     .optional(),
 });

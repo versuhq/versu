@@ -2,6 +2,7 @@ import { logger } from "../utils/logger.js";
 import { getCommitsSinceLastTag } from "../git/index.js";
 import { ModuleRegistry } from "./module-registry.js";
 import { Commit } from "conventional-commits-parser";
+import { isChildPath } from "../utils/file.js";
 
 /**
  * Analyzes git commits for each module, preventing double-counting in hierarchical structures.
@@ -98,10 +99,7 @@ export class CommitAnalyzer {
     // Iterate through all modules to find children
     for (const [otherId, otherInfo] of this.moduleRegistry.getModules()) {
       // Skip the module itself
-      if (
-        otherId !== moduleId &&
-        this.isChildPath(otherInfo.path, modulePath)
-      ) {
+      if (otherId !== moduleId && isChildPath(otherInfo.path, modulePath)) {
         childPaths.push(otherInfo.path);
       }
     }
@@ -113,23 +111,5 @@ export class CommitAnalyzer {
     });
 
     return childPaths;
-  }
-
-  /**
-   * Checks if a path is a child subdirectory of a parent path.
-   *
-   * @param childPath - Path to test
-   * @param parentPath - Potential parent path
-   * @returns `true` if childPath is a subdirectory of parentPath
-   */
-  private isChildPath(childPath: string, parentPath: string): boolean {
-    // Special handling for root path - it's the parent of all non-root paths
-    if (parentPath === ".") {
-      return childPath !== ".";
-    }
-
-    // Check if child path starts with parent path followed by a path separator
-    // This ensures 'core/api' is a child of 'core', but 'core2' is not
-    return childPath.startsWith(parentPath + "/");
   }
 }

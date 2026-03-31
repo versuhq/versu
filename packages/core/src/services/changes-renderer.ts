@@ -1,11 +1,11 @@
 import { logger } from "../utils/logger.js";
 import {
-  renderChangesForModules,
-  renderRootChanges,
-} from "../changelog/index.js";
+  generateChangesForModules,
+  generateRootChanges,
+} from "../changes/index.js";
 import { ModuleChangeResult } from "./version-applier.js";
 import { Commit } from "conventional-commits-parser";
-import { ReleaseChangesConfig } from "../config/types.js";
+import { ChangesConfig } from "../config/types.js";
 
 export type ChangesRendererOptions = {
   render: boolean;
@@ -13,7 +13,7 @@ export type ChangesRendererOptions = {
   dryRun: boolean;
   multiModule: boolean;
   filename: string;
-  config?: ReleaseChangesConfig;
+  config?: ChangesConfig;
   provider?: string;
 };
 
@@ -43,7 +43,7 @@ export class ChangesRenderer {
     logger.info("Rendering changes");
 
     // Generate individual module changes
-    const renderedPaths = await renderChangesForModules(
+    const renderedPaths = await generateChangesForModules(
       moduleResults,
       async (moduleId) =>
         moduleCommits.get(moduleId) || { commits: [], lastTag: null },
@@ -61,7 +61,7 @@ export class ChangesRenderer {
       );
 
       // Generate root changes
-      const rootChangesPath = await renderRootChanges(
+      const rootChangesPath = await generateRootChanges(
         moduleResults,
         async (moduleId) =>
           moduleCommits.get(moduleId) || { commits: [], lastTag: null },

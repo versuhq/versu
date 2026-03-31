@@ -16,7 +16,7 @@ import {
   parseTagName,
 } from "../git/index.js";
 import { isReleaseVersion } from "../semver/index.js";
-import { ModuleReleaseChangesConfig } from "../config/types.js";
+import { ModuleChangesConfig } from "../config/types.js";
 import { GitOptions } from "../git/types.js";
 import Handlebars from "handlebars";
 
@@ -27,7 +27,7 @@ Handlebars.registerHelper("or", (a, b) => a || b);
 Handlebars.registerHelper("not", (a) => !a);
 
 /** Update or create changes file for a module. */
-async function updateRenderFile(
+async function updateChangesFile(
   content: string,
   filePath: string,
   prependPlaceholder: string,
@@ -65,7 +65,7 @@ async function buildContextRepository(
 }
 
 /** Generate changes for multiple modules. */
-export async function renderChangesForModules(
+export async function generateChangesForModules(
   moduleResults: ModuleChangeResult[],
   getCommitsForModule: (
     moduleId: string,
@@ -74,7 +74,7 @@ export async function renderChangesForModules(
   dryRun: boolean,
   filename: string,
   multiModule: boolean,
-  config?: ModuleReleaseChangesConfig,
+  config?: ModuleChangesConfig,
   provider?: string,
 ): Promise<string[]> {
   const renderedPaths: string[] = [];
@@ -153,7 +153,7 @@ export async function renderChangesForModules(
       });
       logger.debug("Generated changes content", { changesContent });
     } else {
-      await updateRenderFile(changesContent, renderedPath, prependPlaceholder);
+      await updateChangesFile(changesContent, renderedPath, prependPlaceholder);
     }
 
     renderedPaths.push(renderedPath);
@@ -162,7 +162,7 @@ export async function renderChangesForModules(
   return renderedPaths;
 }
 
-export async function renderRootChanges(
+export async function generateRootChanges(
   moduleResults: ModuleChangeResult[],
   getCommitsForModule: (
     moduleId: string,
@@ -170,7 +170,7 @@ export async function renderRootChanges(
   repoRoot: string,
   dryRun: boolean,
   filename: string,
-  config?: ModuleReleaseChangesConfig,
+  config?: ModuleChangesConfig,
   provider?: string,
 ): Promise<string | undefined> {
   const moduleResult = moduleResults.find((result) => result.type === "root");
@@ -244,7 +244,7 @@ export async function renderRootChanges(
     });
     logger.debug("Generated root changes content", { changesContent });
   } else {
-    await updateRenderFile(changesContent, renderedPath, prependPlaceholder);
+    await updateChangesFile(changesContent, renderedPath, prependPlaceholder);
   }
 
   return renderedPath;

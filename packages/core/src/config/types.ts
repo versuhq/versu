@@ -22,8 +22,8 @@ export type VersuConfig = {
         | Record<PrereleaseBumpType, PrereleaseBumpType | "none">;
     };
   };
-  readonly changelog?: ReleaseChangesConfig;
-  readonly release?: ReleaseChangesConfig;
+  readonly changelog?: ChangesConfig;
+  readonly release?: ChangesConfig;
 };
 
 export type VersuConfigWithDefaults = Omit<
@@ -31,16 +31,16 @@ export type VersuConfigWithDefaults = Omit<
   "changelog" | "release"
 > & {
   readonly versioning: Required<VersuConfig["versioning"]>;
-  readonly changelog?: ReleaseChangesConfig;
-  readonly release?: ReleaseChangesConfig;
+  readonly changelog?: ChangesConfig;
+  readonly release?: ChangesConfig;
 };
 
-export type ModuleReleaseChangesConfig = {
+export type ModuleChangesConfig = {
   readonly context?: Context<Commit> & { prependPlaceholder: string };
   readonly options?: Options<Commit>;
 };
 
-export type ReleaseChangesConfig = {
-  readonly root?: ModuleReleaseChangesConfig;
-  readonly module?: ModuleReleaseChangesConfig;
+export type ChangesConfig = {
+  readonly root?: ModuleChangesConfig;
+  readonly module?: ModuleChangesConfig;
 };

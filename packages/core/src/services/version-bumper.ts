@@ -1,9 +1,3 @@
-/**
- * Version Bumper Service for Versu.
- * Implements core version calculation logic: analyzes commits, cascades changes through
- * dependencies, and applies versions with support for prereleases, metadata, and snapshots.
- */
-
 import { logger } from "../utils/logger.js";
 import { getDependencyBumpType } from "../config/index.js";
 import { ModuleRegistry } from "./module-registry.js";
